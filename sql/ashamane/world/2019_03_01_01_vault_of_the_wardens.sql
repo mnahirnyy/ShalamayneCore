@@ -525,7 +525,7 @@ UPDATE `creature` SET `PhaseId` = 543 WHERE `guid` = 20542915;
 UPDATE `creature` SET `PhaseId` = 543 WHERE `guid` = 20542913;
 UPDATE `creature` SET `PhaseId` = 543 WHERE `guid` = 20542914;
 
-DELETE FROM `creature_text` WHERE `CreatureID` = 92985; -- Altruis
+DELETE FROM `creature_text` WHERE `CreatureID` = 92985;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
 (92985,0,0,'Just like old times, eh Kayn?',12,0,100,0,0,57329,0,0,'Altruis the Sufferer to Kayn Sunfury'),
 (92985,1,0,'After ten-thousand years of imprisonment, Illidan succumbed to the fel energy within. When he was freed, he was not in his right mind.',12,0,100,0,0,57284,0,0,'Altruis the Sufferer to Kayn Sunfury'),
@@ -533,21 +533,14 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 (92985,3,0,'I fought as hard as the rest of you! But I did not murder thousands of innocents.',12,0,100,0,0,57386,0,0,'Altruis the Sufferer to Kayn Sunfury'),
 (92985,4,0,'Fool! You would trust the warden? She hates us almost as much as the Legion.',12,0,100,0,0,57389,0,0,'Altruis the Sufferer to Kayn Sunfury');
 
-DELETE FROM `creature_text` WHERE `CreatureID` = 92984; -- Kayn
+DELETE FROM `creature_text` WHERE `CreatureID` = 92984;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
 (92984,0,0,'Do not speak to me of old times, Altruis. You betrayed Illidan. You betrayed us all!',12,0,100,0,0,57345,0,0,'Kayn Sunfury to Altruis the Sufferer'),
-(92984,1,0,'He was fighting it, as we all do. He needed us to have faith in him, Altruis.',12,0,100,0,0,57321,0,0,'Kayn Sunfury to Altruis the Sufferer'),
+(92984,1,0,'He was fighting it, as we all do. He needed us to have faith in him, Altruis.',12,0,100,0,0,57325,0,0,'Kayn Sunfury to Altruis the Sufferer'),
 (92984,2,0,'He made the hard choices. He sacrificed EVERYTHING. What did you give?',12,0,100,0,0,57321,0,0,'Kayn Sunfury to Altruis the Sufferer'),
 (92984,3,0,'You heard the Warden. We are the only ones who can defeat the Legion. We MUST survive this place.',12,0,100,0,0,57322,0,0,'Kayn Sunfury to Altruis the Sufferer'),
 (92984,4,0,'You trust no one and believe in nothing, Altruis. You are a leader with no followers.',12,0,100,0,0,57390,0,0,'Kayn Sunfury to Altruis the Sufferer');
 
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 26 AND `SourceEntry` = 7819 AND `ConditionValue1` IN (38723, 40253);
--- INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
--- (26, 543, 7819, 0, 1, 9, 0, 38723, 0, 0, 0, 0, 0, '', 'Vault of the Betrayer Phase 543 when Quest 38723 taken'),
--- (26, 543, 7819, 0, 1, 9, 0, 40253, 0, 0, 0, 0, 0, '', 'Vault of the Betrayer Phase 543 when Quest 40253 taken');
-DELETE FROM `phase_area` WHERE `AreaId` = 7819;
--- INSERT INTO `phase_area` (`AreaId`, `PhaseId`, `Comment`) VALUES
--- (7819, 543, 'Vault of the Betrayer - after quest 38723|40253 available');
 
 
 
