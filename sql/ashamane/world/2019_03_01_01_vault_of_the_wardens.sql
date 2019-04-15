@@ -3,7 +3,7 @@ DELETE FROM `gameobject` WHERE `guid` = 20375675;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `VerifiedBuild`) VALUES
 (20375675, 243965, 1481, 7705, 7747, 0, 0, 0, 1813.36, 1543.43, 88.3732, 5.74205, 0, 0, 0.267278, -0.963619, 7200, 255, 1, 22423);
 
-DELETE FROM `creature_queststarter` WHERE `id` IN (92718, 92980, 92986, 92984, 97643, 96675, 97644, 97978);
+DELETE FROM `creature_queststarter` WHERE `id` IN (92718, 92980, 92986, 92984, 97643, 96675, 97644, 97978, 97296);
 INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES  
 (92718, 38672), -- breaking out
 (92980, 38690), -- rise of the illidari
@@ -22,7 +22,8 @@ INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 (97644, 40255), -- between us and freedom (vengeance A)
 (97644, 40256), -- between us and freedom (vengeance H)
 (97978, 39689), -- Illidari we are leaving (A)
-(97978, 39690); -- Illidari we are leaving (H)
+(97978, 39690), -- Illidari we are leaving (H)
+(97296, 40976); -- Audience with Warchief
 
 DELETE FROM `creature_questender` WHERE `quest` IN (40253, 38723);
 INSERT INTO `creature_questender` (`id`,`quest`) VALUES (92984, 40253), (92984, 38723);
@@ -38,11 +39,15 @@ UPDATE `creature_template` SET `ScriptName` = 'npc_khadgar' WHERE `entry` = 9797
 UPDATE `creature_template` SET `ScriptName` = 'npc_maiev_shadowsong' WHERE `entry` = 92718;
 UPDATE `creature_template` SET `ScriptName` = 'npc_sledge' WHERE `entry` = 92990;
 UPDATE `creature_template` SET `ScriptName` = 'npc_crusher' WHERE `entry` = 97632;
-UPDATE `creature_template` SET `ScriptName` = 'npc_vow_immolanth' WHERE `entry` = 96682;
+UPDATE `creature_template` SET `ScriptName` = 'npc_immolanth' WHERE `entry` = 96682;
 UPDATE `creature_template` SET `ScriptName` = 'npc_vow_ashgolm' WHERE `entry` = 96681;
 UPDATE `creature_template` SET `ScriptName` = 'npc_bastillax' WHERE `entry` = 96783;
 UPDATE `creature_template` SET `ScriptName` = 'npc_legion_portal' WHERE `entry` = 99501;
+UPDATE `creature_template` SET `ScriptName` = 'npc_cyana_immolanth_fight' WHERE `entry` = 96672;
 
+UPDATE `creature` SET `ScriptName` = 'npc_kayn_sledge_fight' WHERE `guid` = 20542913;
+UPDATE `creature` SET `ScriptName` = 'npc_altruis_crusher_fight' WHERE `guid` = 20542914;
+ 
 UPDATE `gameobject_template` SET `ScriptName` = 'go_reflective_mirror' WHERE `entry` = 244449;
 UPDATE `gameobject_template` SET `ScriptName` = 'go_pool_of_judgements' WHERE `entry` = 244455;
 UPDATE `gameobject_template` SET `ScriptName` = 'go_warden_ascent' WHERE `entry` = 244644;
@@ -87,11 +92,6 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`zoneId`,`areaId`,`spawnDifficulties
 DELETE FROM `gameobject` WHERE `guid` IN (20373129, 20373134); -- Vault of Betrayer doors
 UPDATE `gameobject` SET `state` = 1 WHERE `guid` IN (20373013, 20373001, 20373016, 20373071, 20373066, 20373082, 20372994, 20373064);
 DELETE FROM `creature` WHERE `guid` IN (20542659, 20542665);
-
-DELETE FROM `creature_sparring_template` WHERE `AttackerEntry` IN (92984, 92985);
-INSERT INTO `creature_sparring_template` (`AttackerEntry`, `VictimEntry`, `HealthLimitPct`) VALUES
-(92984, 97632, 100),
-(92985, 92990, 100);
 
 DELETE FROM `creature_text` WHERE `CreatureID` IN (92718, 99632, 99631, 96682);
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
@@ -242,7 +242,7 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 SET @CYANA := 96672;
 DELETE FROM `creature_text` WHERE `CreatureID` = @CYANA;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
-(@CYANA,0,0,'That was to0 close for my liking. $n, the demon\'s power is yours.',12,0,100,0,0,55229,0,0,'Cyana to Player');
+(@CYANA,0,0,'That was too close for my liking. $n, the demon\'s power is yours.',12,0,100,0,0,57357,0,0,'Cyana to Player');
 
 -- Kayn near Ashgolm SAI
 SET @KAYN_1 := 102393;
@@ -347,21 +347,6 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+260, 39660, 1468, 7814, 7819, 0, 0, 0, 0, 0, 4079.085, -269.4063, -281.1126, 5.090357, 120, 0, 0, 0, 0, 0, 0, 0, 0, 25549); -- Spirit Healer (Area: VotW: VaultOfTheBetrayer - Catcher7 - Difficulty: 0)
 UPDATE `creature` SET `npcflag`=16384 WHERE `guid` BETWEEN @CGUID+250 AND @CGUID+260;
 
-DELETE FROM `creature_sparring_template` WHERE `AttackerEntry` IN (92984, 92985, 97632, 92990);
-INSERT INTO `creature_sparring_template` (`AttackerEntry`, `VictimEntry`, `HealthLimitPct`) VALUES
-(92984, 92990, 45),
-(92990, 92984, 35),
-(92985, 97632, 45),
-(97632, 92985, 35);
-
--- UPDATE `creature_template` SET `AIName` = "SmartAI" WHERE `entry` IN (92984, 92985);
-UPDATE `creature_template` SET `AIName` = "" WHERE `entry` IN (92984, 92985);
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN (92984, 92985) AND `source_type` = 0;
--- INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
--- (92984, 0, 0, 0, 25, 0, 100, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 19, 92990, 15, 0, 0, 0, 0, 0, "Kayn Sunfury - On Reset - Start Attack (Creature ID: 92990, 15 Yards)"),
--- (92984, 0, 1, 0, 1, 0, 100, 0, 10000, 10000, 10000, 10000, 49, 0, 0, 0, 0, 0, 0, 19, 92990, 15, 0, 0, 0, 0, 0, "Kayn Sunfury - OOC (10000 - 10000) - Start Attack (Creature ID: 92990, 15 Yards)"),
--- (92985, 0, 0, 0, 25, 0, 100, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 19, 97632, 15, 0, 0, 0, 0, 0, "Altruis the Sufferer - On Reset - Start Attack (Creature ID: 97632, 15 Yards)"),
--- (92985, 0, 1, 0, 1, 0, 100, 0, 10000, 10000, 10000, 10000, 49, 0, 0, 0, 0, 0, 0, 19, 97632, 15, 0, 0, 0, 0, 0, "Altruis the Sufferer - OOC (10000 - 10000) - Start Attack (Creature ID: 97632, 15 Yards)");
 UPDATE `creature` SET `npcflag`=0 WHERE `guid`=20542913;
 
 -- Altruis the Sufferer 3 SAI
@@ -541,6 +526,16 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 (92984,3,0,'You heard the Warden. We are the only ones who can defeat the Legion. We MUST survive this place.',12,0,100,0,0,57322,0,0,'Kayn Sunfury to Altruis the Sufferer'),
 (92984,4,0,'You trust no one and believe in nothing, Altruis. You are a leader with no followers.',12,0,100,0,0,57390,0,0,'Kayn Sunfury to Altruis the Sufferer');
 
+UPDATE `creature_template` SET `MovementType`=2 WHERE `entry`=92984;
+UPDATE `creature_template` SET `MovementType`=2 WHERE `entry`=92985;
 
+-- UPDATE `creature` SET `ScriptName`='npc_altruis_sufferer_4' WHERE `guid`=20542908;
+UPDATE `creature` SET `ScriptName`='' WHERE `guid`=20542908;
 
-
+UPDATE `creature_template` SET `minlevel`=100, `maxlevel`=100 WHERE `entry`=100636;
+DELETE FROM `creature` WHERE `guid`=280000275;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+(280000275,100636,1,1637,5170,0,0,1178,0,-1,0,1,1606.07,-4376.37,21.8468,3.63639,300,0,0,1305,0,0,3,0,0,0,0,'npc_lord_saurfang',25549);
+DELETE FROM `creature` WHERE `guid`=280000276;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+(280000276,97296,1,1637,5170,0,0,1178,0,-1,0,1,1465.72,-4419.58,25.45,0.172787,120,0,0,9145554,5,0,2,0,0,0,0,'',25549);

@@ -45,7 +45,8 @@ enum eQuests
     QUEST_GRAND_THEFT_FELBAT    = 39682,
     QUEST_FROZEN_IN_TIME        = 39685,
     QUEST_BEAM_ME_UP            = 39684,
-    QUEST_FORGED_IN_FIRE        = 39683,
+    QUEST_FORGED_IN_FIRE_H      = 39683,
+    QUEST_FORGED_IN_FIRE_V      = 40254,
     QUEST_ALL_THE_WAY_UP        = 39686,
     QUEST_A_NEW_DIRECTION       = 40373,
     QUEST_BETWEEN_US_AND_FREEDOM_HH = 39694,
@@ -279,6 +280,7 @@ enum KaynSledgeFightMisc
 {
     NPC_KAYN_SUNFURY_SLEDGE = 92984,
     NPC_ALTRUIS_SUFFERER_CRUSHER = 92985,
+    NPC_CRUSHER = 97632,
     NPC_SLEDGE = 92990,
     DB_PHASE_FIGHT = 543,
     DB_PHASE_AFTER_FIGHT = 993
@@ -366,7 +368,9 @@ public:
 
         void JustReachedHome() override
         {
-            _events.ScheduleEvent(EVENT_UPDATE_PHASES, 5000);
+            if (Creature* creature = me->FindNearestCreature(NPC_CRUSHER, me->GetVisibilityRange(), false))
+                if (creature->isDead())
+                    _events.ScheduleEvent(EVENT_UPDATE_PHASES, 2000);
         }
 
         void UpdateAI(uint32 diff) override
@@ -593,11 +597,6 @@ enum AltruisCrusherFightTexts
     TEXT_SAY_DIDNT_MURDER = 3,
 };
 
-enum AltruisCrusherFightMisc
-{
-    NPC_CRUSHER = 97632,
-};
-
 class npc_altruis_crusher_fight : public CreatureScript
 {
 public:
@@ -697,7 +696,10 @@ public:
 
         void JustReachedHome() override
         {
-            _events.ScheduleEvent(EVENT_UPDATE_PHASES, 5000);
+            if (Creature* creature = me->FindNearestCreature(NPC_SLEDGE, me->GetVisibilityRange(), false))
+                if (creature->isDead())
+                    _events.ScheduleEvent(EVENT_UPDATE_PHASES, 2000);
+            // _events.ScheduleEvent(EVENT_UPDATE_PHASES, 5000);
         }
 
         void UpdateAI(uint32 diff) override
@@ -1112,62 +1114,223 @@ public:
     }
 };
 
-// 96682
-struct npc_vow_immolanth : public ScriptedAI
+//  Cyanna: 20543125 (96672)
+enum CyanaImmolanthFightData
 {
-    npc_vow_immolanth(Creature* creature) : ScriptedAI(creature) { }
+    DATA_IMMOLANTH_DEATH = 1,
+};
 
-    enum Spells
+enum CyanaImmolanthFightTexts
+{
+    TEXT_DEATH = 0,
+};
+
+enum CyanaImmolanthFightMisc
+{
+    NPC_IMMOLANTH = 96682,
+};
+
+class npc_cyana_immolanth_fight : public CreatureScript
+{
+public:
+    npc_cyana_immolanth_fight() : CreatureScript("npc_cyana_immolanth_fight") { }
+
+    struct npc_cyana_immolanth_fightAI : public ScriptedAI
     {
-        SPELL_BURNING_FEL = 199758,
-        SPELL_CHAOS_NOVA = 199828,
-    };
-
-    enum Text
-    {   
-        SAY_60PCT = 0,
-        SAY_20PCT = 1,
-    };
-
-    void Reset() override { }
-
-    void EnterCombat(Unit*) override
-    {
-        me->GetScheduler().Schedule(Seconds(15), [this](TaskContext context)
-        {
-            if (Unit* target = me->GetVictim())
-                me->CastSpell(target, SPELL_BURNING_FEL);
-
-            context.Repeat(Seconds(15));
-        })
-            .Schedule(Seconds(10), [this](TaskContext context)
-        {
-            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
-                me->CastSpell(target, SPELL_CHAOS_NOVA);
-
-            if (me->GetHealthPct() <= 60)
-            {
-                Talk(SAY_60PCT);
-            }
-
-            if (me->GetHealthPct() <= 20)
-            {
-                Talk(SAY_20PCT);
-            }
-
-            context.Repeat(Seconds(10));
-        });
-    }
-
-    void JustDied(Unit* /*killer*/) override
-    {
-        std::list<Player*> players;
-        me->GetPlayerListInGrid(players, 50.0f);
-
-        for (Player* player : players)
-        {
-            player->KilledMonsterCredit(106254);
+        npc_cyana_immolanth_fightAI(Creature* creature) : ScriptedAI(creature) {
+            me->SetReactState(REACT_DEFENSIVE);
         }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (who->IsPlayer())
+                if (Creature* creature = me->FindNearestCreature(NPC_IMMOLANTH, me->GetVisibilityRange(), true))
+                    AttackStart(creature);
+        }
+
+        void EnterCombat(Unit* who) override
+        {
+            who->GetAI()->AttackStart(me);
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+        {
+            if (HealthAbovePct(85))
+                damage = urand(1, 2);
+            else
+                me->SetHealth(me->GetMaxHealth() * 0.85f);
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override {}
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_IMMOLANTH_DEATH:
+                Talk(TEXT_DEATH);
+                EnterEvadeMode(EVADE_REASON_OTHER);
+                break;
+            }
+        }
+
+        void JustReachedHome() override {}
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            // while (uint32 eventId = _events.ExecuteEvent())
+            // {
+                // switch (eventId)
+                // {
+                    // case EVENT_TEMPERED_FURY:
+                    //     DoCastVictim(SPELL_TEMPERED_FURY);
+                    //     _events.ScheduleEvent(EVENT_TEMPERED_FURY, urand(2000, 4000));
+                    //     break;
+                // }
+            // }
+
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_cyana_immolanth_fightAI(creature);
+    }
+};
+
+enum ImmolanthEvents
+{
+    EVENT_BURNING_FEL = 1,
+    EVENT_CHAOS_NOVA = 2,
+    EVENT_SUMMON_BURNING_FEL = 3,
+};
+
+enum ImmolanthSpells
+{
+    SPELL_CHAOS_NOVA = 199828,
+    SPELL_BURNING_FEL = 199758,
+};
+
+enum ImmolanthMisc
+{
+    NPC_CYANA_IMMOLANTH = 96672,
+    NPC_BURNING_FEL = 60685,
+    KILL_CREDIT_BONUS_OBJECTIVE = 97970,
+    IMMOLANTH_POWER_TAKEN = 106254,
+};
+
+// 96682
+class npc_immolanth : public CreatureScript
+{
+public:
+    npc_immolanth() : CreatureScript("npc_immolanth") { }
+
+    struct npc_immolanthAI : public ScriptedAI
+    {
+        npc_immolanthAI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _playerParticipating = false;
+        }
+
+        void Reset() override
+        {
+            _events.Reset();
+            Initialize();
+            me->setActive(true);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void EnterCombat(Unit* /*who*/) override
+        {
+            _events.ScheduleEvent(EVENT_BURNING_FEL, 8000);
+            _events.ScheduleEvent(EVENT_CHAOS_NOVA, urand(16000, 18000));
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (HealthAbovePct(85) && attacker->IsCreature())
+                if (attacker->GetEntry() == NPC_CYANA_IMMOLANTH)
+                    damage = urand(1, 2);
+
+            if (HealthBelowPct(85) && attacker->IsCreature())
+                if (attacker->GetEntry() == NPC_CYANA_IMMOLANTH)
+                    me->SetHealth(me->GetHealth() + damage);
+
+            if (!_playerParticipating && attacker->ToPlayer())
+            {
+                if (Creature* creature = me->FindNearestCreature(NPC_CYANA_IMMOLANTH, me->GetVisibilityRange(), true))
+                {
+                    _playerParticipating = true;
+                }
+            }
+
+            if (damage >= me->GetHealth())
+            {
+                std::list<HostileReference*> threatList;
+                threatList = me->getThreatManager().getThreatList();
+                for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+                    if (Player* target = (*itr)->getTarget()->ToPlayer())
+                        if (target->GetQuestStatus(QUEST_FORGED_IN_FIRE_H) == QUEST_STATUS_INCOMPLETE ||
+                            target->GetQuestStatus(QUEST_FORGED_IN_FIRE_V) == QUEST_STATUS_INCOMPLETE)
+                        {
+                            target->KilledMonsterCredit(IMMOLANTH_POWER_TAKEN);
+                            target->KilledMonsterCredit(KILL_CREDIT_BONUS_OBJECTIVE);
+                        }
+            }
+        }
+
+        void JustDied(Unit* /*killer*/) override
+        {
+            if (Creature* creature = me->FindNearestCreature(NPC_CYANA_IMMOLANTH, me->GetVisibilityRange(), true))
+                creature->AI()->SetData(DATA_IMMOLANTH_DEATH, DATA_IMMOLANTH_DEATH);
+
+            me->DespawnOrUnsummon(20000, Seconds(1));
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            if (!UpdateVictim())
+                return;
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_CHAOS_NOVA:
+                    if (Unit* target = me->GetVictim())
+                        me->CastSpell(target, SPELL_CHAOS_NOVA, true);
+                    _events.ScheduleEvent(EVENT_CHAOS_NOVA, 18000);
+                    break;
+                case EVENT_BURNING_FEL:
+                    if (Unit* target = me->GetVictim())
+                        me->CastSpell(target, SPELL_BURNING_FEL, true);
+                    _events.ScheduleEvent(EVENT_BURNING_FEL, urand(10000, 14000));
+                    break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap _events;
+        bool _playerParticipating;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_immolanthAI(creature);
     }
 };
 
@@ -1264,11 +1427,9 @@ public:
         if (quest->GetQuestId() == QUEST_ILLIDARI_LEAVING_H)
         {
             player->CastSpell(player, SPELL_TELEPORT_TO_ORGRIMMAR, true);
-            // player->TeleportTo(1, 1569.96f, -4397.41f, 16.05f, 0.527317f);
         } else if (quest->GetQuestId() == QUEST_ILLIDARI_LEAVING_A)
         {
             player->CastSpell(player, SPELL_TELEPORT_TO_STORMWIND, true);
-            // player->TeleportTo(0, -8554.12f, 477.13f, 104.36f, 3.589650f);
         }
 
         return true;
@@ -1289,7 +1450,7 @@ public:
        if (GameObject* go = player->FindNearestGameObject(244923, 50.0f)) {
            go->UseDoorOrButton();
        }   
-       player->TeleportTo(1468, 4063.53f, -297.05f, -281.58f, 3.098f, false);
+       player->TeleportTo(1468, 4084.52f, -297.89f, -282.28f, 3.132f, false);
    }
 };
 
@@ -1381,7 +1542,7 @@ public:
     {
         if (checkTimer <= diff)
         {
-            if (player->getClass() == CLASS_DEMON_HUNTER && player->GetZoneId() == 7814 && player->GetQuestStatus(QUEST_BREAKING_OUT) == QUEST_STATUS_REWARDED)
+            if (player->getClass() == CLASS_DEMON_HUNTER && player->GetAreaId() == 7873 && player->GetQuestStatus(QUEST_BREAKING_OUT) == QUEST_STATUS_REWARDED)
             {
                 if (player->GetQuestStatus(QUEST_VAULT_OF_THE_WARDENS) == QUEST_STATUS_NONE)
                 {
@@ -1427,9 +1588,200 @@ public:
                     if (!(*itr)->IsAlive())
                         (*itr)->Respawn();
             }
+            if (player->getClass() == CLASS_DEMON_HUNTER &&
+                player->GetAreaId() == 7819 &&
+                (player->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_REWARDED ||
+                    player->GetQuestStatus(QUEST_STOP_GULDAN_V) == QUEST_STATUS_REWARDED) &&
+                !player->GetPhaseShift().HasPhase(993))
+            {
+                PhasingHandler::AddPhase(player, 993, true);
+            }
             checkTimer = 1000;
         }
         else checkTimer -= diff;
+    }
+};
+
+// ********* Grand Theft Felbat: Kayn and Altruis run and speak
+class npc_kayn_sunfury_4 : public CreatureScript
+{
+public:
+    npc_kayn_sunfury_4() : CreatureScript("npc_kayn_sunfury_4") { }
+
+    enum eCreatureTexts {
+        KAYN_TEXT_3 = 3,
+        KAYN_TEXT_4 = 4,
+        // ALTRUIS_TEXT_4 = 4,
+    };
+
+    enum eCreaturesEvents {
+        EVENT_KAYN_TALK_1 = 0,
+        EVENT_KAYN_TALK_2 = 1,
+        // EVENT_ALTRUIS_TALK_1 = 2,
+        EVENT_START_KAYN_MOVE = 4,
+        // EVENT_START_ALTRUIS_MOVE = 5,
+    };
+
+    enum eCreaturesMisc {
+        NPC_KAYN_FELBAT = 92984,
+        // NPC_ALTRUIS_FELBAT = 92985,
+        KAYN_FELBAT_PATH = 9298400,
+        // ALTRUIS_FELBAT_PATH = 9298500,
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_GRAND_THEFT_FELBAT)
+        {
+            if (creature == nullptr)
+                return false;
+
+            // Kayn copy
+            player->SummonCreature(NPC_KAYN_FELBAT, creature->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 15000);
+            // Altruis copy
+            // if (Creature* altruis = creature->FindNearestCreature(NPC_ALTRUIS_FELBAT, creature->GetVisibilityRange(), true))
+                // player->SummonCreature(NPC_ALTRUIS_FELBAT, altruis->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 15000);
+        }
+        return true;
+    }
+
+    struct npc_kayn_sunfury_4AI : public ScriptedAI
+    {
+        npc_kayn_sunfury_4AI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize() {}
+
+        void Reset() override {}
+
+        void EnterCombat(Unit* /*who*/) override { }
+
+        void IsSummonedBy(Unit* who) override
+        {
+            _events.ScheduleEvent(EVENT_START_KAYN_MOVE, 1000);
+            _events.ScheduleEvent(EVENT_KAYN_TALK_1, 1000);
+            _events.ScheduleEvent(EVENT_KAYN_TALK_2, 11000);
+        }
+
+        void EnterEvadeMode(EvadeReason /*why*/) override {}
+
+        void UpdateAI(uint32 diff) override
+        {
+            UpdateVictim();
+
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_KAYN_TALK_1:
+                    Talk(KAYN_TEXT_3, me->GetOwner());
+                    break;
+                case EVENT_KAYN_TALK_2:
+                    Talk(KAYN_TEXT_4, me->GetOwner());
+                    break;
+                case EVENT_START_KAYN_MOVE:
+                    me->GetMotionMaster()->MovePath(KAYN_FELBAT_PATH, false);
+                default:
+                    break;
+                }
+            }
+            // no melee attacks
+        }
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_kayn_sunfury_4AI(creature);
+    }
+};
+
+class npc_altruis_sufferer_4 : public CreatureScript
+{
+public:
+    npc_altruis_sufferer_4() : CreatureScript("npc_altruis_sufferer_4") { }
+
+    enum eCreatureTexts {
+        ALTRUIS_TEXT_4 = 4,
+    };
+
+    enum eCreaturesEvents {
+        EVENT_ALTRUIS_TALK_1 = 2,
+        EVENT_START_ALTRUIS_MOVE = 5,
+    };
+
+    enum eCreaturesMisc {
+        NPC_ALTRUIS_FELBAT = 92985,
+        ALTRUIS_FELBAT_PATH = 9298500,
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_GRAND_THEFT_FELBAT)
+        {
+            if (creature == nullptr)
+                return false;
+
+            // Altruis copy
+            player->SummonCreature(NPC_ALTRUIS_FELBAT, creature->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 15000);
+        }
+        return true;
+    }
+
+    struct npc_altruis_sufferer_4AI : public ScriptedAI
+    {
+        npc_altruis_sufferer_4AI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize() {}
+
+        void Reset() override {}
+
+        void EnterCombat(Unit* /*who*/) override { }
+
+        void IsSummonedBy(Unit* who) override
+        {
+            _events.ScheduleEvent(EVENT_START_ALTRUIS_MOVE, 1000);
+            _events.ScheduleEvent(EVENT_ALTRUIS_TALK_1, 7000);
+        }
+
+        void EnterEvadeMode(EvadeReason /*why*/) override {}
+
+        void UpdateAI(uint32 diff) override
+        {
+            UpdateVictim();
+
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_ALTRUIS_TALK_1:
+                    Talk(ALTRUIS_TEXT_4, me->GetOwner());
+                    break;
+                case EVENT_START_ALTRUIS_MOVE:
+                    me->GetMotionMaster()->MovePath(ALTRUIS_FELBAT_PATH, false);
+                default:
+                    break;
+                }
+            }
+            // no melee attacks
+        }
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {   
+        return new npc_altruis_sufferer_4AI(creature);
     }
 };
 
@@ -1454,13 +1806,16 @@ void AddSC_zone_vault_of_wardens()
     new go_pool_of_judgements();
     new npc_bastillax();
     new npc_khadgar();
-    new PlayerScript_follower_choice();
-    RegisterCreatureAI(npc_vow_immolanth);
+    new npc_cyana_immolanth_fight();
+    new npc_immolanth();
     RegisterCreatureAI(npc_vow_ashgolm);
     new npc_maiev_shadowsong();
     new npc_legion_portal();
     new scene_guldan_stealing_illidan_corpse();
+    new npc_kayn_sunfury_4();
+    new npc_altruis_sufferer_4();
 
+    new PlayerScript_follower_choice();
     new On100DHArrival();
     new PlayerScript_bonus_objective();
     new PlayerScript_switch_phases();
