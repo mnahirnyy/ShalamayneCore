@@ -1,0 +1,3 @@
+DELETE FROM `broadcast_text` WHERE `ID` IN (147324);
+INSERT INTO `broadcast_text` (`ID`, `Text`, `Text1`, `EmoteID1`, `EmoteID2`, `EmoteID3`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmotesID`, `LanguageID`, `Flags`, `ConditionID`, `SoundEntriesID1`, `SoundEntriesID2`, `VerifiedBuild`) VALUES
+(147324, '<Saurfang looks you up and down with narrowed eyes.>\n\nWhen Khadgar claimed we would be seeing demon hunters today, I laughed in his face. When he said I should hear you out, I laught louder.\n\nAnd yet, here you are.\n\nI will permit you alone to enter the Hold. You will leave your weapons and companions at the door. You will not speak until spoken to.\n\nOne false move and my axe will end you.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27404);

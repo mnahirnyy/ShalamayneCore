@@ -23,6 +23,7 @@
 #include "ScriptedCreature.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
+#include "PhasingHandler.h"
 
 /*######
 ## Quest 37446: Lazy Peons
@@ -167,8 +168,51 @@ class spell_voodoo : public SpellScriptLoader
         }
 };
 
+class PlayerScript_durotar_funeral : public PlayerScript
+{
+public:
+    PlayerScript_durotar_funeral() : PlayerScript("PlayerScript_durotar_funeral") {}
+
+    uint32 checkTimer = 1000;
+    
+    void OnUpdate(Player* player, uint32 diff) override
+    {
+        if (checkTimer <= diff)
+        {
+            if (player->getClass() == CLASS_DEMON_HUNTER &&
+                player->GetAreaId() == 4982 &&
+                player->GetQuestStatus(40976) == QUEST_STATUS_COMPLETE &&
+                !player->GetPhaseShift().HasPhase(1180)) {
+                    PhasingHandler::RemovePhase(player, 1178);
+                    PhasingHandler::AddPhase(player, 1180, true);
+            }
+            checkTimer = 1000;
+        }
+        else checkTimer -= diff;
+    }
+};
+
+// 188501 spectral sight
+class spell_durotar_spectral_sight : public SpellScript
+{
+    PrepareSpellScript(spell_durotar_spectral_sight);
+
+    void HandleOnCast()
+    {
+        if (GetCaster()->IsPlayer() && GetCaster()->GetAreaId() == 4982)
+            GetCaster()->ToPlayer()->KilledMonsterCredit(102563);
+    }
+
+    void Register() override
+    {
+        OnCast += SpellCastFn(spell_durotar_spectral_sight::HandleOnCast);
+    }
+};
+
 void AddSC_durotar()
 {
     new npc_lazy_peon();
     new spell_voodoo();
+    new PlayerScript_durotar_funeral();
+    RegisterSpellScript(spell_durotar_spectral_sight);
 }

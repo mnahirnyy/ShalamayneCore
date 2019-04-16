@@ -530,12 +530,31 @@ UPDATE `creature_template` SET `MovementType`=2 WHERE `entry`=92984;
 UPDATE `creature_template` SET `MovementType`=2 WHERE `entry`=92985;
 
 -- UPDATE `creature` SET `ScriptName`='npc_altruis_sufferer_4' WHERE `guid`=20542908;
-UPDATE `creature` SET `ScriptName`='' WHERE `guid`=20542908;
 
-UPDATE `creature_template` SET `minlevel`=100, `maxlevel`=100 WHERE `entry`=100636;
 DELETE FROM `creature` WHERE `guid`=280000275;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
-(280000275,100636,1,1637,5170,0,0,1178,0,-1,0,1,1606.07,-4376.37,21.8468,3.63639,300,0,0,1305,0,0,3,0,0,0,0,'npc_lord_saurfang',25549);
+(280000275,100636,1,1637,5170,0,0,1178,0,-1,0,1,1606.07,-4376.37,21.8468,3.63639,300,0,0,1305,0,0,1,0,0,0,0,'npc_lord_saurfang',25549);
 DELETE FROM `creature` WHERE `guid`=280000276;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
 (280000276,97296,1,1637,5170,0,0,1178,0,-1,0,1,1465.72,-4419.58,25.45,0.172787,120,0,0,9145554,5,0,2,0,0,0,0,'',25549);
+
+DELETE FROM `creature_text` WHERE `CreatureID`=100636;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
+(100636,0,0,'I don\'t like the looks of them, mage. They smell of demon filth.',12,0,100,0,0,57915,0,0,'Lord Saurfang to Player');
+
+DELETE FROM `npc_text` WHERE `ID`=30560;
+INSERT INTO `npc_text` (`ID`, `Probability0`, `Probability1`, `Probability2`, `Probability3`, `Probability4`, `Probability5`, `Probability6`, `Probability7`, `BroadcastTextId0`, `BroadcastTextId1`, `BroadcastTextId2`, `BroadcastTextId3`, `BroadcastTextId4`, `BroadcastTextId5`, `BroadcastTextId6`, `BroadcastTextId7`, `VerifiedBuild`) VALUES
+(30560,1,0,0,0,0,0,0,0,147324,0,0,0,0,0,0,0,25549);
+
+DELETE FROM `gossip_menu` WHERE `MenuID`=20460;
+INSERT INTO `gossip_menu` (`MenuID`, `TextID`) VALUES
+(20460, 30560);
+
+UPDATE `creature_template` SET `minlevel`=100, `maxlevel`=100, `gossip_menu_id`=20460 WHERE `entry`=100636;
+
+DELETE FROM `creature` WHERE `guid`=280000277;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+(280000277,100873,1,14,4982,0,0,1180,0,-1,0,0,1272.81,-4383.71,28.735,3.48624,300,0,0,870,0,0,3,0,0,0,0,'',25549);
+
+UPDATE `quest_template_addon` SET `PrevQuestID`=40976 WHERE `ID`=40982; -- Second Sight
+UPDATE `quest_template_addon` SET `PrevQuestID`=40982 WHERE `ID`=40983; -- Demons Among Them
