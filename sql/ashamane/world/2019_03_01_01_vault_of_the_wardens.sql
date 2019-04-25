@@ -3,7 +3,7 @@ DELETE FROM `gameobject` WHERE `guid` = 20375675;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `VerifiedBuild`) VALUES
 (20375675, 243965, 1481, 7705, 7747, 0, 0, 0, 1813.36, 1543.43, 88.3732, 5.74205, 0, 0, 0.267278, -0.963619, 7200, 255, 1, 22423);
 
-DELETE FROM `creature_queststarter` WHERE `id` IN (92718, 92980, 92986, 92984, 97643, 96675, 97644, 97978, 97296);
+DELETE FROM `creature_queststarter` WHERE `id` IN (92718, 92980, 92986, 92984, 97643, 96675, 97644, 97978, 97296, 114562);
 INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES  
 (92718, 38672), -- breaking out
 (92980, 38690), -- rise of the illidari
@@ -23,7 +23,8 @@ INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 (97644, 40256), -- between us and freedom (vengeance H)
 (97978, 39689), -- Illidari we are leaving (A)
 (97978, 39690), -- Illidari we are leaving (H)
-(97296, 40976); -- Audience with Warchief
+(97296, 40976), -- Audience with Warchief
+(114562, 44663); -- Blink of an Eye
 
 DELETE FROM `creature_questender` WHERE `quest` IN (40253, 38723);
 INSERT INTO `creature_questender` (`id`,`quest`) VALUES (92984, 40253), (92984, 38723);
@@ -44,6 +45,7 @@ UPDATE `creature_template` SET `ScriptName` = 'npc_vow_ashgolm' WHERE `entry` = 
 UPDATE `creature_template` SET `ScriptName` = 'npc_bastillax' WHERE `entry` = 96783;
 UPDATE `creature_template` SET `ScriptName` = 'npc_legion_portal' WHERE `entry` = 99501;
 UPDATE `creature_template` SET `ScriptName` = 'npc_cyana_immolanth_fight' WHERE `entry` = 96672;
+UPDATE `creature_template` SET `ScriptName` = 'npc_khadgars_upgraded_servant' WHERE `entry` = 114562;
 
 UPDATE `creature` SET `ScriptName` = 'npc_kayn_sledge_fight' WHERE `guid` = 20542913;
 UPDATE `creature` SET `ScriptName` = 'npc_altruis_crusher_fight' WHERE `guid` = 20542914;
@@ -530,10 +532,11 @@ UPDATE `creature_template` SET `MovementType`=2 WHERE `entry`=92984;
 UPDATE `creature_template` SET `MovementType`=2 WHERE `entry`=92985;
 
 -- UPDATE `creature` SET `ScriptName`='npc_altruis_sufferer_4' WHERE `guid`=20542908;
-
+-- Overlord Saurfang in Orgri
 DELETE FROM `creature` WHERE `guid`=280000275;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
 (280000275,100636,1,1637,5170,0,0,1178,0,-1,0,1,1606.07,-4376.37,21.8468,3.63639,300,0,0,1305,0,0,1,0,0,0,0,'npc_lord_saurfang',25549);
+-- khadgar in Orgri
 DELETE FROM `creature` WHERE `guid`=280000276;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
 (280000276,97296,1,1637,5170,0,0,1178,0,-1,0,1,1465.72,-4419.58,25.45,0.172787,120,0,0,9145554,5,0,2,0,0,0,0,'',25549);
@@ -542,19 +545,61 @@ DELETE FROM `creature_text` WHERE `CreatureID`=100636;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
 (100636,0,0,'I don\'t like the looks of them, mage. They smell of demon filth.',12,0,100,0,0,57915,0,0,'Lord Saurfang to Player');
 
-DELETE FROM `npc_text` WHERE `ID`=30560;
+DELETE FROM `npc_text` WHERE `ID` IN (30560, 30561);
 INSERT INTO `npc_text` (`ID`, `Probability0`, `Probability1`, `Probability2`, `Probability3`, `Probability4`, `Probability5`, `Probability6`, `Probability7`, `BroadcastTextId0`, `BroadcastTextId1`, `BroadcastTextId2`, `BroadcastTextId3`, `BroadcastTextId4`, `BroadcastTextId5`, `BroadcastTextId6`, `BroadcastTextId7`, `VerifiedBuild`) VALUES
-(30560,1,0,0,0,0,0,0,0,147324,0,0,0,0,0,0,0,25549);
+(30560,1,0,0,0,0,0,0,0,147324,0,0,0,0,0,0,0,25549),
+(30561,1,0,0,0,0,0,0,0,147325,0,0,0,0,0,0,0,25549);
 
-DELETE FROM `gossip_menu` WHERE `MenuID`=20460;
+DELETE FROM `gossip_menu` WHERE `MenuID` IN (20460, 20461);
 INSERT INTO `gossip_menu` (`MenuID`, `TextID`) VALUES
-(20460, 30560);
+(20460, 30560),
+(20461, 30561);
 
 UPDATE `creature_template` SET `minlevel`=100, `maxlevel`=100, `gossip_menu_id`=20460 WHERE `entry`=100636;
-
+UPDATE `creature_template` SET `gossip_menu_id`=20461 WHERE `entry`=101035;
+-- Alari the Souleater in Durotar Funeral
 DELETE FROM `creature` WHERE `guid`=280000277;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
-(280000277,100873,1,14,4982,0,0,1180,0,-1,0,0,1272.81,-4383.71,28.735,3.48624,300,0,0,870,0,0,3,0,0,0,0,'',25549);
-
+(280000277,100873,1,14,4982,0,0,1180,0,-1,0,0,1272.81,-4383.71,28.735,3.48624,120,0,0,870,0,0,3,0,0,0,0,'',25549);
+-- Lady Sylvana Windrunner in Durotar Funeral
+DELETE FROM `creature` WHERE `guid`=280000278;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+(280000278,101035,1,14,4982,0,0,1180,0,-1,0,0,1244.27,-4381.93,28.2979,4.74574,120,0,0,1075122944,0,0,3,0,0,0,0,'npc_lady_sylvana_funeral',25549);
+-- Faction Acquisition quests
 UPDATE `quest_template_addon` SET `PrevQuestID`=40976 WHERE `ID`=40982; -- Second Sight
 UPDATE `quest_template_addon` SET `PrevQuestID`=40982 WHERE `ID`=40983; -- Demons Among Them
+UPDATE `quest_template_addon` SET `PrevQuestID`=40983 WHERE `ID`=41002; -- A Weapon of the Horde
+-- other quests to not mess up with the DH chain
+UPDATE `quest_template_addon` SET `PrevQuestID`=40522 WHERE `ID`=40607; -- Demons Among Us
+UPDATE `quest_template_addon` SET `PrevQuestID`=40607 WHERE `ID`=40605; -- Keep Your Friends Close
+-- Felblade Spawns
+DELETE FROM `creature` WHERE `guid` BETWEEN 280000301 AND 280000320;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+(280000301,101104,1,14,4982,0,0,1181,0,-1,0,0,1234.2,-4423.7,22.5085,1.24287,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000302,101104,1,14,4982,0,0,1181,0,-1,0,0,1266.75,-4428.12,26.6402,2.11152,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000303,101104,1,14,4982,0,0,1181,0,-1,0,0,1294,-4389.82,26.2693,3.29276,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000304,101104,1,14,4982,0,0,1181,0,-1,0,0,1208.96,-4404.49,23.1639,0.0105786,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000305,101104,1,14,4982,0,0,1181,0,-1,0,0,1308.13,-4427.31,24.7053,2.7202,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000306,102543,1,14,4982,0,0,1181,0,-1,0,1,1264.68,-4398.66,26.3237,2.01098,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000307,102543,1,14,4982,0,0,1181,0,-1,0,1,1258.96,-4401.78,25.8567,1.77694,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000308,102543,1,14,4982,0,0,1181,0,-1,0,1,1263.19,-4407.53,25.7372,1.65755,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000309,102543,1,14,4982,0,0,1181,0,-1,0,1,1249.8,-4409.17,24.6836,2.19241,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000310,102543,1,14,4982,0,0,1181,0,-1,0,1,1242.62,-4413.61,23.726,1.96779,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000311,102543,1,14,4982,0,0,1181,0,-1,0,1,1248.65,-4419.28,23.8528,2.08481,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000312,102543,1,14,4982,0,0,1181,0,-1,0,1,1226.22,-4414.39,22.6062,1.0363,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000313,102543,1,14,4982,0,0,1181,0,-1,0,1,1218.39,-4409.72,22.9143,0.719791,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000314,102543,1,14,4982,0,0,1181,0,-1,0,1,1216.52,-4417.56,22.0563,0.7677,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000315,102543,1,14,4982,0,0,1181,0,-1,0,1,1244.4,-4390.51,28.2295,2.15628,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000316,102543,1,14,4982,0,0,1181,0,-1,0,1,1296.29,-4410.06,26.5713,2.26624,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000317,102543,1,14,4982,0,0,1181,0,-1,0,1,1293.49,-4434.14,27.1493,1.90103,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000318,102543,1,14,4982,0,0,1181,0,-1,0,1,1258.61,-4437.65,26.8017,1.70625,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000319,102543,1,14,4982,0,0,1181,0,-1,0,1,1227.55,-4448.21,24.2946,1.55939,120,0,0,174,0,0,0,0,0,0,0,'',25549),
+(280000320,102543,1,14,4982,0,0,1181,0,-1,0,1,1224.24,-4394.29,23.6983,0.350657,120,0,0,174,0,0,0,0,0,0,0,'',25549);
+UPDATE `creature_template` SET `KillCredit1`=101105, `minlevel`=99, `maxlevel`=99, `faction`=954, `unit_flags`=32768, `unit_flags2`=0 WHERE `entry` IN (102543, 101104);
+UPDATE `creature_template_addon` SET `bytes1` = '0' , `auras` = '' WHERE `entry` = '102543';
+UPDATE `creature_template` SET `faction` = '1786' WHERE `entry` = '102543';
+UPDATE `creature_template` SET `unit_flags2` = '35653632' WHERE `entry` = '102543';
+UPDATE `creature_template` SET `HealthScalingExpansion` = '5' , `lootid` = '98486' , `HealthModifier` = '1' WHERE `entry` = '102543';
+UPDATE `scene_template` SET `ScriptName`='scene_demons_among_them_horde' WHERE `SceneId`=1453;
+UPDATE `creature_template` SET `npcflag` = 2 WHERE `entry`=114562;
+

@@ -18,6 +18,7 @@
 #include "Log.h"
 #include "ScriptedGossip.h"
 #include "PhasingHandler.h"
+#include "Conversation.h"
 
 class play_fate_of_the_horde : public PlayerScript
 {
@@ -48,8 +49,11 @@ public:
 enum eQuest {
     QUEST_ILLIDARI_LEAVING_H = 39690,
     QUEST_AUDIENCE_WITH_WARCHIEF = 40976,
+    QUEST_WEAPON_OF_THE_HORDE = 41002,
+    QUEST_BLINK_OF_AN_EYE = 44663,
     PHASE_ORGRIMMAR_WARCHIEF = 1178,
     SPELL_SUMMON_KHADGAR = 230064,
+    CONVERSATION_KHADGAR_BLINK_OF_EYE = 3827,
 };
 
 class PlayerScript_summon_khadgar : public PlayerScript
@@ -161,9 +165,71 @@ public:
     }
 };
 
+class PlayerScript_summon_khadgar_servant : public PlayerScript
+{
+public:
+    PlayerScript_summon_khadgar_servant() : PlayerScript("PlayerScript_summon_khadgar_servant") {}
+
+    uint32 checkTimer = 1000;
+    bool _khadgarServantSummoned = false;
+
+    void OnUpdate(Player* player, uint32 diff) override
+    {
+        if (checkTimer <= diff)
+        {
+            if (player->getClass() == CLASS_DEMON_HUNTER &&
+                player->GetQuestStatus(QUEST_WEAPON_OF_THE_HORDE) == QUEST_STATUS_REWARDED &&
+                player->GetQuestStatus(QUEST_BLINK_OF_AN_EYE) == QUEST_STATUS_NONE && !_khadgarServantSummoned
+            ) {
+                if (Creature* creature = player->FindNearestCreature(114562, 10.0f)) {
+                    creature->DestroyForPlayer(player);
+                    _khadgarServantSummoned = false;
+                }
+
+                if (TempSummon* personalCreature = player->SummonCreature(114562, player->GetPosition(), TEMPSUMMON_MANUAL_DESPAWN, 0, 0, true))
+                {
+                    _khadgarServantSummoned = true;
+                    float x, y, z;
+                    personalCreature->GetClosePoint(x, y, z, personalCreature->GetObjectSize() / 3, 10.0f);
+                    personalCreature->GetMotionMaster()->MovePoint(0, x, y, z);
+                }
+            }
+            checkTimer = 1000;
+        }
+        else checkTimer -= diff;
+    }
+};
+
+/// Khadgars Upgraded Servant - 114562 (Dalaran quest chain starter)
+class npc_khadgars_upgraded_servant : public CreatureScript
+{
+public:
+    npc_khadgars_upgraded_servant() : CreatureScript("npc_khadgars_upgraded_servant") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+    {
+        switch (quest->GetQuestId())
+        {
+        case QUEST_BLINK_OF_AN_EYE:
+        {
+            Conversation::CreateConversation(CONVERSATION_KHADGAR_BLINK_OF_EYE, player, player->GetPosition(), { player->GetGUID() });
+            player->PlayerTalkClass->SendCloseGossip();
+            creature->DespawnOrUnsummon(5000);
+            break;
+        }
+        default:
+            break;
+        }
+
+        return false;
+    }
+};
+
 void AddSC_orgrimmar()
 {
 	new play_fate_of_the_horde();
     new PlayerScript_summon_khadgar();
     new npc_lord_saurfang();
+    new PlayerScript_summon_khadgar_servant();
+    new npc_khadgars_upgraded_servant();
 }

@@ -21,9 +21,21 @@
 #include "MotionMaster.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
 #include "PhasingHandler.h"
+
+enum eQuest {
+    QUEST_AUDIENCE_WARCHIEF = 40976,
+    QUEST_SECOND_SIGHT = 40982,
+    QUEST_DEMONS_AMONG_THEM = 40983,
+    QUEST_WEAPON_OF_THE_HORDE = 41002,
+};
+
+enum eScene {
+    SCENE_DEMONS_AMONG_THEM_HORDE = 1453,
+};
 
 /*######
 ## Quest 37446: Lazy Peons
@@ -32,7 +44,7 @@
 
 enum LazyPeonYells
 {
-    SAY_SPELL_HIT                                 = 0
+    SAY_SPELL_HIT = 0,
 };
 
 enum LazyPeon
@@ -168,6 +180,52 @@ class spell_voodoo : public SpellScriptLoader
         }
 };
 
+class npc_lady_sylvana_funeral : CreatureScript
+{
+public:
+    npc_lady_sylvana_funeral() : CreatureScript("npc_lady_sylvana_funeral") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (player->GetQuestStatus(QUEST_DEMONS_AMONG_THEM) == QUEST_STATUS_INCOMPLETE) {
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "This cannot wait. There are demons among your ranks. Let me show you.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+        }
+        SendGossipMenuFor(player, 30561, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        ClearGossipMenuFor(player);
+        switch (action)
+        {
+        case GOSSIP_ACTION_INFO_DEF:
+            player->GetSceneMgr().PlayScene(SCENE_DEMONS_AMONG_THEM_HORDE);
+            CloseGossipMenuFor(player);
+            break;
+        }
+        return true;
+    }
+};
+
+class scene_demons_among_them_horde : public SceneScript
+{
+public:
+    scene_demons_among_them_horde() : SceneScript("scene_demons_among_them_horde") { }
+    enum {
+        KILL_CREDIT_WARN_SYLVANAS = 100866,
+        PHASE_FIGHT_IN_FUNERAL = 1181,
+    };
+    void OnSceneEnd(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) override
+    {
+        player->KilledMonsterCredit(KILL_CREDIT_WARN_SYLVANAS, ObjectGuid::Empty);
+        PhasingHandler::AddPhase(player, PHASE_FIGHT_IN_FUNERAL, true);
+    }
+};
+
 class PlayerScript_durotar_funeral : public PlayerScript
 {
 public:
@@ -192,27 +250,11 @@ public:
     }
 };
 
-// 188501 spectral sight
-class spell_durotar_spectral_sight : public SpellScript
-{
-    PrepareSpellScript(spell_durotar_spectral_sight);
-
-    void HandleOnCast()
-    {
-        if (GetCaster()->IsPlayer() && GetCaster()->GetAreaId() == 4982)
-            GetCaster()->ToPlayer()->KilledMonsterCredit(102563);
-    }
-
-    void Register() override
-    {
-        OnCast += SpellCastFn(spell_durotar_spectral_sight::HandleOnCast);
-    }
-};
-
 void AddSC_durotar()
 {
     new npc_lazy_peon();
     new spell_voodoo();
+    new npc_lady_sylvana_funeral();
+    new scene_demons_among_them_horde();
     new PlayerScript_durotar_funeral();
-    RegisterSpellScript(spell_durotar_spectral_sight);
 }
