@@ -628,11 +628,12 @@ class spell_mardum_spectral_sight : public SpellScript
 
     void HandleOnCast()
     {
-        if (GetCaster()->IsPlayer() && GetCaster()->GetAreaId() == 7754)
+        if (GetCaster()->IsPlayer() && GetCaster()->GetAreaId() == 7754) // Mardum
             GetCaster()->ToPlayer()->KilledMonsterCredit(96437);
-        if (GetCaster()->IsPlayer() && GetCaster()->GetAreaId() == 4982)
+        if (GetCaster()->IsPlayer() && GetCaster()->GetAreaId() == 4982) // Durotar Funeral
             GetCaster()->ToPlayer()->KilledMonsterCredit(102563);
-        // TO STROWIND PART AND PLAY SCENE
+        if (GetCaster()->IsPlayer() && GetCaster()->GetAreaId() == 6292) // Stromwind Keep
+            GetCaster()->ToPlayer()->KilledMonsterCredit(102563);
     }
 
     void Register() override

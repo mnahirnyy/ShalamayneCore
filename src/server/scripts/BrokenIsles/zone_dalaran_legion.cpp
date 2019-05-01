@@ -24,6 +24,7 @@
 #include "ScriptMgr.h"
 #include "SpellMgr.h"
 #include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "SpellScript.h"
 
 /*
@@ -36,6 +37,7 @@ enum
 {
     PHASE_DALARAN_KARAZHAN  = 5829,
     QUEST_BLINK_OF_AN_EYE   = 44663,
+    QUEST_CALL_OF_THE_ILLIDARI = 39047,
 };
 
 // TODO : All this script is temp fix,
@@ -381,6 +383,244 @@ public:
     }
 };
 
+class PlayerScript_summon_korvas_bloodthorn : public PlayerScript
+{
+public:
+    PlayerScript_summon_korvas_bloodthorn() : PlayerScript("PlayerScript_summon_korvas_bloodthorn") {}
+
+    uint32 checkTimer = 1000;
+    bool _korvasSummoned = false;
+
+    void OnUpdate(Player* player, uint32 diff) override
+    {
+        if (checkTimer <= diff)
+        {
+            if (player->getClass() == CLASS_DEMON_HUNTER && player->GetAreaId() == 7581 &&
+                player->GetQuestStatus(QUEST_BLINK_OF_AN_EYE) == QUEST_STATUS_REWARDED &&
+                player->GetQuestStatus(QUEST_CALL_OF_THE_ILLIDARI) == QUEST_STATUS_NONE && !_korvasSummoned
+                ) {
+                    if (Creature* creature = player->FindNearestCreature(116704, 10.0f)) {
+                        creature->DestroyForPlayer(player);
+                        _korvasSummoned = false;
+                    }
+
+                    player->CastSpell(player, 232347, true);
+                    _korvasSummoned = true;
+            }
+            checkTimer = 1000;
+        }
+        else checkTimer -= diff;
+    }
+};
+
+class npc_korvas_bloodthorn_summon : public CreatureScript
+{
+public:
+    npc_korvas_bloodthorn_summon() : CreatureScript("npc_korvas_bloodthorn_summon") { }
+
+    enum {
+        TEXT_GREETING = 0,
+        TEXT_ACCEPT_ALTRUIS = 1,
+        TEXT_ACCEPT_KAYN = 2,
+        TEXT_EXTRA_GREETING_1 = 3,
+        TEXT_EXTRA_GREETING_2 = 4,
+        TEXT_EXTRA_GREETING_3 = 5,
+        EVENT_EXTRA_GREETING_1 = 10,
+        EVENT_EXTRA_GREETING_2 = 11,
+        EVENT_EXTRA_GREETING_3 = 12,
+        EVENT_EXTRA_GREETING_4 = 13,
+        DATA_GREETING_ENDED = 20,
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_CALL_OF_THE_ILLIDARI)
+        {
+            creature->AI()->SetData(DATA_GREETING_ENDED, DATA_GREETING_ENDED);
+            creature->AI()->Talk(TEXT_ACCEPT_ALTRUIS);
+            creature->DespawnOrUnsummon(15000);
+        }
+        return true;
+    }
+
+    struct npc_korvas_summonAI : public ScriptedAI
+    {
+        npc_korvas_summonAI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Reset() override {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _alreadyGreet = false;
+        }
+
+        void MoveInLineOfSight(Unit* unit) override
+        {
+            if (Player* player = unit->ToPlayer())
+                if (player->GetDistance(me) < 15.0f)
+                    if (!player->HasQuest(QUEST_CALL_OF_THE_ILLIDARI) && !_alreadyGreet)
+                    {
+                        _events.ScheduleEvent(EVENT_EXTRA_GREETING_1, 1000);
+                        _events.ScheduleEvent(EVENT_EXTRA_GREETING_2, 25000);
+                        _events.ScheduleEvent(EVENT_EXTRA_GREETING_3, 45000);
+                        _events.ScheduleEvent(EVENT_EXTRA_GREETING_4, 75000);
+                        _alreadyGreet = true;
+                    }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            UpdateVictim();
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_EXTRA_GREETING_1:
+                    Talk(TEXT_GREETING, me->GetOwner());
+                    break;
+                case EVENT_EXTRA_GREETING_2:
+                    Talk(TEXT_EXTRA_GREETING_1, me->GetOwner());
+                    break;
+                case EVENT_EXTRA_GREETING_3:
+                    Talk(TEXT_EXTRA_GREETING_2, me->GetOwner());
+                    break;
+                case EVENT_EXTRA_GREETING_4:
+                    Talk(TEXT_EXTRA_GREETING_3, me->GetOwner());
+                    break;
+                default:
+                    break;
+                }
+            }
+            // no melee attacks
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+                case DATA_GREETING_ENDED:
+                {
+                    _events.CancelEvent(EVENT_EXTRA_GREETING_2);
+                    _events.CancelEvent(EVENT_EXTRA_GREETING_3);
+                    _events.CancelEvent(EVENT_EXTRA_GREETING_4);
+                    _alreadyGreet = true;
+                    break;
+                }
+            }
+        }
+
+    private:
+        bool _alreadyGreet;
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_korvas_summonAI(creature);
+    }
+};
+
+enum eChoices
+{
+    QUEST_THE_POWER_TO_SURVIVE = 40816,
+    SPELL_PLAYERCHOICE = 201092,
+    PLAYER_CHOICE_DH_ARTIFACT_SELECTION = 255,
+    PLAYER_CHOICE_DH_HAVOC = 641,
+    PLAYER_CHOICE_DH_VENGEANCE = 640,
+    SPELL_DH_SPEC_HAVOK = 201093,
+    SPELL_DH_SPEC_VENGEANCE = 201094,
+    QUEST_ALDRACHI_WARBLADES_CHOSEN = 40818,
+    QUEST_TWINBLADES_OFTHE_DECEIVER_CHOSEN = 40817,
+    KILL_CREDIT_DH_ARTIFACT_CHOSEN = 105177,
+};
+
+class npc_altruis_sufferer_artifact : public CreatureScript
+{
+public:
+    npc_altruis_sufferer_artifact() : CreatureScript("npc_altruis_sufferer_artifact") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_THE_POWER_TO_SURVIVE)
+        {
+            player->CastSpell(player, 201092, true); // Display player spec choice
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (player->HasQuest(QUEST_THE_POWER_TO_SURVIVE) &&
+            player->GetQuestStatus(QUEST_THE_POWER_TO_SURVIVE) != QUEST_STATUS_REWARDED) {
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I would like to review weapons we might pursue.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+
+        SendGossipMenuFor(player, player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        ClearGossipMenuFor(player);
+
+        switch (action)
+        {
+            case GOSSIP_ACTION_INFO_DEF + 1:
+                player->CastSpell(player, 201092, true); // Display player spec choice
+                CloseGossipMenuFor(player);
+                break;
+        }
+        return true;
+    }
+};
+
+class PlayerScript_DH_artifact_choice : public PlayerScript
+{
+public:
+    PlayerScript_DH_artifact_choice() : PlayerScript("PlayerScript_DH_artifact_choice") {}
+
+    void OnCompleteQuestChoice(Player* player, uint32 choiceID, uint32 responseID)
+    {
+        if (choiceID != PLAYER_CHOICE_DH_ARTIFACT_SELECTION)
+            return;
+
+        switch (responseID)
+        {
+            case PLAYER_CHOICE_DH_HAVOC:
+            {
+                player->RemoveRewardedQuest(QUEST_ALDRACHI_WARBLADES_CHOSEN);
+                player->KilledMonsterCredit(KILL_CREDIT_DH_ARTIFACT_CHOSEN);
+
+                if (ChrSpecializationEntry const* spec = sChrSpecializationStore.AssertEntry(577))
+                    player->ActivateTalentGroup(spec);
+
+                break;
+            }   
+            case PLAYER_CHOICE_DH_VENGEANCE:
+            {
+                player->RemoveRewardedQuest(QUEST_TWINBLADES_OFTHE_DECEIVER_CHOSEN);
+                player->KilledMonsterCredit(KILL_CREDIT_DH_ARTIFACT_CHOSEN);
+
+                if (ChrSpecializationEntry const* spec = sChrSpecializationStore.AssertEntry(581))
+                    player->ActivateTalentGroup(spec);
+
+                break;
+            }   
+            default:
+                break;
+        }
+    }
+};
+
 void AddSC_dalaran_legion()
 {
     new OnLegionArrival();
@@ -392,5 +632,9 @@ void AddSC_dalaran_legion()
     new zone_legion_dalaran_underbelly();
     new npc_hunter_talua();
     new npc_great_eagle();
-    new player_artifact_choice();
+    // new player_artifact_choice();
+    new PlayerScript_DH_artifact_choice();
+    new PlayerScript_summon_korvas_bloodthorn();
+    new npc_korvas_bloodthorn_summon();
+    new npc_altruis_sufferer_artifact();
 }

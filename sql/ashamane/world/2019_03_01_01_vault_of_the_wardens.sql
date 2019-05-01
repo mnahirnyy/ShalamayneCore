@@ -3,7 +3,7 @@ DELETE FROM `gameobject` WHERE `guid` = 20375675;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `VerifiedBuild`) VALUES
 (20375675, 243965, 1481, 7705, 7747, 0, 0, 0, 1813.36, 1543.43, 88.3732, 5.74205, 0, 0, 0.267278, -0.963619, 7200, 255, 1, 22423);
 
-DELETE FROM `creature_queststarter` WHERE `id` IN (92718, 92980, 92986, 92984, 97643, 96675, 97644, 97978, 97296, 114562);
+DELETE FROM `creature_queststarter` WHERE `id` IN (92718, 92980, 92986, 92984, 97643, 96675, 97644, 97978, 97296, 114562, 116704, 99254);
 INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES  
 (92718, 38672), -- breaking out
 (92980, 38690), -- rise of the illidari
@@ -24,7 +24,13 @@ INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 (97978, 39689), -- Illidari we are leaving (A)
 (97978, 39690), -- Illidari we are leaving (H)
 (97296, 40976), -- Audience with Warchief
-(114562, 44663); -- Blink of an Eye
+(97296, 39691), -- The Call of War
+(114562, 44663), -- Blink of an Eye
+(116704, 39047), -- call of the Illidari
+(99254, 40816), -- Power To Survive (Altruis)
+(99254, 41120), -- Making Arrangements
+(99254, 41121), -- By Any Means
+(99254, 41119); -- The Hunt
 
 DELETE FROM `creature_questender` WHERE `quest` IN (40253, 38723);
 INSERT INTO `creature_questender` (`id`,`quest`) VALUES (92984, 40253), (92984, 38723);
@@ -545,15 +551,19 @@ DELETE FROM `creature_text` WHERE `CreatureID`=100636;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
 (100636,0,0,'I don\'t like the looks of them, mage. They smell of demon filth.',12,0,100,0,0,57915,0,0,'Lord Saurfang to Player');
 
-DELETE FROM `npc_text` WHERE `ID` IN (30560, 30561);
+DELETE FROM `npc_text` WHERE `ID` IN (30560, 30561, 30562, 30563);
 INSERT INTO `npc_text` (`ID`, `Probability0`, `Probability1`, `Probability2`, `Probability3`, `Probability4`, `Probability5`, `Probability6`, `Probability7`, `BroadcastTextId0`, `BroadcastTextId1`, `BroadcastTextId2`, `BroadcastTextId3`, `BroadcastTextId4`, `BroadcastTextId5`, `BroadcastTextId6`, `BroadcastTextId7`, `VerifiedBuild`) VALUES
 (30560,1,0,0,0,0,0,0,0,147324,0,0,0,0,0,0,0,25549),
-(30561,1,0,0,0,0,0,0,0,147325,0,0,0,0,0,0,0,25549);
+(30561,1,0,0,0,0,0,0,0,147325,0,0,0,0,0,0,0,25549),
+(30562,1,0,0,0,0,0,0,0,147326,0,0,0,0,0,0,0,25549),
+(30563,1,0,0,0,0,0,0,0,147327,0,0,0,0,0,0,0,25549);
 
-DELETE FROM `gossip_menu` WHERE `MenuID` IN (20460, 20461);
+DELETE FROM `gossip_menu` WHERE `MenuID` IN (20460, 20461, 20462, 20463);
 INSERT INTO `gossip_menu` (`MenuID`, `TextID`) VALUES
 (20460, 30560),
-(20461, 30561);
+(20461, 30561),
+(20462, 30562),
+(20463, 30563);
 
 UPDATE `creature_template` SET `minlevel`=100, `maxlevel`=100, `gossip_menu_id`=20460 WHERE `entry`=100636;
 UPDATE `creature_template` SET `gossip_menu_id`=20461 WHERE `entry`=101035;
@@ -602,4 +612,50 @@ UPDATE `creature_template` SET `unit_flags2` = '35653632' WHERE `entry` = '10254
 UPDATE `creature_template` SET `HealthScalingExpansion` = '5' , `lootid` = '98486' , `HealthModifier` = '1' WHERE `entry` = '102543';
 UPDATE `scene_template` SET `ScriptName`='scene_demons_among_them_horde' WHERE `SceneId`=1453;
 UPDATE `creature_template` SET `npcflag` = 2 WHERE `entry`=114562;
+
+DELETE FROM `creature_text` WHERE `CreatureID` = 116704;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
+(116704,0,0,'I need to speak with you.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
+(116704,0,1,'Altruis and the others await you at Krasus\' Landing. I\'ll meet you there.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
+(116704,0,2,'Kayn and the others await you at Krasus\' Landing. I\'ll meet you there.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
+(116704,0,3,'Every moment we sit idle, the Legion gains strength.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
+(116704,0,4,'In Lord Illidan\'s absence, you are the ranking member of our order. We can\'t make this decision without you.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
+(116704,0,5,'Let me know when you\'re ready.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player');
+
+UPDATE `creature_template` SET `npcflag`=2, `AIName`="", `ScriptName`='npc_korvas_bloodthorn_summon', `VerifiedBuild`=25549 WHERE `entry`=116704;
+DELETE FROM `creature_equip_template` WHERE `CreatureID`=116704;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES 
+(116704,1,128359,0,0,128371,0,0,0,0,0,25549);
+
+UPDATE `creature_template` SET `npcflag`=3, `gossip_menu_id`=20463, `ScriptName`='npc_altruis_sufferer_artifact', `VerifiedBuild`=25549 WHERE `entry`=99254;
+
+UPDATE `quest_template_addon` SET `PrevQuestID`=39047 WHERE `ID`=40816; -- The Power To Survive (Altruis)
+UPDATE `quest_template_addon` SET `PrevQuestID`=39261 WHERE `ID`=40814; -- The Power To Survive (Kayn)
+UPDATE `quest_template_addon` SET `PrevQuestID`=41120 WHERE `ID`=41121; -- By Any Means
+UPDATE `quest_template_addon` SET `PrevQuestID`=41121 WHERE `ID`=41119; -- The Hunt
+
+DELETE FROM `playerchoice_response` WHERE `ChoiceId`=255;
+INSERT INTO `playerchoice_response` (`ChoiceId`, `ResponseId`, `Index`, `ChoiceArtFileId`, `Header`, `Answer`, `Description`, `Confirmation`, `QuestId`, `VerifiedBuild`) VALUES
+(255, 640, 2, 0, 'Vengeance', 'Select', 'The mighty Aldrachi were one of the few to stand against the Burning Legion. It took Sargeras to fell their greatest champion, seizing his warblades in the process. Now the traitorous Illidari Carla, servant of Kil\'Jaeden, wields the infamous warblades. The more souls she claims, the more powerful she becomes.\n\n            |cFF000000|Hitem:128832|h[Aldrachi Warblades]|h|r', 'CONFIRM_ARTIFACT_CHOICE', 40818, 25549),
+(255, 641, 1, 0, 'Havoc', 'Select', 'These glaives belong to the former demon hunter Varedis Felsoul, who was slain defending the Black Temple many years ago. The Burning Legion\'s master, Kil\'jaeden the Deceiver, raised Varedis in the Twisting Nether and imbued his glaives with a piece of the demon lord\'s chaotic power.\n\n            |cFF000000|Hitem:127829|h[Twinblades of the Deceiver]|h|r', 'CONFIRM_ARTIFACT_CHOICE', 40817, 25549);
+
+DELETE FROM `spell_target_position` WHERE `ID`=192757;
+INSERT INTO `spell_target_position` (`ID`, `EffectIndex`, `MapID`, `PositionX`, `PositionY`, `PositionZ`, `VerifiedBuild`) VALUES
+(192757, 0, 0, -8544.392578, 462.887299, 104.472054, 22566);
+
+-- Delete Reward From Artifact Quests (Temporarly, only for the implemented ones)
+UPDATE `quest_template` SET `RewardAmount1` = 0 WHERE `ID` IN (40817, 40818);
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=19 AND `SourceEntry` IN (41120,41803);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(19,0,41120,0,0,14,0,40818,0,0,0,0,0,"","Quest 'Making Arrangements' can only be taken if quest 'Aldrachi Warblades Chosen' is not taken"),
+(19,0,41803,0,0,28,0,40817,0,0,1,0,0,"","Quest 'Asking A Favor' can only be taken if quest 'Twinblades of the Deceiver Chosen' is not completed");
+
+DELETE FROM `creature` WHERE `guid`=280000321;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+(280000321,97296,0,1519,5390,0,0,175,0,-1,0,1,-8540.17,462.07,104.71,5.338177,120,0,0,9145554,5,0,2,0,0,0,0,'',25549);
+
+DELETE FROM `spell_area` WHERE `area` IN (5390);
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `quest_start_status`, `quest_end_status`) VALUES
+(57569, 5390, 39689, 39691, 64, 64);
 
