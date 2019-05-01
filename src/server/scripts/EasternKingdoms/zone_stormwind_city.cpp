@@ -44,7 +44,7 @@
 #include "InstanceScript.h"
 #include "DBCEnums.h"
 
-
+#define GOSSIP_SHOW_DEMONS "This cannot wait. There are demons among your ranks. Let me show you."
 #define GOSSIP_ACCEPT_DUEL      "Let''s duel"
 #define EVENT_SPECIAL 20
 
@@ -654,6 +654,77 @@ public:
     }
 };
 
+enum {
+    QUEST_THE_CALL_OF_WAR = 39691,
+    QUEST_DEMONS_AMONG_THEM = 44463,
+    SCENE_DEMONS_AMONG_THEM = 1456,
+    KILL_CREDIT_WARN_ANDUIN_WRYNN = 111585,
+    SPELL_PHASE_175 = 57569,
+    SPELL_PHASE_176 = 74789,
+};
+
+// 102585 - Jace Darkweaver
+struct npc_stormwind_jace : public ScriptedAI
+{
+    npc_stormwind_jace(Creature* creature) : ScriptedAI(creature) { }
+
+    void MoveInLineOfSight(Unit* unit) override
+    {
+        if (Player* player = unit->ToPlayer())
+            if (player->GetDistance(me) < 10.0f)
+                if (!player->GetQuestObjectiveData(QUEST_THE_CALL_OF_WAR, 0))
+                    player->KilledMonsterCredit(me->GetEntry());
+    }
+};
+
+class npc_anduin_wrynn : public CreatureScript
+{
+public:
+    npc_anduin_wrynn() : CreatureScript("npc_anduin_wrynn") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (player->HasQuest(QUEST_DEMONS_AMONG_THEM) &&
+            player->GetQuestStatus(QUEST_DEMONS_AMONG_THEM) != QUEST_STATUS_REWARDED)
+        {
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, GOSSIP_SHOW_DEMONS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+
+        SendGossipMenuFor(player, player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        ClearGossipMenuFor(player);
+
+        switch (action)
+        {
+        case GOSSIP_ACTION_INFO_DEF + 1:
+            player->GetSceneMgr().PlayScene(SCENE_DEMONS_AMONG_THEM);
+            CloseGossipMenuFor(player);
+            break;
+        }
+        return true;
+    }
+};
+
+class scene_demons_among_them_alliance : public SceneScript
+{
+public:
+    scene_demons_among_them_alliance() : SceneScript("scene_demons_among_them_alliance") { }
+
+    void OnSceneEnd(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) override
+    {
+        player->KilledMonsterCredit(KILL_CREDIT_WARN_ANDUIN_WRYNN, ObjectGuid::Empty);
+        player->RemoveAurasDueToSpell(SPELL_PHASE_175);
+        player->CastSpell(player, SPELL_PHASE_176, true);
+    }
+};
+
 void AddSC_stormwind_city()
 {
     new npc_q42782("npc_q42782");
@@ -670,5 +741,8 @@ void AddSC_stormwind_city()
 	new npc_tele_q40644();
 	new npc_tele_qq40644();
 	new npc_tele_qqq40644();
+    RegisterCreatureAI(npc_stormwind_jace);
+    new npc_anduin_wrynn();
+    new scene_demons_among_them_alliance();
 }
 
