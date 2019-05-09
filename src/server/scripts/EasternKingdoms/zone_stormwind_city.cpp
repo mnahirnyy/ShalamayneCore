@@ -43,6 +43,7 @@
 #include "Transport.h"
 #include "InstanceScript.h"
 #include "DBCEnums.h"
+#include "PhasingHandler.h"
 
 #define GOSSIP_SHOW_DEMONS "This cannot wait. There are demons among your ranks. Let me show you."
 #define GOSSIP_ACCEPT_DUEL      "Let''s duel"
@@ -656,6 +657,8 @@ public:
 
 enum {
     QUEST_THE_CALL_OF_WAR = 39691,
+    QUEST_WEAPON_OF_THE_ALLIANCE = 44473,
+    QUEST_BLINK_OF_AN_EYE = 44663,
     QUEST_DEMONS_AMONG_THEM = 44463,
     SCENE_DEMONS_AMONG_THEM = 1456,
     KILL_CREDIT_WARN_ANDUIN_WRYNN = 111585,
@@ -664,16 +667,27 @@ enum {
 };
 
 // 102585 - Jace Darkweaver
-struct npc_stormwind_jace : public ScriptedAI
+class npc_stormwind_jace : public CreatureScript
 {
-    npc_stormwind_jace(Creature* creature) : ScriptedAI(creature) { }
+public:
+    npc_stormwind_jace() : CreatureScript("npc_stormwind_jace") { }
 
-    void MoveInLineOfSight(Unit* unit) override
+    struct npc_stormwind_jaceAI : public ScriptedAI
     {
-        if (Player* player = unit->ToPlayer())
-            if (player->GetDistance(me) < 10.0f)
-                if (!player->GetQuestObjectiveData(QUEST_THE_CALL_OF_WAR, 0))
-                    player->KilledMonsterCredit(me->GetEntry());
+        npc_stormwind_jaceAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void MoveInLineOfSight(Unit* unit) override
+        {
+            if (Player* player = unit->ToPlayer())
+                if (player->GetDistance(me) < 10.0f)
+                    if (player->HasQuest(QUEST_THE_CALL_OF_WAR) && !player->GetQuestObjectiveData(QUEST_THE_CALL_OF_WAR, 0))
+                        player->KilledMonsterCredit(me->GetEntry());
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_stormwind_jaceAI(creature);
     }
 };
 
@@ -720,8 +734,60 @@ public:
     void OnSceneEnd(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) override
     {
         player->KilledMonsterCredit(KILL_CREDIT_WARN_ANDUIN_WRYNN, ObjectGuid::Empty);
-        player->RemoveAurasDueToSpell(SPELL_PHASE_175);
-        player->CastSpell(player, SPELL_PHASE_176, true);
+        PhasingHandler::OnConditionChange(player);
+    }
+};
+
+class quest_demons_among_them : public QuestScript
+{
+public:
+    quest_demons_among_them() : QuestScript("quest_demons_among_them") { }
+
+    void OnQuestStatusChange(Player* player, Quest const* /*quest*/, QuestStatus /*oldStatus*/, QuestStatus newStatus) override
+    {
+        if (newStatus == QUEST_STATUS_NONE)
+        {
+            PhasingHandler::OnConditionChange(player);
+        }
+        if (newStatus == QUEST_STATUS_COMPLETE)
+        {
+            if (player->GetPhaseShift().HasPhase(175))
+            {
+                PhasingHandler::RemovePhase(player, 175);
+            }
+        }
+    }
+};
+
+class PlayerScript_summon_khadgar_servant : public PlayerScript
+{
+public:
+    PlayerScript_summon_khadgar_servant() : PlayerScript("PlayerScript_summon_khadgar_servant") {}
+
+    uint32 checkTimer = 1000;
+    bool _khadgarServantSummoned = false;
+
+    void OnUpdate(Player* player, uint32 diff) override
+    {
+        if (checkTimer <= diff)
+        {
+            if (player->getClass() == CLASS_DEMON_HUNTER &&
+                player->GetQuestStatus(QUEST_WEAPON_OF_THE_ALLIANCE) == QUEST_STATUS_REWARDED &&
+                player->GetQuestStatus(QUEST_BLINK_OF_AN_EYE) == QUEST_STATUS_NONE && !_khadgarServantSummoned)
+            {
+                /*www.wowhead.com/npc=114562/khadgars-upgraded-servant*/
+                if (Creature* creature = player->FindNearestCreature(114562, 10.0f)) {
+                    creature->DestroyForPlayer(player);
+                    _khadgarServantSummoned = false;
+                }
+
+                /*www.wowhead.com/spell=228002/summon-khadgars-upgraded-servant-3*/
+                player->CastSpell(228002, true);
+                _khadgarServantSummoned = true;
+            }
+            checkTimer = 1000;
+        }
+        else checkTimer -= diff;
     }
 };
 
@@ -741,8 +807,10 @@ void AddSC_stormwind_city()
 	new npc_tele_q40644();
 	new npc_tele_qq40644();
 	new npc_tele_qqq40644();
-    RegisterCreatureAI(npc_stormwind_jace);
+    new npc_stormwind_jace();
     new npc_anduin_wrynn();
     new scene_demons_among_them_alliance();
+    new quest_demons_among_them();
+    new PlayerScript_summon_khadgar_servant();
 }
 
