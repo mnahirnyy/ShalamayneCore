@@ -3,7 +3,7 @@ DELETE FROM `gameobject` WHERE `guid` = 20375675;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `VerifiedBuild`) VALUES
 (20375675, 243965, 1481, 7705, 7747, 0, 0, 0, 1813.36, 1543.43, 88.3732, 5.74205, 0, 0, 0.267278, -0.963619, 7200, 255, 1, 22423);
 
-DELETE FROM `creature_queststarter` WHERE `id` IN (92718, 92980, 92986, 92984, 97643, 96675, 97644, 97978, 97296, 114562, 116704, 99254, 103156, 102585, 107574);
+DELETE FROM `creature_queststarter` WHERE `id` IN (92718, 92980, 92986, 92984, 97643, 96675, 97644, 97978, 97296, 114562, 116704, 99254, 99262, 103156, 102585, 107574);
 INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES  
 (92718, 38672), -- breaking out
 (92980, 38690), -- rise of the illidari
@@ -29,6 +29,9 @@ INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 (116704, 39047), -- call of the Illidari
 (99254, 40816), -- Power To Survive (Altruis)
 (99254, 41120), -- Making Arrangements
+(99254, 41803), -- Asking A Favor
+(99254, 41863), -- Vengeance Will Be Ours
+(99262, 41807), -- Establishing a Connection
 (103156, 41121), -- By Any Means
 (103156, 41119), -- The Hunt
 (102585, 39691), -- The Call of War
@@ -646,6 +649,11 @@ UPDATE `quest_template_addon` SET `PrevQuestID`=44471 WHERE `ID`=44463; -- Demon
 UPDATE `quest_template_addon` SET `PrevQuestID`=44463 WHERE `ID`=44473; -- A Weapon of the Alliance
 UPDATE `quest_template_addon` SET `PrevQuestID`=40593 WHERE `ID`=44120; -- Illidari Allies
 
+UPDATE `quest_template_addon` SET `PrevQuestID`=41803 WHERE `ID`=41804; -- Ask And You Shall Receive
+UPDATE `quest_template_addon` SET `PrevQuestID`=41804 WHERE `ID`=41806; -- Return To Jace
+UPDATE `quest_template_addon` SET `PrevQuestID`=41806 WHERE `ID`=41807; -- Establishing a Connection
+UPDATE `quest_template_addon` SET `PrevQuestID`=41807 WHERE `ID`=41863; -- Vengeance Will Be Ours
+
 DELETE FROM `playerchoice_response` WHERE `ChoiceId`=255;
 INSERT INTO `playerchoice_response` (`ChoiceId`, `ResponseId`, `Index`, `ChoiceArtFileId`, `Header`, `Answer`, `Description`, `Confirmation`, `QuestId`, `VerifiedBuild`) VALUES
 (255, 640, 2, 0, 'Vengeance', 'Select', 'The mighty Aldrachi were one of the few to stand against the Burning Legion. It took Sargeras to fell their greatest champion, seizing his warblades in the process. Now the traitorous Illidari Carla, servant of Kil\'Jaeden, wields the infamous warblades. The more souls she claims, the more powerful she becomes.\n\n            |cFF000000|Hitem:128832|h[Aldrachi Warblades]|h|r', 'CONFIRM_ARTIFACT_CHOICE', 40818, 25549),
@@ -660,8 +668,8 @@ UPDATE `quest_template` SET `RewardAmount1` = 0 WHERE `ID` IN (40817, 40818);
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=19 AND `SourceEntry` IN (41120,41803);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(19,0,41120,0,0,28,0,40818,0,0,1,0,0,"","Quest 'Making Arrangements' can only be taken if quest 'Aldrachi Warblades Chosen' is not taken"),
-(19,0,41803,0,0,28,0,40817,0,0,1,0,0,"","Quest 'Asking A Favor' can only be taken if quest 'Twinblades of the Deceiver Chosen' is not completed");
+(19,0,41120,0,0,14,0,40818,0,0,0,0,0,"","Quest 'Making Arrangements' can only be taken if quest 'Aldrachi Warblades Chosen' is not taken"),
+(19,0,41803,0,0,14,0,40817,0,0,0,0,0,"","Quest 'Asking A Favor' can only be taken if quest 'Twinblades of the Deceiver Chosen' is not taken");
 
 DELETE FROM `creature` WHERE `guid` BETWEEN 280000321 AND 280000353;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
