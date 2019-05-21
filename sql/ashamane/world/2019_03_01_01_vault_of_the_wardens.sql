@@ -625,11 +625,11 @@ UPDATE `creature_template` SET `npcflag` = 2 WHERE `entry`=114562;
 DELETE FROM `creature_text` WHERE `CreatureID` = 116704;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
 (116704,0,0,'I need to speak with you.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
-(116704,0,1,'Altruis and the others await you at Krasus\' Landing. I\'ll meet you there.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
-(116704,0,2,'Kayn and the others await you at Krasus\' Landing. I\'ll meet you there.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
-(116704,0,3,'Every moment we sit idle, the Legion gains strength.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
-(116704,0,4,'In Lord Illidan\'s absence, you are the ranking member of our order. We can\'t make this decision without you.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
-(116704,0,5,'Let me know when you\'re ready.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player');
+(116704,1,0,'Altruis and the others await you at Krasus\' Landing. I\'ll meet you there.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
+(116704,2,0,'Kayn and the others await you at Krasus\' Landing. I\'ll meet you there.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
+(116704,3,0,'Every moment we sit idle, the Legion gains strength.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
+(116704,4,0,'In Lord Illidan\'s absence, you are the ranking member of our order. We can\'t make this decision without you.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player'),
+(116704,5,0,'Let me know when you\'re ready.',12,0,100,0,0,57295,0,0,'Korvas Bloodthorn to Player');
 
 UPDATE `creature_template` SET `npcflag`=2, `AIName`="", `ScriptName`='npc_korvas_bloodthorn_summon', `VerifiedBuild`=25549 WHERE `entry`=116704;
 DELETE FROM `creature_equip_template` WHERE `CreatureID`=116704;
@@ -707,7 +707,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (280000352,1756,0,1519,6292,0,0,175,0,-1,0,1,-8412.601,304.631,147.013,3.801755,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Guard
 (280000353,1756,0,1519,6292,0,0,175,0,-1,0,1,-8410.082,301.516,147.013,3.797828,120,0,0,0,0,0,0,0,0,0,0,'',25549); -- Guard
 
-DELETE FROM `creature` WHERE `guid` BETWEEN 280000354 AND 280000394;
+DELETE FROM `creature` WHERE `guid` BETWEEN 280000354 AND 280000398;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
 (280000354,100973,0,1519,6292,0,0,176,0,-1,0,1,-8363.29,232.547,157.073,2.2498,120,0,0,0,0,0,3,0,0,0,0,'',25549), -- Anduinn
 (280000355,100472,0,1519,6292,0,0,176,0,-1,0,1,-8361.094,244.066,155.333,1.441499,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Aysa
@@ -746,10 +746,14 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (280000388,102543,0,1519,6292,0,0,176,0,-1,0,1,-8401.074,289.815,149.124,3.814184,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felblade
 (280000389,102543,0,1519,6292,0,0,176,0,-1,0,1,-8400.776,269.493,153.145,0.630967,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felblade
 (280000390,102543,0,1519,6292,0,0,176,0,-1,0,1,-8390.620,277.214,153.217,3.850315,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felblade
-(280000391,100993,0,1519,6292,0,0,176,0,-1,0,1,-8371.511,239.132,155.311,0.674953,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Dead Felblade
-(280000392,100993,0,1519,6292,0,0,176,0,-1,0,1,-8356.389,244.339,155.345,4.298779,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Dead Felblade
-(280000393,100993,0,1519,6292,0,0,176,0,-1,0,1,-8371.095,249.906,155.345,3.237705,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Dead Felblade
-(280000394,100993,0,1519,6292,0,0,176,0,-1,0,1,-8379.079,247.806,155.347,3.123822,120,0,0,0,0,0,0,0,0,0,0,'',25549); -- Dead Felblade
+(280000391,102543,0,1519,6292,0,0,176,0,-1,0,1,-8405.039,214.168,155.346,0.718823,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felblade
+(280000392,102543,0,1519,6292,0,0,176,0,-1,0,1,-8412.923,222.840,155.346,0.603369,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felblade
+(280000393,102543,0,1519,6292,0,0,176,0,-1,0,1,-8423.000,215.158,155.346,0.683480,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felblade
+(280000394,102543,0,1519,6292,0,0,176,0,-1,0,1,-8414.742,205.794,155.346,0.687407,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felblade
+(280000395,100993,0,1519,6292,0,0,176,0,-1,0,1,-8371.511,239.132,155.311,0.674953,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Dead Felblade
+(280000396,100993,0,1519,6292,0,0,176,0,-1,0,1,-8356.389,244.339,155.345,4.298779,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Dead Felblade
+(280000397,100993,0,1519,6292,0,0,176,0,-1,0,1,-8371.095,249.906,155.345,3.237705,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Dead Felblade
+(280000398,100993,0,1519,6292,0,0,176,0,-1,0,1,-8379.079,247.806,155.347,3.123822,120,0,0,0,0,0,0,0,0,0,0,'',25549); -- Dead Felblade
 
 DELETE FROM `creature_addon` WHERE `guid` BETWEEN 280000354 AND 280000363;
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `aiAnimKit`, `movementAnimKit`, `meleeAnimKit`, `auras`) VALUES
@@ -1041,10 +1045,10 @@ UPDATE `scene_template` SET `ScriptName`='scene_demons_among_them_alliance' WHER
 UPDATE `quest_template_addon` SET `ScriptName` = 'quest_demons_among_them' WHERE `ID` = 44463;
 UPDATE `creature_template` SET `KillCredit2`= 100993 WHERE `entry` = 102543;
 
-DELETE FROM `creature` WHERE `guid` IN (280000395 , 280000396);
+DELETE FROM `creature` WHERE `guid` IN (280000399 , 280000400);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
-(280000395,103156,1220,7502,7592,0,0,171,0,-1,0,0,-952.355,4333.064,740.184,4.087,120,0,0,800,0,0,2,0,0,0,0,'',25549), -- Altruis the Sufferer
-(280000396,96313,1220,7502,7592,0,0,171,0,-1,0,0,-956.850,4329.416,740.170,0.853,120,0,0,0,0,0,0,0,0,0,0,'',25549);
+(280000399,103156,1220,7502,7592,0,0,171,0,-1,0,0,-952.355,4333.064,740.184,4.087,120,0,0,800,0,0,2,0,0,0,0,'',25549), -- Altruis the Sufferer
+(280000400,96313,1220,7502,7592,0,0,171,0,-1,0,0,-956.850,4329.416,740.170,0.853,120,0,0,0,0,0,0,0,0,0,0,'',25549);
 
 SET @QUEST_STATUS_NONE = 1;
 SET @QUEST_STATUS_COMPLETE = 2;
@@ -1059,25 +1063,92 @@ SET @QUEST_STATUS_COMPLETED_REWARDED = @QUEST_STATUS_COMPLETE | @QUEST_STATUS_RE
 
 DELETE FROM `spell_area` WHERE `area` IN (5390, 6292);
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `quest_start_status`, `quest_end_status`) VALUES
--- (172329, 6292, 0, 0, 0, 0),
 (57569, 5390, 39689, 39691, @QUEST_STATUS_REWARDED, @QUEST_STATUS_COMPLETED_REWARDED), -- Phase 175 on Stormwind Canals starting when quest 39689 rewarded until 39691 rewarded
 (57569, 6292, 39689, 44471, @QUEST_STATUS_REWARDED, @QUEST_STATUS_REWARDED), -- Phase 175 on Stormwind Keep starting when quest 39691 rewarded until 44463 incompleted/taken
 (57569, 6292, 44471, 44463, @QUEST_STATUS_REWARDED, @QUEST_STATUS_INCOMPLETE),
--- (74789, 6292, 44463, 44473, @QUEST_STATUS_COMPLETED_REWARDED, @QUEST_STATUS_COMPLETED_REWARDED), -- Phase 176 on Stormwind Keep starting when quest 44463 rewarded until 44473 rewarded
+(74789, 6292, 44463, 44473, @QUEST_STATUS_COMPLETED_REWARDED, @QUEST_STATUS_COMPLETED_REWARDED), -- Phase 176 on Stormwind Keep starting when quest 44463 rewarded until 44473 rewarded
 (172329, 6292, 44473, 0, @QUEST_STATUS_COMPLETED_REWARDED, 0);
 
 DELETE FROM `spell_area` WHERE `area` = 7592 AND `spell` = 59074;
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `quest_start_status`, `quest_end_status`) VALUES
 (59074, 7592, 41120, 41121, @QUEST_TAKEN, @QUEST_STATUS_COMPLETED_REWARDED);
 
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 26 AND `ConditionTypeOrReference` = 48 AND `SourceGroup` IN (175, 176) AND `ConditionValue1` = 286650; 
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`=26 AND `SourceEntry`=6292) OR (`SourceTypeOrReferenceId`=26 AND `SourceGroup` IN (175,176));
+-- DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 26 AND `ConditionTypeOrReference` = 48 AND `SourceGroup` IN (175, 176) AND `ConditionValue1` = 286650; 
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(26, 175, 6292, 0, 0, 48, 0, 286650, 0, 0, 1, 0, 0, '', 'Stormwind Keep Phase 175 when Quest objective not complete'),
-(26, 176, 6292, 0, 0, 48, 0, 286650, 0, 0, 0, 0, 0, '', 'Stormwind Keep Phase 176 when Quest objective has been completed');
+(26, 175, 6292, 0, 0, 9, 0, 44463, 0, 0, 0, 0, 0, '', 'Stormwind Keep Phase 175 when Quest 44463 taken'),
+(26, 175, 6292, 0, 0, 48, 0, 286650, 0, 0, 1, 0, 0, '', 'Stormwind Keep Set in Phase 175 from start to - Complete first objective of quest 44463'),
+(26, 176, 6292, 0, 0, 48, 0, 286650, 0, 0, 0, 0, 0, '', 'Stormwind Keep Set in Phase 176 from Complete first objective of quest 44463'),
+(26, 176, 6292, 0, 0, 8, 0, 44463, 0, 0, 1, 0, 0, '', 'Stormwind Keep Set in Phase 176 to reward 44463');
 
 DELETE FROM `phase_area` WHERE `AreaId` = 6292 AND `PhaseId` IN (175, 176);
 INSERT INTO `phase_area` (`AreaId`, `PhaseId`, `Comment`) VALUES
-(6292, 175, 'Stormwind Keep - quest 44463 taken and PHASE - !CONDITION_QUEST_OBJECTIVE_COMPLETE'),
-(6292, 176, 'Stormwind Keep - quest 44463 taken and PHASE - CONDITION_QUEST_OBJECTIVE_COMPLETE');
+(6292, 175, 'Stormwind Keep - quest 44463 taken quest objective not complete'),
+(6292, 176, 'Stormwind Keep - quest 44463 first objective complete');
 
+-- Felblade Assassin SAI
+SET @FELBLADE_ASSASSIN := 102543;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@FELBLADE_ASSASSIN;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@FELBLADE_ASSASSIN AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@FELBLADE_ASSASSIN,0,0,0,0,0,100,1,0,0,0,0,1,0,5000,0,0,0,0,1,0,0,0,0,0,0,0,"Felblade Assassin - In Combat - Say Line 0 (No Repeat)"),
+(@FELBLADE_ASSASSIN,0,1,0,0,0,100,0,5000,8000,12000,15000,11,225207,0,0,0,0,0,1,0,0,0,0,0,0,0,"Felblade Assassin - In Combat - Cast 'Unwavering Assault'");
 
+DELETE FROM `creature_text` WHERE `CreatureID` = 102543;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(102543, 0, 0, 'I live to serve.', 12, 0, 100, 0, 0, 55363, 0, 0, 'Felblade Assassin to Demon Hunter');
+
+-- Fel Spreader SAI
+SET @FEL_SPREADER := 97142;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@FEL_SPREADER;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@FEL_SPREADER AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@FEL_SPREADER,0,0,1,73,0,100,0,0,0,0,0,11,191827,6,0,0,0,0,1,0,0,0,0,0,0,0,"Fel Spreader - On Spellclick - Cast 'Fel Spreader Destroyed'"),
+(@FEL_SPREADER,0,1,2,61,0,100,1,0,0,0,0,206,581,0,0,0,0,0,7,0,0,0,0,0,0,0,"Fel Spreader - On Spellclick Play Conversation"),
+(@FEL_SPREADER,0,2,3,61,0,100,0,0,0,0,0,11,207508,16,0,0,0,0,1,0,0,0,0,0,0,0,"Fel Spreader - On Spellclick - Cast 'Fel Spreader Explosion'"),
+(@FEL_SPREADER,0,3,0,61,0,100,0,0,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Fel Spreader - On Spellclick - Despawn Instant");
+
+-- Legion Communicator SAI
+SET @GO_LEGION_COMMUNICATOR := 244439;
+UPDATE `gameobject_template` SET `AIName`="SmartGameObjectAI" WHERE `entry`=@GO_LEGION_COMMUNICATOR;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@GO_LEGION_COMMUNICATOR AND `source_type`=1;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@GO_LEGION_COMMUNICATOR,1,0,1,64,0,100,0,0,0,0,0,206,558,0,0,0,0,0,7,0,0,0,0,0,0,0,"Legion Communicator - On Gossip Hello - Play Conversation"),
+(@GO_LEGION_COMMUNICATOR,1,1,2,61,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0,0,0,0,"Legion Communicator - On Gossip Hello - Close Gossip"); 
+
+-- Mardum Scripts
+UPDATE `creature_template` SET `ScriptName` = 'npc_brood_queen_tyranna' WHERE `entry` = 93802;
+UPDATE `creature` SET `ScriptName` = 'npc_kayn_tyranna_fight' WHERE `guid` = 20542609;
+UPDATE `creature` SET `ScriptName` = 'npc_allari_tyranna_fight' WHERE `guid` = 20542497;
+UPDATE `creature` SET `ScriptName` = 'npc_jace_tyranna_fight' WHERE `guid` = 20542610;
+UPDATE `creature` SET `ScriptName` = 'npc_korvas_tyranna_fight' WHERE `guid` = 20542498;
+UPDATE `creature` SET `spawntimesecs` = 300 WHERE `guid` = 20542608;
+
+DELETE FROM `spell_script_names` WHERE `spell_id`=197627;
+INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES (197627, 'spell_summon_spiders');
+
+DELETE FROM `creature_text` WHERE `CreatureID` = 93802;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(93802, 0, 0, '$n! You and your demon hunters are nothing.', 12, 0, 100, 0, 3000, 55363, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),
+(93802, 1, 0, 'The keystone was entrusted to me by Sargeras himself. You will not have it!', 12, 0, 100, 0, 4000, 55065, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),
+(93802, 2, 0, 'None can resist my kiss.', 14, 0, 100, 0, 0, 55068, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),
+(93802, 3, 0, 'Come forth, my children. Feast upon our enemies.', 14, 0, 100, 0, 0, 55069, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),
+(93802, 4, 0, 'My Lord Sargeras, no!!!', 14, 0, 100, 0, 0, 55055, 0, 0, 'Brood Queen Tyranna to Demon Hunter');
+
+DELETE FROM `creature_text` WHERE `CreatureID` = 97244;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(97244, 0, 0, 'Grab the keystone! Let\'s get to the portal down below and back to the Black Temple!', 14, 0, 100, 0, 0, 55268, 0, 0, 'Kayn Sunfury yells to Player');
+
+DELETE FROM `creature_text` WHERE `CreatureID` = 97297;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(97297, 0, 0, 'I\'ll secure the exit portal back to the Black Temple once the others fly up here.', 12, 0, 100, 0, 0, 55096, 0, 0, 'Cyana Nightglaive to Player'),
+(97297, 1, 0, 'Hurry. Kayn has already launched the attack on Tyranna.', 12, 0, 100, 0, 0, 55095, 0, 0, 'Cyana Nightglaive to Player');
+
+-- Cyana Nightglaive SAI
+SET @CYANA_NIGHTGLAIVE := 97297;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@CYANA_NIGHTGLAIVE;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@CYANA_NIGHTGLAIVE AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@CYANA_NIGHTGLAIVE,0,0,0,19,0,100,0,38728,0,0,0,66,0,0,0,0,0,0,21,5,0,0,0,0,0,0,"Cyana Nightglaive - On Quest 'The Keystone' Taken - Set Orientation Closest Player"), 
+(@CYANA_NIGHTGLAIVE,0,1,0,19,0,100,0,38728,0,0,0,1,0,5000,0,0,0,0,1,0,0,0,0,0,0,0,"Cyana Nightglaive - On Quest 'The Keystone' Taken - Say Line 0"),
+(@CYANA_NIGHTGLAIVE,0,2,0,52,0,100,0,0,97297,0,0,1,1,5000,0,0,0,0,1,0,0,0,0,0,0,0,"Cyana Nightglaives - On Text 0 Over - Say Line 1");

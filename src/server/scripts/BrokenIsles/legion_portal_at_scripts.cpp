@@ -64,4 +64,6 @@ void AddSC_legion_portal_at_scripts()
     new at_legion_instance_portal("at_legion_portal_nighthold_exit",   1220, 1227.523f, 4210.746f, -66.f, 2.59f);
     new at_legion_instance_portal("at_portal_nighthold_lo1",           1530, 524.225f, 3324.473f, 19.5f, 2.11f);
     new at_legion_instance_portal("at_portal_nighthold_lo2",           1530, 388.29f, 3321.877f, -188.f, 1.22f);
+    new at_legion_instance_portal("at_portal_violet_hold_dh_havoc",    1494, 1293.18579f, -262.7205f, 44.364666f, 0.0f);
+    new at_legion_instance_portal("at_portal_violet_hold_dh_havoc_exit", 1220, -953.287f, 4334.03f, 740.184f, 230.541f);
 }

@@ -25,6 +25,7 @@
 #include "ScriptedCreature.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
+#include "PhasingHandler.h"
 
 enum eQuests
 {
@@ -798,18 +799,489 @@ public:
     }
 };
 
-// 93802
-struct npc_mardum_tyranna : public ScriptedAI
+// **********************************************************************
+// ************************ Brood Quieen Tyranna Script *****************
+// **********************************************************************
+enum TyrannaFightData
 {
-    npc_mardum_tyranna(Creature* creature) : ScriptedAI(creature) { }
+    DATA_TYRANNA_DEATH = 1,
+};
 
-    void JustDied(Unit* /*killer*/) override
+enum TyrannaFightTexts
+{
+    TEXT_DEATH = 0,
+};
+
+enum TyrannaFightMisc
+{
+    BROOD_QUEEN_TYRANNA = 93802,
+};
+
+// Kayn: 20542609 (Entry: 97244)
+class npc_kayn_tyranna_fight : public CreatureScript
+{
+public:
+    npc_kayn_tyranna_fight() : CreatureScript("npc_kayn_tyranna_fight") { }
+
+    struct npc_kayn_tyranna_fightAI : public ScriptedAI
     {
-        std::list<Player*> players;
-        me->GetPlayerListInGrid(players, 50.0f);
+        npc_kayn_tyranna_fightAI(Creature* creature) : ScriptedAI(creature) {
+            me->SetReactState(REACT_DEFENSIVE);
+        }
 
-        for (Player* player : players)
-            player->KilledMonsterCredit(101760);
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (who->IsPlayer())
+                if (Creature* creature = me->FindNearestCreature(BROOD_QUEEN_TYRANNA, me->GetVisibilityRange(), true))
+                    AttackStart(creature);
+        }
+
+        void EnterCombat(Unit* who) override
+        {
+            who->GetAI()->AttackStart(me);
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+        {
+            if (HealthAbovePct(75))
+                damage = urand(1, 2);
+            else
+                me->SetHealth(me->GetMaxHealth() * 0.85f);
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override {}
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_TYRANNA_DEATH:
+                Talk(TEXT_DEATH);
+                EnterEvadeMode(EVADE_REASON_OTHER);
+                break;
+            }
+        }
+
+        void JustReachedHome() override {}
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            // while loop goes here
+
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_kayn_tyranna_fightAI(creature);
+    }
+};
+
+// Allari: 20542497 (Entry: 97962)
+class npc_allari_tyranna_fight : public CreatureScript
+{
+public:
+    npc_allari_tyranna_fight() : CreatureScript("npc_allari_tyranna_fight") { }
+
+    struct npc_allari_tyranna_fightAI : public ScriptedAI
+    {
+        npc_allari_tyranna_fightAI(Creature* creature) : ScriptedAI(creature) {
+            me->SetReactState(REACT_DEFENSIVE);
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (who->IsPlayer())
+                if (Creature* creature = me->FindNearestCreature(BROOD_QUEEN_TYRANNA, me->GetVisibilityRange(), true))
+                    AttackStart(creature);
+        }
+
+        void EnterCombat(Unit* who) override
+        {
+            who->GetAI()->AttackStart(me);
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+        {
+            if (HealthAbovePct(75))
+                damage = urand(1, 2);
+            else
+                me->SetHealth(me->GetMaxHealth() * 0.85f);
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override {}
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_TYRANNA_DEATH:
+                EnterEvadeMode(EVADE_REASON_OTHER);
+                break;
+            }
+        }
+
+        void JustReachedHome() override {}
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            // while loop goes here
+
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_allari_tyranna_fightAI(creature);
+    }
+};
+
+// Jace: 20542610 (Entry: 97959)
+class npc_jace_tyranna_fight : public CreatureScript
+{
+public:
+    npc_jace_tyranna_fight() : CreatureScript("npc_jace_tyranna_fight") { }
+
+    struct npc_jace_tyranna_fightAI : public ScriptedAI
+    {
+        npc_jace_tyranna_fightAI(Creature* creature) : ScriptedAI(creature) {
+            me->SetReactState(REACT_DEFENSIVE);
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (who->IsPlayer())
+                if (Creature* creature = me->FindNearestCreature(BROOD_QUEEN_TYRANNA, me->GetVisibilityRange(), true))
+                    AttackStart(creature);
+        }
+
+        void EnterCombat(Unit* who) override
+        {
+            who->GetAI()->AttackStart(me);
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+        {
+            if (HealthAbovePct(75))
+                damage = urand(1, 2);
+            else
+                me->SetHealth(me->GetMaxHealth() * 0.85f);
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override {}
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_TYRANNA_DEATH:
+                EnterEvadeMode(EVADE_REASON_OTHER);
+                break;
+            }
+        }
+
+        void JustReachedHome() override {}
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_jace_tyranna_fightAI(creature);
+    }
+};
+
+// Korvas: 20542498 (Entry: 98712)
+class npc_korvas_tyranna_fight : public CreatureScript
+{
+public:
+    npc_korvas_tyranna_fight() : CreatureScript("npc_korvas_tyranna_fight") { }
+
+    struct npc_korvas_tyranna_fightAI : public ScriptedAI
+    {
+        npc_korvas_tyranna_fightAI(Creature* creature) : ScriptedAI(creature) {
+            me->SetReactState(REACT_DEFENSIVE);
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (who->IsPlayer())
+                if (Creature* creature = me->FindNearestCreature(BROOD_QUEEN_TYRANNA, me->GetVisibilityRange(), true))
+                    AttackStart(creature);
+        }
+
+        void EnterCombat(Unit* who) override
+        {
+            who->GetAI()->AttackStart(me);
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+        {
+            if (HealthAbovePct(75))
+                damage = urand(1, 2);
+            else
+                me->SetHealth(me->GetMaxHealth() * 0.85f);
+        }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override {}
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_TYRANNA_DEATH:
+                EnterEvadeMode(EVADE_REASON_OTHER);
+                break;
+            }
+        }
+
+        void JustReachedHome() override {}
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_korvas_tyranna_fightAI(creature);
+    }
+};
+
+enum TyrannaTexts
+{
+    TEXT_START_COMBAT = 0,
+    TEXT_KEYSTONE = 1,
+    TEXT_KISS = 2,
+    TEXT_CHILDREN = 3,
+    TEXT_TYRANNA_DEATH = 4,
+};
+
+enum TyrannaEvents
+{
+    EVENT_BROOD_SWARM = 1,
+    EVENT_INTO_THE_SHADOWS = 2,
+    EVENT_QUEENS_BITE = 3,
+    EVENT_SAY_TEXT_2 = 4,
+    EVENT_SAY_TEXT_1 = 5,
+    EVENT_TYRANNA_DIED = 6,
+};
+
+enum TyrannaSpells
+{
+    SPELL_BROOD_SWARM = 197627,
+    SPELL_INTO_THE_SHADOWS = 197414,
+    SPELL_QUEENS_BITE = 197486,
+};
+
+enum TyrannaMisc
+{
+    NPC_KORVAS_TYRANNA = 98712,
+    NPC_JACE_TYRANNA = 97959,
+    NPC_KAYN_TYRANNA = 97244,
+    NPC_ALLARI_TYRANNA = 97962,
+    NPC_TYRANNA_SPAWN = 100334,
+    NPC_SKITTERING_BROODLING = 100333,
+};
+
+// 93802
+class npc_brood_queen_tyranna : public CreatureScript
+{
+public:
+    npc_brood_queen_tyranna() : CreatureScript("npc_brood_queen_tyranna") { }
+
+    struct npc_brood_queen_tyrannaAI : public ScriptedAI
+    {
+        npc_brood_queen_tyrannaAI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _playerParticipating = false;
+            _combatStarted = false;
+            _swarmSummoned = 0;
+        }
+
+        void Reset() override
+        {
+            _events.Reset();
+            Initialize();
+            me->setActive(true);
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (Player* player = who->ToPlayer())
+                if (player->GetDistance(me) < 10.0f)
+                    if (!_combatStarted)
+                    {
+                        _combatStarted = true;
+                        // Enter Combat
+                        _events.ScheduleEvent(EVENT_SAY_TEXT_1, 0);
+                        _events.ScheduleEvent(EVENT_BROOD_SWARM, 19000);
+                        _events.ScheduleEvent(EVENT_INTO_THE_SHADOWS, 22000);
+                        _events.ScheduleEvent(EVENT_QUEENS_BITE, urand(16000, 18000));
+                    }  
+        }
+
+        void EnterCombat(Unit* /*who*/) override
+        {
+            // We will schedule the npc abilities when player move near the npc 
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (HealthAbovePct(65) && attacker->IsCreature())
+                if (attacker->GetEntry() == NPC_KAYN_TYRANNA)
+                    damage = urand(1, 2);
+
+            if (HealthBelowPct(65) && attacker->IsCreature())
+                if (attacker->GetEntry() == NPC_KAYN_TYRANNA)
+                    me->SetHealth(me->GetHealth() + damage);
+
+            if (!_playerParticipating && attacker->ToPlayer())
+            {
+                if (Creature* creature = me->FindNearestCreature(NPC_KAYN_TYRANNA, me->GetVisibilityRange(), true))
+                {
+                    _playerParticipating = true;
+                }
+            }
+
+            if (damage >= me->GetHealth())
+            {
+                _events.ScheduleEvent(EVENT_TYRANNA_DIED, 0);
+
+                std::list<HostileReference*> threatList;
+                threatList = me->getThreatManager().getThreatList();
+                for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+                    if (Player* target = (*itr)->getTarget()->ToPlayer())
+                        if (target->GetQuestStatus(38728) == QUEST_STATUS_INCOMPLETE)
+                            target->KilledMonsterCredit(101760);
+            }
+        }
+
+        void JustDied(Unit* /*killer*/) override
+        {
+            std::list<Creature*> summonedSwarm;
+            me->GetCreatureListWithEntryInGrid(summonedSwarm, NPC_TYRANNA_SPAWN, me->GetVisibilityRange());
+            for (std::list<Creature*>::const_iterator itr = summonedSwarm.begin(); itr != summonedSwarm.end(); ++itr)
+                (*itr)->ToCreature()->DespawnOrUnsummon(0);
+
+            if (Creature* creature = me->FindNearestCreature(NPC_KAYN_TYRANNA, me->GetVisibilityRange(), true))
+                creature->AI()->SetData(DATA_TYRANNA_DEATH, DATA_TYRANNA_DEATH);
+            if (Creature* creature = me->FindNearestCreature(NPC_KORVAS_TYRANNA, me->GetVisibilityRange(), true))
+                creature->AI()->SetData(DATA_TYRANNA_DEATH, DATA_TYRANNA_DEATH);
+            if (Creature* creature = me->FindNearestCreature(NPC_JACE_TYRANNA, me->GetVisibilityRange(), true))
+                creature->AI()->SetData(DATA_TYRANNA_DEATH, DATA_TYRANNA_DEATH);
+            if (Creature* creature = me->FindNearestCreature(NPC_ALLARI_TYRANNA, me->GetVisibilityRange(), true))
+                creature->AI()->SetData(DATA_TYRANNA_DEATH, DATA_TYRANNA_DEATH);
+
+            me->DespawnOrUnsummon(300000, Seconds(30));
+        }
+
+        void SummomNearTarget(uint8 count, uint32 entry, Position targetPos, uint32 duration)
+        {
+            for (uint8 i = 0; i < count; i++)
+            {
+                uint8 rand = urand(1, 2);
+                float angle = frand(0.0f, 2.0f * float(M_PI));
+                float x = targetPos.GetPositionX() + (5.0f * std::cos(angle));
+                float y = targetPos.GetPositionY() + (5.0f * std::sin(angle));
+                Position randomPosition = {
+                    x, y, targetPos.GetPositionZ(), targetPos.GetOrientation()
+                };
+                me->SummonCreature(entry, randomPosition, TEMPSUMMON_CORPSE_DESPAWN, duration);
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            if (!UpdateVictim())
+                return;
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_BROOD_SWARM:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
+                    {
+                        Talk(TEXT_CHILDREN, me->GetOwner());
+                        // commented out cast of the brood swarm spell because I've failed with the implementation
+                        // leave here a workaround with the regular summon
+                        // DoCast(target, SPELL_BROOD_SWARM);
+                        SummomNearTarget(2, NPC_TYRANNA_SPAWN, target->GetPosition(), 15000); // 2 bigger spiders
+                        SummomNearTarget(3, NPC_SKITTERING_BROODLING, target->GetPosition(), 10000); // 3 small spiders
+                    }
+                    _events.ScheduleEvent(EVENT_BROOD_SWARM, 22000);
+                    _swarmSummoned++;
+                    break;
+                case EVENT_QUEENS_BITE:
+                    Talk(TEXT_KISS, me->GetOwner());
+                    DoCast(SelectTarget(SELECT_TARGET_RANDOM, 1), SPELL_QUEENS_BITE, true);
+                    _events.ScheduleEvent(EVENT_QUEENS_BITE, urand(18000, 24000));
+                    break;
+                case EVENT_INTO_THE_SHADOWS:
+                    DoCast(me, SPELL_INTO_THE_SHADOWS, true);
+                    _events.RescheduleEvent(EVENT_QUEENS_BITE, 20000 + urand(14000, 20000));
+                    _events.RescheduleEvent(EVENT_BROOD_SWARM, 20000 + urand(20000, 26000));
+                    _events.ScheduleEvent(EVENT_INTO_THE_SHADOWS, 20000 + 20000);
+                    break;
+                case EVENT_SAY_TEXT_2:
+                    Talk(TEXT_KEYSTONE, me->GetOwner());
+                    break;
+                case EVENT_SAY_TEXT_1:
+                    Talk(TEXT_START_COMBAT, me->GetOwner());
+                    _events.ScheduleEvent(EVENT_SAY_TEXT_2, 3000);
+                    break;
+                case EVENT_TYRANNA_DIED:
+                    Talk(TEXT_TYRANNA_DEATH, me->GetOwner());
+                    break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap _events;
+        bool _playerParticipating;
+        bool _combatStarted;
+        uint8 _swarmSummoned;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_brood_queen_tyrannaAI(creature);
     }
 };
 
@@ -819,11 +1291,13 @@ class npc_mardum_kayn_sunfury_end : public CreatureScript
 public:
     npc_mardum_kayn_sunfury_end() : CreatureScript("npc_mardum_kayn_sunfury_end") { }
 
-    bool OnQuestReward(Player* /*player*/, Creature* /*creature*/, Quest const* /*quest*/, uint32 /*opt*/) override
+    bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* /*quest*/, uint32 /*opt*/) override
     {
         // This Scene make the mobs disappear ATM
         //if (quest->GetQuestId() == QUEST_THE_KEYSTONE)
         //    player->CastSpell(player, 193387, true); // Scene
+
+        PhasingHandler::OnConditionChange(player);
 
         return true;
     }
@@ -904,7 +1378,11 @@ void AddSC_zone_mardum()
     new PlayerScript_mardum_spec_choice();
     new npc_mardum_dh_learn_spec();
     new npc_mardum_izal_whitemoon();
-    RegisterCreatureAI(npc_mardum_tyranna);
+    new npc_kayn_tyranna_fight();
+    new npc_allari_tyranna_fight();
+    new npc_jace_tyranna_fight();
+    new npc_korvas_tyranna_fight();
+    new npc_brood_queen_tyranna();
     new npc_mardum_kayn_sunfury_end();
     new go_mardum_the_keystone();
     RegisterSpellScript(spell_mardum_back_to_black_temple);

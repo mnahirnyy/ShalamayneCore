@@ -680,7 +680,7 @@ public:
         {
             if (Player* player = unit->ToPlayer())
                 if (player->GetDistance(me) < 10.0f)
-                    if (player->HasQuest(QUEST_THE_CALL_OF_WAR) && !player->GetQuestObjectiveData(QUEST_THE_CALL_OF_WAR, 0))
+                    if (player->HasQuest(QUEST_THE_CALL_OF_WAR) && player->GetQuestStatus(QUEST_THE_CALL_OF_WAR) == QUEST_STATUS_INCOMPLETE)
                         player->KilledMonsterCredit(me->GetEntry());
         }
     };
@@ -749,13 +749,6 @@ public:
         {
             PhasingHandler::OnConditionChange(player);
         }
-        if (newStatus == QUEST_STATUS_COMPLETE)
-        {
-            if (player->GetPhaseShift().HasPhase(175))
-            {
-                PhasingHandler::RemovePhase(player, 175);
-            }
-        }
     }
 };
 
@@ -791,6 +784,37 @@ public:
     }
 };
 
+class PlayerScript_phase_correction : public PlayerScript
+{
+public:
+    PlayerScript_phase_correction() : PlayerScript("PlayerScript_phase_correction") {}
+
+    uint32 checkTimer = 1000;
+    
+    void OnUpdate(Player* player, uint32 diff) override
+    {
+        if (checkTimer <= diff)
+        {
+            if (player->getClass() == CLASS_DEMON_HUNTER && player->GetAreaId() == 6292 &&
+                player->GetQuestStatus(QUEST_DEMONS_AMONG_THEM) == QUEST_STATUS_COMPLETE &&
+                player->GetPhaseShift().HasPhase(175) && player->GetPhaseShift().HasPhase(176))
+            {
+                PhasingHandler::RemovePhase(player, 175);
+            }
+
+            if (player->getClass() == CLASS_DEMON_HUNTER && player->GetAreaId() == 6292 &&
+                player->GetQuestStatus(QUEST_DEMONS_AMONG_THEM) == QUEST_STATUS_NONE)
+            {
+                PhasingHandler::OnConditionChange(player);
+                player->AddAura(SPELL_PHASE_175);
+            }
+
+            checkTimer = 1000;
+        }
+        else checkTimer -= diff;
+    }
+};
+
 void AddSC_stormwind_city()
 {
     new npc_q42782("npc_q42782");
@@ -812,5 +836,6 @@ void AddSC_stormwind_city()
     new scene_demons_among_them_alliance();
     new quest_demons_among_them();
     new PlayerScript_summon_khadgar_servant();
+    new PlayerScript_phase_correction();
 }
 
