@@ -339,9 +339,11 @@ UPDATE `creature_template` SET `AIName`='', `ScriptName`='' WHERE `entry`=44915;
 DELETE FROM `gossip_menu_option` WHERE `MenuId`=11901;
 INSERT INTO `gossip_menu_option` (`MenuId`, `OptionIndex`, `OptionIcon`, `OptionText`, `OptionBroadcastTextId`, `OptionType`, `OptionNpcFlag`, `VerifiedBuild`) VALUES
 (11901, 0, 0, 'I seem to have misplaced my sea pup, admiral. Do you have another that you could lend to me?', 45023, 1, 1, 25549);
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=15 AND `SourceGroup`=7967;
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=15 AND `SourceGroup`=11901;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`ErrorTextId`,`ScriptName`,`Comment`) VALUES
 (15,11901,0,0,9,27069,0,0,0,'','Show gossip option 0 if player has Quest 27069 "Steel Thunder"');
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_webbed_victim_skitterweb' WHERE `entry`=44941;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_orc_sea_dog' WHERE `entry`=44942;
 -- VIOLET HOLD
 -- gameobjects for the special violet hold TO DO
 DELETE FROM `gameobject` WHERE `guid` BETWEEN 51014366 AND 51014370;

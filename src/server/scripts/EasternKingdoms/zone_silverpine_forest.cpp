@@ -1972,17 +1972,18 @@ public:
         }
 
         void Reset() override
-        {
-            _playerGUID = ObjectGuid::Empty;
-            _torokGUID = ObjectGuid::Empty;
+        {   
             _events.Reset();
+            Initialize();
             _events.ScheduleEvent(EVENT_CHECK_TALK, 1000);
-            _playerNear = false;
         }
 
         void UpdateAI(uint32 diff) override
         {
             _events.Update(diff);
+
+            if (!UpdateVictim())
+                return;
 
             while (uint32 eventId = _events.ExecuteEvent())
             {
@@ -1990,7 +1991,7 @@ public:
                 {
                     case EVENT_CHECK_TALK:
                     {
-                        CheckForGUID();
+                        CheckForTorok();
                         if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
                             if (player->GetDistance2d(me) < 20.0f && !_playerNear)
                             {
@@ -1998,7 +1999,6 @@ public:
                                 _events.ScheduleEvent(EVENT_TALK + 1, 1000);
                                 _events.ScheduleEvent(EVENT_TALK_COOLDOWN, 90000);
                                 _playerNear = true;
-
                             }
                             else
                                 _events.ScheduleEvent(EVENT_CHECK_TALK, 1000);
@@ -2037,13 +2037,10 @@ public:
                 }
             }
 
-            if (!UpdateVictim())
-                return;
-            else
-                DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
         }
 
-        void CheckForGUID()
+        void CheckForTorok()
         {
             if (!_torokGUID)
                 if (Creature* torok = me->FindNearestCreature(NPC_WARLORD_TOROK, 30.0f))
@@ -2168,10 +2165,144 @@ public:
     }
 };
 
+// Orc Sea Dog
+class npc_orc_sea_dog : public CreatureScript
+{
+public:
+    npc_orc_sea_dog() : CreatureScript("npc_orc_sea_dog") { }
+
+    enum eNPC
+    {
+        QUEST_LOST_IN_THE_DARKNESS = 27093,
+        NPC_WEBBED_VICTIM = 44941,
+        NPC_ORC_SEA_DOG = 44942,
+        SPELL_DESPAWN_ALL_SUMMONS = 83935,
+        EVENT_CHECK_PLAYER = 100,
+    };
+
+    struct npc_orc_sea_dog_AI : public ScriptedAI
+    {
+        npc_orc_sea_dog_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _playerGUID = ObjectGuid::Empty;
+        }
+
+        void Reset() override
+        {
+            _events.Reset();
+            Initialize();
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void IsSummonedBy(Unit* who) override
+        {
+            if (Player* player = who->ToPlayer())
+            {
+                _playerGUID = player->GetGUID();
+                me->GetMotionMaster()->MoveFollow(player, 4.0f, frand(1.57f, 4.71f));
+                _events.ScheduleEvent(EVENT_CHECK_PLAYER, 1000);
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            if (!UpdateVictim())
+                return;
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_CHECK_PLAYER:
+                {
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        if (player->IsAlive() && player->IsInWorld() && !player->IsQuestRewarded(QUEST_LOST_IN_THE_DARKNESS))
+                        {
+                            _events.ScheduleEvent(EVENT_CHECK_PLAYER, 1000);
+                            break;
+                        }
+
+                    me->DespawnOrUnsummon(10);
+                    break;
+                }
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap _events;
+        ObjectGuid _playerGUID;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_orc_sea_dog_AI(creature);
+    }
+};
+
+// Webbed Victim
+class npc_webbed_victim_skitterweb : public CreatureScript
+{
+public:
+    npc_webbed_victim_skitterweb() : CreatureScript("npc_webbed_victim_skitterweb") { }
+
+    enum eNPC
+    {
+        QUEST_LOST_IN_THE_DARKNESS = 27093,
+        NPC_ORC_SEA_DOG = 44942,
+        SPELL_FREE_WEBBED_VICTIM1 = 83919,
+        SPELL_FREE_WEBBED_VICTIM2 = 83921,
+        SPELL_FREE_WEBBED_VICTIM3 = 83927,
+    };
+
+    struct npc_webbed_victim_skitterweb_AI : public ScriptedAI
+    {
+        npc_webbed_victim_skitterweb_AI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _playerGUID = ObjectGuid::Empty;
+        }
+
+        void Reset() override
+        {
+            Initialize();
+        }
+
+        void JustDied(Unit* killer) override
+        {
+            if (Player* player = killer->ToPlayer())
+                if (player->GetQuestStatus(QUEST_LOST_IN_THE_DARKNESS) == QUEST_STATUS_INCOMPLETE)
+                {
+                    _playerGUID = player->GetGUID();
+                    player->CastSpell(me, SPELL_FREE_WEBBED_VICTIM3, true);
+                    player->KilledMonsterCredit(NPC_ORC_SEA_DOG, ObjectGuid::Empty);
+                }
+        }
+
+    private:
+        ObjectGuid _playerGUID;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_webbed_victim_skitterweb_AI(creature);
+    }
+};
+
 /*######
 ## AddSC
 ######*/
-
 void AddSC_silverpine_forest()
 {
     new npc_deathstalker_erland();
@@ -2192,4 +2323,6 @@ void AddSC_silverpine_forest()
     new npc_admiral_hatchet();
     new spell_sea_pup_trigger_83865();
     new spell_pick_up_orc_crate_83838();
+    new npc_orc_sea_dog();
+    new npc_webbed_victim_skitterweb();
 }
