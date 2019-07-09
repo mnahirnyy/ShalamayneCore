@@ -4353,8 +4353,11 @@ void Player::BuildPlayerRepop()
     packet.PlayerGUID = GetGUID();
     GetSession()->SendPacket(packet.Write());
 
-    if (getRace() == RACE_NIGHTELF)
+    // if (getRace() == RACE_NIGHTELF)
+    // If the player has the Wisp racial then cast the Wisp aura on them
+    if (HasSpell(20585)) {
         CastSpell(this, 20584, true);
+    }   
     CastSpell(this, 8326, true);
 
     // there must be SMSG.FORCE_RUN_SPEED_CHANGE, SMSG.FORCE_SWIM_SPEED_CHANGE, SMSG.MOVE_SET_WATER_WALK

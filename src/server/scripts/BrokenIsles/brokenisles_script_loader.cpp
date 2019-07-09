@@ -31,6 +31,7 @@ void AddSC_valsharah();
 void AddSC_zone_argus_krokuun();
 void AddSC_zone_argus_antoran_wastes();
 void AddSC_zone_argus_macaree();
+void AddSC_zone_violet_hold();
 
 // Demon Hunter start zone
 void AddSC_zone_mardum();
@@ -219,6 +220,7 @@ void AddBrokenIslesScripts()
     AddSC_zone_argus_krokuun();
     AddSC_zone_argus_antoran_wastes();
     AddSC_zone_argus_macaree();
+    AddSC_zone_violet_hold();
 
     // Demon Hunter start zone
     AddSC_zone_mardum();

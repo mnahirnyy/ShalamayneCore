@@ -46,7 +46,7 @@
 #include "PhasingHandler.h"
 
 #define GOSSIP_SHOW_DEMONS "This cannot wait. There are demons among your ranks. Let me show you."
-#define GOSSIP_ACCEPT_DUEL      "Let''s duel"
+#define GOSSIP_ACCEPT_DUEL "Let''s duel"
 #define EVENT_SPECIAL 20
 
 //for base sql update

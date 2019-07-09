@@ -1240,10 +1240,10 @@ public:
                         // commented out cast of the brood swarm spell because I've failed with the implementation
                         // leave here a workaround with the regular summon
                         // DoCast(target, SPELL_BROOD_SWARM);
-                        SummomNearTarget(2, NPC_TYRANNA_SPAWN, target->GetPosition(), 15000); // 2 bigger spiders
-                        SummomNearTarget(3, NPC_SKITTERING_BROODLING, target->GetPosition(), 10000); // 3 small spiders
+                        SummomNearTarget(2, NPC_TYRANNA_SPAWN, target->GetPosition(), 20000); // 2 bigger spiders
+                        SummomNearTarget(3, NPC_SKITTERING_BROODLING, target->GetPosition(), 15000); // 3 small spiders
                     }
-                    _events.ScheduleEvent(EVENT_BROOD_SWARM, 22000);
+                    _events.ScheduleEvent(EVENT_BROOD_SWARM, 16000);
                     _swarmSummoned++;
                     break;
                 case EVENT_QUEENS_BITE:

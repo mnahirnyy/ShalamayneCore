@@ -1048,7 +1048,7 @@ UPDATE `creature_template` SET `KillCredit2`= 100993 WHERE `entry` = 102543;
 DELETE FROM `creature` WHERE `guid` IN (280000399 , 280000400);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
 (280000399,103156,1220,7502,7592,0,0,171,0,-1,0,0,-952.355,4333.064,740.184,4.087,120,0,0,800,0,0,2,0,0,0,0,'',25549), -- Altruis the Sufferer
-(280000400,96313,1220,7502,7592,0,0,171,0,-1,0,0,-956.850,4329.416,740.170,0.853,120,0,0,0,0,0,0,0,0,0,0,'',25549);
+(280000400,96313,1220,7502,7592,0,0,171,0,-1,0,0,-956.850,4329.416,740.170,0.853,120,0,0,0,0,0,1,0,0,0,0,'npc_warden_alturas',25549);
 
 SET @QUEST_STATUS_NONE = 1;
 SET @QUEST_STATUS_COMPLETE = 2;
@@ -1074,7 +1074,6 @@ INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `quest_st
 (59074, 7592, 41120, 41121, @QUEST_TAKEN, @QUEST_STATUS_COMPLETED_REWARDED);
 
 DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId`=26 AND `SourceEntry`=6292) OR (`SourceTypeOrReferenceId`=26 AND `SourceGroup` IN (175,176));
--- DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 26 AND `ConditionTypeOrReference` = 48 AND `SourceGroup` IN (175, 176) AND `ConditionValue1` = 286650; 
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (26, 175, 6292, 0, 0, 9, 0, 44463, 0, 0, 0, 0, 0, '', 'Stormwind Keep Phase 175 when Quest 44463 taken'),
 (26, 175, 6292, 0, 0, 48, 0, 286650, 0, 0, 1, 0, 0, '', 'Stormwind Keep Set in Phase 175 from start to - Complete first objective of quest 44463'),
@@ -1124,12 +1123,9 @@ UPDATE `creature` SET `ScriptName` = 'npc_jace_tyranna_fight' WHERE `guid` = 205
 UPDATE `creature` SET `ScriptName` = 'npc_korvas_tyranna_fight' WHERE `guid` = 20542498;
 UPDATE `creature` SET `spawntimesecs` = 300 WHERE `guid` = 20542608;
 
-DELETE FROM `spell_script_names` WHERE `spell_id`=197627;
-INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES (197627, 'spell_summon_spiders');
-
 DELETE FROM `creature_text` WHERE `CreatureID` = 93802;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
-(93802, 0, 0, '$n! You and your demon hunters are nothing.', 12, 0, 100, 0, 3000, 55363, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),
+(93802, 0, 0, '$n, You and your demon hunters are nothing.', 12, 0, 100, 0, 3000, 55363, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),
 (93802, 1, 0, 'The keystone was entrusted to me by Sargeras himself. You will not have it!', 12, 0, 100, 0, 4000, 55065, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),
 (93802, 2, 0, 'None can resist my kiss.', 14, 0, 100, 0, 0, 55068, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),
 (93802, 3, 0, 'Come forth, my children. Feast upon our enemies.', 14, 0, 100, 0, 0, 55069, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),
@@ -1152,3 +1148,26 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (@CYANA_NIGHTGLAIVE,0,0,0,19,0,100,0,38728,0,0,0,66,0,0,0,0,0,0,21,5,0,0,0,0,0,0,"Cyana Nightglaive - On Quest 'The Keystone' Taken - Set Orientation Closest Player"), 
 (@CYANA_NIGHTGLAIVE,0,1,0,19,0,100,0,38728,0,0,0,1,0,5000,0,0,0,0,1,0,0,0,0,0,0,0,"Cyana Nightglaive - On Quest 'The Keystone' Taken - Say Line 0"),
 (@CYANA_NIGHTGLAIVE,0,2,0,52,0,100,0,0,97297,0,0,1,1,5000,0,0,0,0,1,0,0,0,0,0,0,0,"Cyana Nightglaives - On Text 0 Over - Say Line 1");
+
+DELETE FROM `creature_text` WHERE `CreatureID` = 96313;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(96313, 0, 0, 'If you don\'t have time to explain, then I don\'t have time to waste on you.', 12, 0, 100, 0, 0, 64624, 0, 0, 'Warden Alturas to Player'),
+(96313, 1, 0, 'Fair enough. Let\'s get this over with, then.', 12, 0, 100, 0, 0, 64623, 0, 0, 'Warden Alturas to Player'),
+(96313, 2, 0, 'You\'re fortunate that Khadgar trusts you. But make no mistake... I do not share his sentiment.', 12, 0, 100, 0, 0, 64622, 0, 0, 'Warden Alturas to Player'),
+(96313, 3, 0, 'You may enter the hold, but I will not put the lives of my guards at risk for your mission. Is that clear?', 12, 0, 100, 0, 0, 64641, 0, 0, 'Warden Alturas to Player');
+
+DELETE FROM `spell_area` WHERE `area` = 7873 AND `spell` = 59074;
+INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `quest_start_status`, `quest_end_status`) VALUES
+(59074, 7873, 38672, 38672, @QUEST_TAKEN, @QUEST_STATUS_COMPLETED_REWARDED);
+
+-- 92718
+DELETE FROM `creature` WHERE `guid`=280000401;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+(280000401,92718,1468,7814,7873,0,0,171,0,-1,0,0,4325.95,-605.75,-281.759,4.69607,720,0,0,0,0,0,0,0,0,0,0,'',25549);
+
+DELETE FROM `creature_text` WHERE `CreatureID` = 99473;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(99473, 0, 0, 'Lower the barrier and evacuate the hold. These Illidari wish to... exchange words... with the eredar.', 12, 0, 100, 0, 0, 64634, 0, 0, 'Warden Alturas to Player'),
+(99473, 1, 0, 'Follow me. I shall open the cell for you.', 12, 0, 100, 0, 0, 64635, 0, 0, 'Warden Alturas to Player'),
+(99473, 2, 0, 'Meet Taldath, one of the most powerful eredar we\'ve ever encountered. I\'m sure you two will be fast friends.', 12, 0, 100, 0, 0, 57564, 0, 0, 'Warden Alturas to Player'),
+(99473, 3, 0, 'Remember, demon hunter... you were never here.', 12, 0, 100, 0, 0, 64638, 0, 0, 'Warden Alturas to Player');

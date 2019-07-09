@@ -621,6 +621,216 @@ public:
     }
 };
 
+#define GOSSIP_HELLO_ALTURAS1 "There's no time to explain. Let us inside the hold, warden."
+#define GOSSIP_HELLO_ALTURAS2 "Let us inside or I'll show you the difference."
+#define GOSSIP_HELLO_ALTURAS3 "Do you want to find out?"
+#define GOSSIP_HELLO_ALTURAS4 "What do you have to lose either way?"
+class npc_warden_alturas : public CreatureScript
+{
+public:
+    npc_warden_alturas() : CreatureScript("npc_warden_alturas") { }
+
+    enum {
+        TEXT_ALLOW_ENTER = 3,
+        EVENT_TELEPORT_VIOLETHOLD = 11,
+        EVENT_START_MOVE = 12,
+        EVENT_MOVE_TO_GATES = 13,
+        EVENT_TELEPORT = 14,
+        EVENT_RESET = 15,
+        DATA_START_EVENT = 21,
+    };
+
+    bool _diffsPicked = false;
+    bool _noTimePicked = false;
+    
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        if (player->GetQuestStatus(41121) == QUEST_STATUS_INCOMPLETE && !_diffsPicked && !_noTimePicked)
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, GOSSIP_HELLO_ALTURAS1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+        if (player->GetQuestStatus(41121) == QUEST_STATUS_INCOMPLETE && !_diffsPicked)
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, GOSSIP_HELLO_ALTURAS2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+
+        if (player->GetQuestStatus(41121) == QUEST_STATUS_INCOMPLETE && _diffsPicked)
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, GOSSIP_HELLO_ALTURAS3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+
+        if (player->GetQuestStatus(41121) == QUEST_STATUS_INCOMPLETE && _diffsPicked)
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, GOSSIP_HELLO_ALTURAS4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+
+        SendGossipMenuFor(player, player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        if (!player)
+            return false;
+
+        player->PlayerTalkClass->ClearMenus();
+
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            _noTimePicked = true;
+            creature->AI()->Talk(0);
+            creature->SetStandState(UNIT_STAND_STATE_STAND);
+            CloseGossipMenuFor(player);
+        }
+
+        if (action == GOSSIP_ACTION_INFO_DEF + 2)
+        {
+            _diffsPicked = true;
+            creature->SetStandState(UNIT_STAND_STATE_STAND);
+            CloseGossipMenuFor(player);
+        }
+
+        if (action == GOSSIP_ACTION_INFO_DEF + 3)
+        {
+            creature->AI()->Talk(2);
+            player->KilledMonsterCredit(96313);
+            creature->AI()->SetData(DATA_START_EVENT, DATA_START_EVENT);
+            CloseGossipMenuFor(player);
+        }
+
+        if (action == GOSSIP_ACTION_INFO_DEF + 4)
+        {
+            creature->AI()->Talk(1);
+            player->KilledMonsterCredit(96313);
+            creature->AI()->SetData(DATA_START_EVENT, DATA_START_EVENT);
+            CloseGossipMenuFor(player);
+        }
+
+        return true;
+    }
+
+    bool OnQuestAccept(Player* /*player*/, Creature* /*creature*/, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == 41121)
+        {
+            _diffsPicked = false;
+            _noTimePicked = false;
+        }
+
+        return true;
+    }
+
+    struct npc_warden_alturas_AI : public ScriptedAI
+    {
+        npc_warden_alturas_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Reset() override
+        {
+            _events.Reset();
+        }
+
+        void Initialize() {}
+
+        void UpdateAI(uint32 diff) override
+        {
+            UpdateVictim();
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_TELEPORT_VIOLETHOLD: {
+                    Talk(TEXT_ALLOW_ENTER, me->GetOwner());
+                    _events.ScheduleEvent(EVENT_START_MOVE, 4000);
+                    break;
+                }   
+                case EVENT_START_MOVE: {
+                    _events.ScheduleEvent(EVENT_MOVE_TO_GATES, 2000);
+                    me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+                    me->SetOrientation(4.0119f);
+                    break;
+                }
+                case EVENT_MOVE_TO_GATES: {
+                    _events.ScheduleEvent(EVENT_TELEPORT, 3000);
+                    me->GetMotionMaster()->MovePoint(2, -958.91f, 4326.97f, 740.20f);
+                    break;
+                }
+                case EVENT_TELEPORT: {
+                    _events.ScheduleEvent(EVENT_RESET, 1500);
+                    me->CastSpell(me, 52096, true); // cosmetic-teleport-effect
+                    break;
+                }
+                case EVENT_RESET: {
+                    me->AI()->Reset();
+                    _events.CancelEvent(EVENT_TELEPORT_VIOLETHOLD);
+                    _events.CancelEvent(EVENT_START_MOVE);
+                    _events.CancelEvent(EVENT_MOVE_TO_GATES);
+                    _events.CancelEvent(EVENT_TELEPORT);
+                    me->DespawnOrUnsummon(5000, Seconds(3));
+                    break;
+                }
+                default:
+                    break;
+                }
+            }
+            // no melee attacks
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+                case DATA_START_EVENT:
+                {
+                    _events.ScheduleEvent(EVENT_TELEPORT_VIOLETHOLD, 3000);
+                    break;
+                }
+            }
+        }
+
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_warden_alturas_AI(creature);
+    }
+};
+
+class go_violethold_entrance_portal : public GameObjectScript
+{
+public:
+    go_violethold_entrance_portal() : GameObjectScript("go_violethold_entrance_portal")
+    {
+        checkTimer = 1000;
+        giveKillCredit = 1000;
+    }
+
+    uint32 checkTimer;
+    uint32 giveKillCredit;
+
+    void OnUpdate(GameObject* p_Object, uint32 diff) override
+    {
+        if (checkTimer < diff)
+        {
+            checkTimer -= diff;
+            return;
+        }
+
+        checkTimer = 1000;
+        giveKillCredit = 1000;
+
+        std::list<Player*> playerList;
+        GetPlayerListInGrid(playerList, p_Object, 2.0f);
+
+        for (Player* player : playerList)
+        {
+            if (player->GetQuestStatus(41121) == QUEST_STATUS_INCOMPLETE)
+            {
+                player->KilledMonsterCredit(95731, ObjectGuid::Empty);
+                player->TeleportTo(1494, 1293.185f, -262.720f, 44.364f, 0.307976f);
+            }
+        }
+    }
+};
+
 void AddSC_dalaran_legion()
 {
     new OnLegionArrival();
@@ -633,6 +843,8 @@ void AddSC_dalaran_legion()
     new npc_hunter_talua();
     new npc_great_eagle();
     // new player_artifact_choice();
+    new npc_warden_alturas();
+    new go_violethold_entrance_portal();
     new PlayerScript_DH_artifact_choice();
     new PlayerScript_summon_korvas_bloodthorn();
     new npc_korvas_bloodthorn_summon();
