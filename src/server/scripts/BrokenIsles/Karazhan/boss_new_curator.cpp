@@ -27,37 +27,35 @@ enum Spells
 
 enum Events
 {
-    EVENT_VOLATILE_ENERGY   = 1,
-    EVENT_POWER_DISCHARGE   = 2,
-    EVENT_EVOCATION         = 3,
-    EVENT_REDUCE_MANA       = 4,
+    EVENT_VOLATILE_ENERGY               = 1,
+    EVENT_POWER_DISCHARGE               = 2,
+    EVENT_EVOCATION                     = 3,
+    EVENT_REDUCE_MANA                   = 4,
 };
 
 enum Says
 {
-    SAY_INTRO           = 0,
-    SAY_AGGRO           = 1,
-    SAY_VOLATILE_ENERGY = 2,
-    SAY_EVOCATION       = 3,
-    SAY_EVOCATION_END   = 4,
-    SAY_KILL            = 5,
-    SAY_DEATH           = 6,
+    SAY_INTRO                           = 0,
+    SAY_AGGRO                           = 1,
+    SAY_VOLATILE_ENERGY                 = 2,
+    SAY_EVOCATION                       = 3,
+    SAY_EVOCATION_END                   = 4,
+    SAY_KILL                            = 5,
+    SAY_DEATH                           = 6,
 };
 
 constexpr uint32 NPC_VOLATILE_ENERGY    = 114249;
 constexpr uint32 NPC_SOUL_FRAGMENT_KARA = 115113;
 constexpr int32 ACTION_CHECK_MANA       = 1;
 
-class boss_curator : public CreatureScript
+class boss_new_curator : public CreatureScript
 {
     public:
-        boss_curator() : CreatureScript("boss_curator")
-        {}
+        boss_new_curator() : CreatureScript("boss_new_curator") { }
 
-        struct boss_curator_AI : public BossAI
+        struct boss_new_curator_AI : public BossAI
         {
-            explicit boss_curator_AI(Creature* creature) : BossAI(creature, DATA_CURATOR)
-            {}
+            explicit boss_new_curator_AI(Creature* creature) : BossAI(creature, DATA_CURATOR) { }
 
             void JustDied(Unit* /**/) override
             {
@@ -75,9 +73,9 @@ class boss_curator : public CreatureScript
                 _EnterCombat();
                 me->SetMaxPower(POWER_MANA, 100);
                 me->SetPower(POWER_MANA, 100);
-                events.ScheduleEvent(EVENT_VOLATILE_ENERGY, Seconds(5));
-                events.ScheduleEvent(EVENT_POWER_DISCHARGE, Seconds(15));
-                events.ScheduleEvent(EVENT_REDUCE_MANA, IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_VOLATILE_ENERGY, 5s);
+                events.ScheduleEvent(EVENT_POWER_DISCHARGE, 15s);
+                events.ScheduleEvent(EVENT_REDUCE_MANA, 1s);
             }
 
             void EnterEvadeMode(EvadeReason why) override
@@ -96,7 +94,7 @@ class boss_curator : public CreatureScript
             void DoAction(int32 action) override
             {
                 if (action == ACTION_CHECK_MANA)
-                    events.ScheduleEvent(EVENT_REDUCE_MANA, IN_MILLISECONDS);
+                    events.ScheduleEvent(EVENT_REDUCE_MANA, 1s);
             }
 
             void ExecuteEvent(uint32 eventId) override
@@ -109,14 +107,14 @@ class boss_curator : public CreatureScript
                             Talk(SAY_VOLATILE_ENERGY);
 
                         DoCast(me, SPELL_SUMMON_VOLATILE_ENERGY);
-                        events.ScheduleEvent(EVENT_VOLATILE_ENERGY, Seconds(12));
+                        events.ScheduleEvent(EVENT_VOLATILE_ENERGY, 12s);
                         break;
                     }
 
                     case EVENT_POWER_DISCHARGE:
                     {
                         DoCast(me, SPELL_POWER_DISCHARGE);
-                        events.ScheduleEvent(EVENT_POWER_DISCHARGE, Seconds(urand(12, 15)));
+                        events.ScheduleEvent(EVENT_POWER_DISCHARGE, 12s, 15s);
                         break;
                     }
 
@@ -135,9 +133,9 @@ class boss_curator : public CreatureScript
                         me->ModifyPower(POWER_MANA, -1);
                         
                         if (me->GetPower(POWER_MANA) <= 0)
-                            events.ScheduleEvent(EVENT_EVOCATION, 500);
+                            events.ScheduleEvent(EVENT_EVOCATION, 500ms);
                         else
-                            events.ScheduleEvent(EVENT_REDUCE_MANA, IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_REDUCE_MANA, 1s);
 
                         break;
                     }
@@ -147,15 +145,14 @@ class boss_curator : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const override
         {
-            return new boss_curator_AI(creature);
+            return new boss_new_curator_AI(creature);
         }
 };
 
 class npc_kara_volatile_energy : public CreatureScript
 {
     public:
-        npc_kara_volatile_energy() : CreatureScript("npc_kara_volatile_energy")
-        {}
+        npc_kara_volatile_energy() : CreatureScript("npc_kara_volatile_energy") { }
 
         struct npc_kara_volatile_energy_AI : public ScriptedAI
         {
@@ -200,8 +197,7 @@ class npc_kara_volatile_energy : public CreatureScript
 class spell_curator_power_discharge : public SpellScriptLoader
 {
     public:
-        spell_curator_power_discharge() : SpellScriptLoader("spell_curator_power_discharge")
-        {}
+        spell_curator_power_discharge() : SpellScriptLoader("spell_curator_power_discharge") { }
 
         class spell_power_discharge_SpellScript : public SpellScript
         {
@@ -231,8 +227,7 @@ class spell_curator_power_discharge : public SpellScriptLoader
 class spell_curator_overload : public SpellScriptLoader
 {
     public:
-        spell_curator_overload() : SpellScriptLoader("spell_curator_overload")
-        {}
+        spell_curator_overload() : SpellScriptLoader("spell_curator_overload") { }
 
         class spell_overload_SpellScript : public SpellScript
         {
@@ -263,8 +258,7 @@ class spell_curator_overload : public SpellScriptLoader
 class spell_curator_evocation : public SpellScriptLoader
 {
     public:
-        spell_curator_evocation() : SpellScriptLoader("spell_curator_evocation")
-        {}
+        spell_curator_evocation() : SpellScriptLoader("spell_curator_evocation") { }
 
         class spell_evocation_AuraScript : public AuraScript
         {
@@ -327,8 +321,7 @@ class spell_kara_arc_lightning : public SpellScriptLoader
 class spell_kara_arc_lightning_dmg : public SpellScriptLoader
 {
     public:
-        spell_kara_arc_lightning_dmg() : SpellScriptLoader("spell_kara_arc_lightning_dmg")
-        {}
+        spell_kara_arc_lightning_dmg() : SpellScriptLoader("spell_kara_arc_lightning_dmg") { }
 
         class spell_arc_lightning_dmg_SpellScript : public SpellScript
         {
@@ -356,13 +349,11 @@ class spell_kara_arc_lightning_dmg : public SpellScriptLoader
 class at_kara_power_discharge : public AreaTriggerEntityScript
 {
     public:
-        at_kara_power_discharge() : AreaTriggerEntityScript("at_kara_power_discharge")
-        {}
+        at_kara_power_discharge() : AreaTriggerEntityScript("at_kara_power_discharge") { }
 
         struct at_kara_power_dischargue_AI : public AreaTriggerAI
         {
-            explicit at_kara_power_dischargue_AI(AreaTrigger* at) : AreaTriggerAI(at)
-            {}
+            explicit at_kara_power_dischargue_AI(AreaTrigger* at) : AreaTriggerAI(at) { }
 
             void OnUnitEnter(Unit* target) override
             {
@@ -383,9 +374,9 @@ class at_kara_power_discharge : public AreaTriggerEntityScript
         }
 };
 
-void AddSC_boss_curator()
+void AddSC_boss_new_curator()
 {
-    new boss_curator();
+    new boss_new_curator();
     new npc_kara_volatile_energy();
     new spell_curator_evocation();
     new spell_curator_overload();

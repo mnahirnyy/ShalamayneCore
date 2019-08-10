@@ -340,7 +340,6 @@ class HookList final
         typedef typename ContainerType::const_iterator const_iterator;
         typedef typename ContainerType::iterator iterator;
 
-        // Core/Util: avoid one useless copy when adding stuff into a HookList
         HookList<T>& operator+=(T&& t)
         {
             _container.push_back(std::move(t));

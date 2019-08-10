@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2017-2018 AshamaneProject <https://github.com/AshamaneProject>
- * Copyright (C) 2008-2017 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,26 +16,24 @@
  */
 
 #include "ScriptMgr.h"
-#include "ScriptedCreature.h"
 #include "Player.h"
-#include "ObjectMgr.h"
-#include "GameObject.h"
-#include "ScriptedGossip.h"
-#include "ScriptedEscortAI.h"
-#include "QuestPackets.h"
-#include "ScenePackets.h"
-#include "GameObjectAI.h"
-#include "ObjectAccessor.h"
-#include "SpellAuras.h"
-#include "SpellScript.h"
-#include "SpellAuraEffects.h"
-#include "SpellHistory.h"
-#include "WaypointManager.h"
-#include "MotionMaster.h"
-#include "PhasingHandler.h"
-#include "SpellInfo.h"
+#include "SpellMgr.h"
 
-void AddSC_zone_violet_hold()
+class scene_jewelcrafting_game : public SceneScript
 {
-    
+    public:
+        scene_jewelcrafting_game() : SceneScript("scene_jewelcrafting_game") { }
+
+    // Called when a player receive trigger from scene
+    void OnSceneTriggerEvent(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/, std::string const& triggerName) override
+    {
+		if(player)
+			if (triggerName == "achievement")
+				player->CompletedAchievement(10587);
+    }
+};
+
+void AddSC_legion_profession_jewelcrafting()
+{
+	new scene_jewelcrafting_game();
 }

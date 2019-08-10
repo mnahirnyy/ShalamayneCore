@@ -53,56 +53,56 @@ enum Spells
 enum Events
 {
     // All Phases
-    EVENT_DISINTEGRATE      = 1,
-    EVENT_CHAOTIC_SHADOWS   = 2,
-    EVENT_BURNING_BLAST     = 3,
-    EVENT_DEMONIC_PORTAL    = 4,
+    EVENT_DISINTEGRATE              = 1,
+    EVENT_CHAOTIC_SHADOWS           = 2,
+    EVENT_BURNING_BLAST             = 3,
+    EVENT_DEMONIC_PORTAL            = 4,
     
     // Phase One
-    EVENT_FEL_BEAM          = 5,
-    EVENT_BOMBARDMENT       = 6,
-    EVENT_DISINTEGRATE_SHIP = 7,
-    EVENT_CHECK_PLAYER_NEAR = 8,
+    EVENT_FEL_BEAM                  = 5,
+    EVENT_BOMBARDMENT               = 6,
+    EVENT_DISINTEGRATE_SHIP         = 7,
+    EVENT_CHECK_PLAYER_NEAR         = 8,
 
     // Phase Two
-    EVENT_STABILIZE_RIFT    = 9,
-    EVENT_CHECK_PLAYERS     = 10,
-    EVENT_RESTORE_STATE     = 11,
-    EVENT_FELGUARD_SENTRY   = 12,
+    EVENT_STABILIZE_RIFT            = 9,
+    EVENT_CHECK_PLAYERS             = 10,
+    EVENT_RESTORE_STATE             = 11,
+    EVENT_FELGUARD_SENTRY           = 12,
 };
 
 enum Adds
 {
-    NPC_DEMONIC_PORTAL      = 115493,
-    NPC_INVISIBLE_VEHICLE   = 115361,
-    NPC_SOUL_HARVESTER      = 115694,
-    NPC_STABILIZE_RIFT      = 115789,
-    NPC_FELGUARD_SENTRY     = 115730,
+    NPC_DEMONIC_PORTAL              = 115493,
+    NPC_INVISIBLE_VEHICLE           = 115361,
+    NPC_SOUL_HARVESTER              = 115694,
+    NPC_STABILIZE_RIFT              = 115789,
+    NPC_FELGUARD_SENTRY             = 115730,
 };
 
 enum Points
 {
-    POINT_DEMONIC_PORTAL    = 30,
-    POINT_FIRST_SHIP        = 2,
-    POINT_SECOND_SHIP       = 3,
+    POINT_DEMONIC_PORTAL            = 30,
+    POINT_FIRST_SHIP                = 2,
+    POINT_SECOND_SHIP               = 3,
 };
 
 enum Paths
 {
-    FIRST_SHIP_PATH     = 11479010,
-    SECOND_SHIP_PATH    = 11479020,
+    FIRST_SHIP_PATH                 = 11479010,
+    SECOND_SHIP_PATH                = 11479020,
 };
 
 enum Actions
 {
-    ACTION_OPENED_RIFT      = 1,
-    ACTION_CLOSED_RIFT      = 2
+    ACTION_OPENED_RIFT              = 1,
+    ACTION_CLOSED_RIFT              = 2
 };
 
 enum Data
 {
-    DATA_SHIP_PATH      = 1,
-    DATA_FELBEAM_TARGET = 2,
+    DATA_SHIP_PATH                  = 1,
+    DATA_FELBEAM_TARGET             = 2,
 };
 
 const G3D::Vector3 FirstPath[] = 
@@ -136,15 +136,14 @@ const OrbInfo Angles[] =
     { 360.f, 8946 },
 };
 
-class boss_vizaduum : public CreatureScript
+class boss_new_vizaduum : public CreatureScript
 {
     public:
-        boss_vizaduum() : CreatureScript("boss_vizaduum")
-        {}
+        boss_new_vizaduum() : CreatureScript("boss_new_vizaduum") { }
 
-        struct boss_vizaduum_AI : public BossAI
+        struct boss_new_vizaduum_AI : public BossAI
         {
-            explicit boss_vizaduum_AI(Creature* creature) : BossAI(creature, DATA_VIZADUUM)
+            explicit boss_new_vizaduum_AI(Creature* creature) : BossAI(creature, DATA_VIZADUUM)
             {
                 _homePosition = creature->GetPosition();
             }
@@ -163,11 +162,11 @@ class boss_vizaduum : public CreatureScript
                 _EnterCombat();
                 _times = 1;
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                events.ScheduleEvent(EVENT_DISINTEGRATE, Seconds(8));
-                events.ScheduleEvent(EVENT_CHAOTIC_SHADOWS, Seconds(10));
-                events.ScheduleEvent(EVENT_BURNING_BLAST, Seconds(5));
-                events.ScheduleEvent(EVENT_FEL_BEAM, Seconds(5));
-                events.ScheduleEvent(EVENT_BOMBARDMENT, Seconds(30));
+                events.ScheduleEvent(EVENT_DISINTEGRATE, 8s);
+                events.ScheduleEvent(EVENT_CHAOTIC_SHADOWS, 10s);
+                events.ScheduleEvent(EVENT_BURNING_BLAST, 5s);
+                events.ScheduleEvent(EVENT_FEL_BEAM, 5s);
+                events.ScheduleEvent(EVENT_BOMBARDMENT, 30s);
             }
 
             void EnterEvadeMode(EvadeReason why) override
@@ -211,14 +210,14 @@ class boss_vizaduum : public CreatureScript
                     _firstPhase = true;
                     events.Reset();
                     DesactivateShips();
-                    events.ScheduleEvent(EVENT_DEMONIC_PORTAL, 100);
+                    events.ScheduleEvent(EVENT_DEMONIC_PORTAL, 100ms);
                 }
                 else if (me->HealthBelowPct(33) && !_secondPhase)
                 {
                     _secondPhase = true;
                     DesactivateShips();
                     events.Reset();
-                    events.ScheduleEvent(EVENT_DEMONIC_PORTAL, 100);
+                    events.ScheduleEvent(EVENT_DEMONIC_PORTAL, 100ms);
                 }
             }
 
@@ -277,8 +276,8 @@ class boss_vizaduum : public CreatureScript
 
                             ShipReached();
                             _times = 2;
-                            events.ScheduleEvent(EVENT_DISINTEGRATE_SHIP, IN_MILLISECONDS);
-                            events.ScheduleEvent(EVENT_CHECK_PLAYER_NEAR, 500);
+                            events.ScheduleEvent(EVENT_DISINTEGRATE_SHIP, 1s);
+                            events.ScheduleEvent(EVENT_CHECK_PLAYER_NEAR, 500ms);
                             break;
                         }
 
@@ -286,7 +285,7 @@ class boss_vizaduum : public CreatureScript
                         {
                             ShipReached();
                             _times = 3;
-                            events.ScheduleEvent(EVENT_STABILIZE_RIFT, IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_STABILIZE_RIFT, 1s);
                             break;
                         }
                     }
@@ -323,13 +322,13 @@ class boss_vizaduum : public CreatureScript
                             events.CancelEvent(EVENT_CHECK_PLAYER_NEAR);
                             events.CancelEvent(EVENT_DISINTEGRATE_SHIP);
                             me->SetReactState(REACT_AGGRESSIVE);
-                            events.ScheduleEvent(EVENT_BOMBARDMENT, Seconds(20));
-                            events.ScheduleEvent(EVENT_DISINTEGRATE, Seconds(10));
-                            events.ScheduleEvent(EVENT_BURNING_BLAST, Seconds(5));
-                            events.ScheduleEvent(EVENT_CHAOTIC_SHADOWS, Seconds(urand(8, 12)));
+                            events.ScheduleEvent(EVENT_BOMBARDMENT, 20s);
+                            events.ScheduleEvent(EVENT_DISINTEGRATE, 10s);
+                            events.ScheduleEvent(EVENT_BURNING_BLAST, 5s);
+                            events.ScheduleEvent(EVENT_CHAOTIC_SHADOWS, 8s, 12s);
                         }
                         else
-                            events.ScheduleEvent(EVENT_CHECK_PLAYER_NEAR, 500);
+                            events.ScheduleEvent(EVENT_CHECK_PLAYER_NEAR, 500ms);
                         break;
                     }
 
@@ -340,10 +339,10 @@ class boss_vizaduum : public CreatureScript
                             me->SetReactState(REACT_PASSIVE);
                             me->SetFacingToObject(target);
                             DoCast(target, SPELL_DISINTEGRATE);
-                            events.ScheduleEvent(EVENT_RESTORE_STATE, 100);
+                            events.ScheduleEvent(EVENT_RESTORE_STATE, 100ms);
                         }
                         
-                        events.ScheduleEvent(EVENT_DISINTEGRATE, Seconds(10));
+                        events.ScheduleEvent(EVENT_DISINTEGRATE, 10s);
                         break;
                     }
 
@@ -356,14 +355,14 @@ class boss_vizaduum : public CreatureScript
                     case EVENT_DISINTEGRATE_SHIP:
                     {
                         DoCastAOE(SPELL_DISINTEGRATE);
-                        events.ScheduleEvent(EVENT_DISINTEGRATE_SHIP, 3 * IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_DISINTEGRATE_SHIP, 3s);
                         break;
                     }
 
                     case EVENT_BURNING_BLAST:
                     {
                         DoCastVictim(SPELL_BURNING_BLAST);
-                        events.ScheduleEvent(EVENT_BURNING_BLAST, Seconds(5));
+                        events.ScheduleEvent(EVENT_BURNING_BLAST, 5s);
                         break;
                     }
 
@@ -377,7 +376,7 @@ class boss_vizaduum : public CreatureScript
                                 DoCast(target, SPELL_CHAOTIC_SHADOWS);
                         }
 
-                        events.ScheduleEvent(EVENT_CHAOTIC_SHADOWS, Seconds(urand(20, 25)));
+                        events.ScheduleEvent(EVENT_CHAOTIC_SHADOWS, 20s, 25s);
                         break;
                     }
 
@@ -394,7 +393,7 @@ class boss_vizaduum : public CreatureScript
                                 DoCast(target, SPELL_FEL_BEAM_MARKED, true);
                             }
                         }
-                        events.ScheduleEvent(EVENT_FEL_BEAM, Seconds(40));
+                        events.ScheduleEvent(EVENT_FEL_BEAM, 40s);
                         break;
                     }
 
@@ -404,7 +403,7 @@ class boss_vizaduum : public CreatureScript
                         
                         if (auto* ptr = ObjectAccessor::GetCreature(*me, guid))
                             ptr->CastSpell(ptr, SPELL_BOMBARDMENT_CHARGE, true);
-                        events.ScheduleEvent(EVENT_BOMBARDMENT, _firstPhase ? Seconds(20) : Seconds(40));
+                        events.ScheduleEvent(EVENT_BOMBARDMENT, _firstPhase ? 20s : 40s);
                         break;
                     }
 
@@ -436,9 +435,9 @@ class boss_vizaduum : public CreatureScript
                             DoCast(rift, SPELL_STABILIZE_RIFT);
                         
                         me->SetReactState(REACT_AGGRESSIVE);
-                        events.ScheduleEvent(EVENT_DISINTEGRATE, Seconds(10));
-                        events.ScheduleEvent(EVENT_BURNING_BLAST, Seconds(5));
-                        events.ScheduleEvent(EVENT_CHAOTIC_SHADOWS, Seconds(urand(8, 12)));
+                        events.ScheduleEvent(EVENT_DISINTEGRATE, 10s);
+                        events.ScheduleEvent(EVENT_BURNING_BLAST, 5s);
+                        events.ScheduleEvent(EVENT_CHAOTIC_SHADOWS, 8s, 12s);
                         break;
                     }
                 }
@@ -454,15 +453,14 @@ class boss_vizaduum : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const override
         {
-            return new boss_vizaduum_AI(creature);
+            return new boss_new_vizaduum_AI(creature);
         }
 };
 
 class npc_kara_fel_cannon : public CreatureScript
 {
     public:
-        npc_kara_fel_cannon() : CreatureScript("npc_kara_fel_cannon")
-        {}
+        npc_kara_fel_cannon() : CreatureScript("npc_kara_fel_cannon") { }
 
         struct npc_kara_fel_cannon_AI : public ScriptedAI
         {
@@ -515,13 +513,11 @@ class npc_kara_fel_cannon : public CreatureScript
 class npc_kara_invisible_vehicle : public CreatureScript
 {
     public:
-        npc_kara_invisible_vehicle() : CreatureScript("npc_kara_invisible_vehicle")
-        {}
+        npc_kara_invisible_vehicle() : CreatureScript("npc_kara_invisible_vehicle") { }
 
         struct npc_kara_invisible_vehicle_AI : public ScriptedAI
         {
-            explicit npc_kara_invisible_vehicle_AI(Creature* me) : ScriptedAI(me)
-            {}
+            explicit npc_kara_invisible_vehicle_AI(Creature* me) : ScriptedAI(me) { }
 
             void PassengerBoarded(Unit* passenger, int8 /**/, bool /**/) override
             {
@@ -563,15 +559,12 @@ class npc_kara_invisible_vehicle : public CreatureScript
 class npc_kara_stabilize_rift : public CreatureScript
 {
     public:
-        npc_kara_stabilize_rift() : CreatureScript("npc_kara_stabilize_rift")
-        {}
+        npc_kara_stabilize_rift() : CreatureScript("npc_kara_stabilize_rift") { }
 
         struct npc_kara_stabilize_rift_AI : public ScriptedAI
         {
             public:
-                npc_kara_stabilize_rift_AI(Creature* me) : ScriptedAI(me),
-                _summons(me), _riftOpened(false)
-                {}
+                npc_kara_stabilize_rift_AI(Creature* me) : ScriptedAI(me), _summons(me), _riftOpened(false) { }
 
                 void JustSummoned(Creature* summon) override
                 {
@@ -605,12 +598,12 @@ class npc_kara_stabilize_rift : public CreatureScript
                         _riftOpened = true;
                         me->CastSpell(me, SPELL_STABILIZE_RIFT_SIZE, true);
                         me->CastSpell(me, SPELL_STABILIZE_RIFT_VISUAL, true);
-                        _events.ScheduleEvent(EVENT_FELGUARD_SENTRY, Seconds(5));
+                        _events.ScheduleEvent(EVENT_FELGUARD_SENTRY, 5s);
                     }
                     else if (action == ACTION_CLOSED_RIFT)
                     {
                         _riftOpened = false;
-                        _events.ScheduleEvent(EVENT_FELGUARD_SENTRY, Seconds(5));
+                        _events.ScheduleEvent(EVENT_FELGUARD_SENTRY, 5s);
                     }
                 }
                 
@@ -629,9 +622,9 @@ class npc_kara_stabilize_rift : public CreatureScript
                             me->SummonCreature(NPC_FELGUARD_SENTRY, me->GetPosition(), TEMPSUMMON_CORPSE_DESPAWN, 5000);
                             
                             if (_riftOpened)
-                                _events.ScheduleEvent(EVENT_FELGUARD_SENTRY, Seconds(5));
+                                _events.ScheduleEvent(EVENT_FELGUARD_SENTRY, 5s);
                             else
-                                _events.ScheduleEvent(EVENT_FELGUARD_SENTRY, Seconds(25));
+                                _events.ScheduleEvent(EVENT_FELGUARD_SENTRY, 25s);
                         }
                     }
                 }
@@ -651,8 +644,7 @@ class npc_kara_stabilize_rift : public CreatureScript
 class spell_vizaduum_chaotic_shadows : public SpellScriptLoader
 {
     public:
-        spell_vizaduum_chaotic_shadows() : SpellScriptLoader("spell_vizaduum_chaotic_shadows")
-        {}
+        spell_vizaduum_chaotic_shadows() : SpellScriptLoader("spell_vizaduum_chaotic_shadows") { }
 
         class spell_chaotic_shadows_AuraScript : public AuraScript
         {
@@ -682,8 +674,7 @@ class spell_vizaduum_chaotic_shadows : public SpellScriptLoader
 class spell_vizaduum_fel_beam_charge : public SpellScriptLoader
 {
     public:
-        spell_vizaduum_fel_beam_charge() : SpellScriptLoader("spell_vizaduum_fel_beam_charge")
-        {}
+        spell_vizaduum_fel_beam_charge() : SpellScriptLoader("spell_vizaduum_fel_beam_charge") { }
 
         class spell_fel_beam_charge_AuraScript : public AuraScript
         {
@@ -716,8 +707,7 @@ class spell_vizaduum_fel_beam_charge : public SpellScriptLoader
 class spell_vizaduum_bombardment_charge : public SpellScriptLoader
 {
     public:
-        spell_vizaduum_bombardment_charge() : SpellScriptLoader("spell_vizaduum_bombardment_charge")
-        {}
+        spell_vizaduum_bombardment_charge() : SpellScriptLoader("spell_vizaduum_bombardment_charge") { }
 
         class spell_bombardment_charge_AuraScript : public AuraScript
         {
@@ -747,8 +737,7 @@ class spell_vizaduum_bombardment_charge : public SpellScriptLoader
 class spell_vizaduum_bombardment_aura : public SpellScriptLoader
 {
     public:
-        spell_vizaduum_bombardment_aura() : SpellScriptLoader("spell_vizaduum_bombardment_aura")
-        {}
+        spell_vizaduum_bombardment_aura() : SpellScriptLoader("spell_vizaduum_bombardment_aura") { }
 
         class spell_bombardment_periodic_AuraScript : public AuraScript
         {
@@ -794,8 +783,7 @@ class spell_vizaduum_bombardment_aura : public SpellScriptLoader
 class spell_vizaduum_disintegrate : public SpellScriptLoader
 {
     public:
-        spell_vizaduum_disintegrate() : SpellScriptLoader("spell_vizaduum_disintegrate")
-        {}
+        spell_vizaduum_disintegrate() : SpellScriptLoader("spell_vizaduum_disintegrate") { }
 
         class spell_disintegrate_SpellScript : public SpellScript
         {
@@ -831,9 +819,7 @@ class spell_vizaduum_disintegrate : public SpellScriptLoader
 class spell_vizaduum_stabilize_rift : public SpellScriptLoader
 {
     public:
-        spell_vizaduum_stabilize_rift() : 
-        SpellScriptLoader("spell_vizaduum_stabilize_rift")
-        {}
+        spell_vizaduum_stabilize_rift() : SpellScriptLoader("spell_vizaduum_stabilize_rift") { }
 
         class spell_stabilize_rift_AuraScript : public AuraScript
         {
@@ -864,8 +850,7 @@ class spell_vizaduum_stabilize_rift : public SpellScriptLoader
 class at_kara_explosive_shadows : public AreaTriggerEntityScript
 {
     public:
-        at_kara_explosive_shadows() : AreaTriggerEntityScript("at_kara_explosive_shadows")
-        {}
+        at_kara_explosive_shadows() : AreaTriggerEntityScript("at_kara_explosive_shadows") { }
 
         struct at_kara_explosive_shadows_AI : public AreaTriggerAI
         {
@@ -920,9 +905,7 @@ class at_kara_explosive_shadows : public AreaTriggerEntityScript
                 at->InitSplines(points, at->GetDuration() * 0.5);
             }
 
-            void OnInitialize() override
-            {
-            }
+            void OnInitialize() override { }
 
             void OnUpdate(uint32 diff) override
             {
@@ -966,8 +949,7 @@ class at_kara_explosive_shadows : public AreaTriggerEntityScript
 class at_kara_demonic_portal : public AreaTriggerEntityScript
 {
     public:
-        at_kara_demonic_portal() : AreaTriggerEntityScript("at_kara_demonic_portal")
-        {}
+        at_kara_demonic_portal() : AreaTriggerEntityScript("at_kara_demonic_portal") { }
 
         struct at_kara_demonic_portal_AI : public AreaTriggerAI
         {
@@ -1006,13 +988,11 @@ class at_kara_demonic_portal : public AreaTriggerEntityScript
 class at_kara_fel_beam : public AreaTriggerEntityScript
 {
     public:
-        at_kara_fel_beam() : AreaTriggerEntityScript("at_kara_fel_beam")
-        {}
+        at_kara_fel_beam() : AreaTriggerEntityScript("at_kara_fel_beam") { }
 
         struct at_kara_fel_beam_AI : public AreaTriggerAI
         {
-            explicit at_kara_fel_beam_AI(AreaTrigger* at) : AreaTriggerAI(at)
-            {}
+            explicit at_kara_fel_beam_AI(AreaTrigger* at) : AreaTriggerAI(at) { }
 
             void OnUnitEnter(Unit* target) override
             {
@@ -1030,13 +1010,11 @@ class at_kara_fel_beam : public AreaTriggerEntityScript
 class at_kara_fel_flames : public AreaTriggerEntityScript
 {
     public:
-        at_kara_fel_flames() : AreaTriggerEntityScript("at_kara_fel_flames")
-        {}
+        at_kara_fel_flames() : AreaTriggerEntityScript("at_kara_fel_flames") { }
 
         struct at_kara_fel_flames_AI : public AreaTriggerAI
         {
-            explicit at_kara_fel_flames_AI(AreaTrigger* at) : AreaTriggerAI(at)
-            {}
+            explicit at_kara_fel_flames_AI(AreaTrigger* at) : AreaTriggerAI(at) { }
 
             void OnCreate()
             {
@@ -1066,8 +1044,7 @@ class at_kara_fel_flames : public AreaTriggerEntityScript
 class at_kara_soul_harvest : public AreaTriggerEntityScript
 {
     public:
-        at_kara_soul_harvest() : AreaTriggerEntityScript("at_kara_soul_harvest")
-        {}
+        at_kara_soul_harvest() : AreaTriggerEntityScript("at_kara_soul_harvest") { }
 
         struct at_kara_soul_harvest_AI : public AreaTriggerAI
         {
@@ -1101,9 +1078,9 @@ class at_kara_soul_harvest : public AreaTriggerEntityScript
         }
 };
 
-void AddSC_boss_vizaduum()
+void AddSC_boss_new_vizaduum()
 {
-    new boss_vizaduum();
+    new boss_new_vizaduum();
     new npc_kara_fel_cannon();
     new npc_kara_invisible_vehicle();
     new npc_kara_stabilize_rift();

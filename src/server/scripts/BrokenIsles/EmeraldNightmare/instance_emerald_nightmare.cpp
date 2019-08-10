@@ -37,11 +37,11 @@ struct instance_emerald_nightmare : public InstanceScript
     {
         SetBossNumber(DATA_MAX_ENCOUNTERS);
         LoadDoorData(doorData);
-        
+
         if (GetBossState(DATA_XAVIUS) != DONE)
             SetBossState(DATA_PRE_EVENT_XAVIUS, NOT_STARTED); // Reset event
     }
-    
+
     void OnPlayerEnter(Player* player) override
     {
         if (GetBossState(DATA_XAVIUS) == IN_PROGRESS)

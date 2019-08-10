@@ -33,6 +33,7 @@ enum Texts
     SAY_ANNIHILATE3   = 8,
     SAY_DEATH         = 9,
 };
+
 enum Spells
 {
     SPELL_ANNIHILATE              = 212492,
@@ -60,17 +61,14 @@ enum Events
     EVENT_DETONATE      = 6,
     EVENT_ANIMATE       = 7,
     EVENT_STATE_FIRE    = 8,
-
 };
 
 class boss_aluriel : public CreatureScript {
 public:
     boss_aluriel() : CreatureScript("boss_aluriel") { }
 
-    struct boss_alurielAI : public BossAI {
-        boss_alurielAI(Creature* creature) : BossAI(creature, BOSS_ALURIEL)
-        {
-        }
+    struct boss_alurielAI : public BossAI { 
+    	boss_alurielAI(Creature* creature) : BossAI(creature, BOSS_ALURIEL){}
 
         uint8 curID;
         EventMap events;
@@ -207,7 +205,6 @@ public:
                 }
                 case EVENT_STATE_FIRE:
                 {
-                    // 16:38:39
                     me->RemoveAura(SPELL_FROST_ENCHANTMENT);
                     DoCast(SPELL_FIERY_ENCHANTMENT);
                     break;
@@ -355,7 +352,6 @@ public:
                                         if (newtarget == caster || newtarget == itr)
                                             newtarget->RemoveAura(SPELL_FROSTBITTEN);
                                     }
-
                                     
                                     caster->CastSpell(caster, SPELL_MARK_OF_FROST_AOE, true);
                                 }
@@ -385,7 +381,6 @@ public:
     class spell_gen_target_mark_of_forst_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_gen_target_mark_of_forst_AuraScript);
-
 
         void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {

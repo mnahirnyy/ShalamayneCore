@@ -56,41 +56,39 @@ enum Events
 
 enum Adds
 {
-    NPC_RESTLESS_BONES  = 114906,
-    NPC_BONECURSE_GOLEM = 114903,
+    NPC_RESTLESS_BONES          = 114906,
+    NPC_BONECURSE_GOLEM         = 114903,
 };
 
 enum Says
 {
-    SAY_AGGRO           = 0,
-    SAY_IGNITE_SOUL     = 1,
-    SAY_AIR_PHASE       = 2,
-    SAY_PHASE_3         = 3,
-    SAY_BELLOWING_ROAR  = 4,
-    SAY_KILL            = 5,
-    SAY_WIPE            = 6,
-    SAY_DEATH           = 7,
-    SAY_INTRO           = 8,
-    SAY_INTRO_2         = 9,
+    SAY_AGGRO                   = 0,
+    SAY_IGNITE_SOUL             = 1,
+    SAY_AIR_PHASE               = 2,
+    SAY_PHASE_3                 = 3,
+    SAY_BELLOWING_ROAR          = 4,
+    SAY_KILL                    = 5,
+    SAY_WIPE                    = 6,
+    SAY_DEATH                   = 7,
+    SAY_INTRO                   = 8,
+    SAY_INTRO_2                 = 9,
 };
 
 
-constexpr uint32 POINT_AIR_PHASE    = 1;
-constexpr uint32 POINT_GROUND_PHASE = 2;
-constexpr uint32 GROUND_PHASE   = 1;
-constexpr uint32 AIR_PHASE      = 2;
+constexpr uint32 POINT_AIR_PHASE        = 1;
+constexpr uint32 POINT_GROUND_PHASE     = 2;
+constexpr uint32 GROUND_PHASE           = 1;
+constexpr uint32 AIR_PHASE              = 2;
 constexpr uint32 ACTION_NIGHTBANE_READY = 1;
 
-class boss_nightbane : public CreatureScript
+class boss_new_nightbane : public CreatureScript
 {
     public:
-        boss_nightbane() : CreatureScript("boss_nightbane")
-        {}
+        boss_new_nightbane() : CreatureScript("boss_new_nightbane") { }
 
-        struct boss_nightbane_AI : public BossAI
+        struct boss_new_nightbane_AI : public BossAI
         {
-            explicit boss_nightbane_AI(Creature* me) : BossAI(me, DATA_NIGHTBANE)
-            {}
+            explicit boss_new_nightbane_AI(Creature* me) : BossAI(me, DATA_NIGHTBANE) { }
 
             void Reset() override
             {
@@ -111,13 +109,13 @@ class boss_nightbane : public CreatureScript
                 _EnterCombat();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 _secondPhase = false;
-                events.ScheduleEvent(EVENT_CINDER_BREATH, Seconds(8), GROUND_PHASE);
-                events.ScheduleEvent(EVENT_CHARRED_EARTH, Seconds(15), GROUND_PHASE);
-                events.ScheduleEvent(EVENT_REVERBERATING_SHADOWS, Seconds(12), GROUND_PHASE);
-                events.ScheduleEvent(EVENT_IGNITE_SOUL, Seconds(20), GROUND_PHASE);
-                events.ScheduleEvent(EVENT_INFERNAL_POWER, Seconds(22), GROUND_PHASE);
-                events.ScheduleEvent(EVENT_BURNING_BONES, Seconds(30), GROUND_PHASE);
-                events.ScheduleEvent(EVENT_TAIL_SWEEP, Seconds(40), GROUND_PHASE);
+                events.ScheduleEvent(EVENT_CINDER_BREATH, 8s, GROUND_PHASE);
+                events.ScheduleEvent(EVENT_CHARRED_EARTH, 15s, GROUND_PHASE);
+                events.ScheduleEvent(EVENT_REVERBERATING_SHADOWS, 12s, GROUND_PHASE);
+                events.ScheduleEvent(EVENT_IGNITE_SOUL, 20s, GROUND_PHASE);
+                events.ScheduleEvent(EVENT_INFERNAL_POWER, 22s, GROUND_PHASE);
+                events.ScheduleEvent(EVENT_BURNING_BONES, 30s, GROUND_PHASE);
+                events.ScheduleEvent(EVENT_TAIL_SWEEP, 40s, GROUND_PHASE);
             }
 
             void DoAction(int32 action) override
@@ -136,7 +134,7 @@ class boss_nightbane : public CreatureScript
                 {
                     me->RemoveAurasDueToSpell(SPELL_CHARRED_EARTH_AURA);
                     events.CancelEventGroup(AIR_PHASE);
-                    events.ScheduleEvent(EVENT_ENTER_GROUND_PHASE, 100);
+                    events.ScheduleEvent(EVENT_ENTER_GROUND_PHASE, 100ms);
                 }
             }
 
@@ -145,7 +143,7 @@ class boss_nightbane : public CreatureScript
                 if (me->HealthBelowPct(50) && !_secondPhase)
                 {
                     _secondPhase = true;
-                    events.ScheduleEvent(EVENT_ENTER_AIR_PHASE, 100);
+                    events.ScheduleEvent(EVENT_ENTER_AIR_PHASE, 100ms);
                 }
             }
 
@@ -188,19 +186,19 @@ class boss_nightbane : public CreatureScript
                         me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                         DoCastSelf(SPELL_CHARRED_EARTH_AURA, true);
                         DoCastSelf(SPELL_RAIN_OF_BONES);
-                        events.ScheduleEvent(EVENT_RESTLESS_BONES, Seconds(urand(8,12)), AIR_PHASE);
+                        events.ScheduleEvent(EVENT_RESTLESS_BONES, 8s, 12s, AIR_PHASE);
                     }
                     else if (POINT_GROUND_PHASE)
                     {
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                        events.ScheduleEvent(EVENT_CINDER_BREATH, Seconds(8));
-                        events.ScheduleEvent(EVENT_CONCENTRATED_POWER, Seconds(urand(15,18)));
-                        events.ScheduleEvent(EVENT_INFERNAL_POWER, Seconds(30));
-                        events.ScheduleEvent(EVENT_BELLOWING_ROAR, Seconds(20));
-                        events.ScheduleEvent(EVENT_IGNITE_SOUL, Seconds(urand(20, 25)));
-                        events.ScheduleEvent(EVENT_CHARRED_EARTH, Seconds(15));
-                        events.ScheduleEvent(EVENT_REVERBERATING_SHADOWS, Seconds(12));
+                        events.ScheduleEvent(EVENT_CINDER_BREATH, 8s);
+                        events.ScheduleEvent(EVENT_CONCENTRATED_POWER, 15s, 18s);
+                        events.ScheduleEvent(EVENT_INFERNAL_POWER, 30s);
+                        events.ScheduleEvent(EVENT_BELLOWING_ROAR, 20s);
+                        events.ScheduleEvent(EVENT_IGNITE_SOUL, 20s, 25s);
+                        events.ScheduleEvent(EVENT_CHARRED_EARTH, 15s);
+                        events.ScheduleEvent(EVENT_REVERBERATING_SHADOWS, 12s);
                     }
                 }
             }
@@ -244,7 +242,7 @@ class boss_nightbane : public CreatureScript
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                             me->SummonCreature(NPC_RESTLESS_BONES, target->GetPosition(), TEMPSUMMON_CORPSE_DESPAWN, 5000);
 
-                        events.ScheduleEvent(EVENT_RESTLESS_BONES, Seconds(urand(8, 12)), AIR_PHASE);
+                        events.ScheduleEvent(EVENT_RESTLESS_BONES, 8s, 12s, AIR_PHASE);
                         break;
                     }
 
@@ -252,42 +250,42 @@ class boss_nightbane : public CreatureScript
                     {
                         Talk(SAY_BELLOWING_ROAR);
                         DoCastSelf(SPELL_BELLOWING_ROAR);
-                        events.ScheduleEvent(EVENT_BELLOWING_ROAR, Seconds(45));
+                        events.ScheduleEvent(EVENT_BELLOWING_ROAR, 45s);
                         break;
                     }
 
                     case EVENT_TAIL_SWEEP:
                     {
                         DoCastSelf(SPELL_TAIL_SWEEP);
-                        events.ScheduleEvent(EVENT_TAIL_SWEEP, Seconds(40));
+                        events.ScheduleEvent(EVENT_TAIL_SWEEP, 40s);
                         break;
                     }
 
                     case EVENT_REVERBERATING_SHADOWS:
                     {
                         DoCast(me, SPELL_REVERBERATING_SHADOWS);
-                        events.ScheduleEvent(EVENT_REVERBERATING_SHADOWS, Seconds(12), GROUND_PHASE);
+                        events.ScheduleEvent(EVENT_REVERBERATING_SHADOWS, 12s, GROUND_PHASE);
                         break;
                     }
 
                     case EVENT_CONCENTRATED_POWER:
                     {
                         DoCastSelf(SPELL_CONCENTRATED_POWER);
-                        events.ScheduleEvent(EVENT_CONCENTRATED_POWER, Seconds(40), GROUND_PHASE);
+                        events.ScheduleEvent(EVENT_CONCENTRATED_POWER, 40s, GROUND_PHASE);
                         break;
                     }
 
                     case EVENT_INFERNAL_POWER:
                     {
                         DoCastSelf(SPELL_INFERNAL_POWER);
-                        events.ScheduleEvent(EVENT_INFERNAL_POWER, Seconds(30), GROUND_PHASE);
+                        events.ScheduleEvent(EVENT_INFERNAL_POWER, 30s, GROUND_PHASE);
                         break;
                     }
 
                     case EVENT_CINDER_BREATH:
                     {
                         DoCastVictim(SPELL_CINDER_BREATH);
-                        events.ScheduleEvent(EVENT_CINDER_BREATH, Seconds(23), GROUND_PHASE);
+                        events.ScheduleEvent(EVENT_CINDER_BREATH, 23s, GROUND_PHASE);
                         break;
                     }
 
@@ -300,7 +298,7 @@ class boss_nightbane : public CreatureScript
                         else
                             me->CastCustomSpell(SPELL_BURNING_BONES, SPELLVALUE_AURA_STACK, 5, me->GetVictim(), true);
 
-                        events.ScheduleEvent(EVENT_BURNING_BONES, Seconds(20), GROUND_PHASE);
+                        events.ScheduleEvent(EVENT_BURNING_BONES, 20s, GROUND_PHASE);
                         break;
                     }
 
@@ -316,7 +314,7 @@ class boss_nightbane : public CreatureScript
                         else
                             DoCastVictim(SPELL_IGNITE_SOUL);
 
-                        events.ScheduleEvent(EVENT_IGNITE_SOUL, Seconds(25), GROUND_PHASE);
+                        events.ScheduleEvent(EVENT_IGNITE_SOUL, 25s, GROUND_PHASE);
                         break;
                     }
 
@@ -325,7 +323,7 @@ class boss_nightbane : public CreatureScript
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                             DoCast(target, SPELL_CHARRED_EARTH);
 
-                        events.ScheduleEvent(EVENT_CHARRED_EARTH, Seconds(20), GROUND_PHASE);
+                        events.ScheduleEvent(EVENT_CHARRED_EARTH, 20s, GROUND_PHASE);
                         break;
                     }
                 }
@@ -337,20 +335,18 @@ class boss_nightbane : public CreatureScript
 
         CreatureAI* GetAI(Creature* me) const override
         {
-            return new boss_nightbane_AI(me);
+            return new boss_new_nightbane_AI(me);
         }
 };
 
 class npc_kara_bonecurse : public CreatureScript
 {
     public:
-        npc_kara_bonecurse() : CreatureScript("npc_kara_bonecurse")
-        {}
+        npc_kara_bonecurse() : CreatureScript("npc_kara_bonecurse") { }
 
         struct npc_kara_bonecurse_AI : public ScriptedAI
         {
-            explicit npc_kara_bonecurse_AI(Creature* me) : ScriptedAI(me)
-            {}
+            explicit npc_kara_bonecurse_AI(Creature* me) : ScriptedAI(me) { }
 
             void Reset() override
             {
@@ -360,8 +356,8 @@ class npc_kara_bonecurse : public CreatureScript
             void EnterCombat(Unit* /**/)
             {
                 DoZoneInCombat();
-                _events.ScheduleEvent(EVENT_ABSORB_VITALITY, Seconds(20));
-                _events.ScheduleEvent(EVENT_JAGGED_SHARDS, Seconds(urand(8, 12)));
+                _events.ScheduleEvent(EVENT_ABSORB_VITALITY, 20s);
+                _events.ScheduleEvent(EVENT_JAGGED_SHARDS, 8s, 12s);
             }
 
             void ExecuteEvent(uint32 eventId)
@@ -371,12 +367,12 @@ class npc_kara_bonecurse : public CreatureScript
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                         DoCast(target, SPELL_ABSORB_VITALITY);
 
-                    _events.ScheduleEvent(EVENT_ABSORB_VITALITY, Seconds(20));
+                    _events.ScheduleEvent(EVENT_ABSORB_VITALITY, 20s);
                 }
                 else if (eventId == EVENT_JAGGED_SHARDS)
                 {
                     DoCastAOE(SPELL_JAGGED_SHARDS, true);
-                    _events.ScheduleEvent(EVENT_JAGGED_SHARDS, Seconds(urand(8, 12)));
+                    _events.ScheduleEvent(EVENT_JAGGED_SHARDS, 8s, 12s);
                 }
             }
 
@@ -414,13 +410,11 @@ class npc_kara_bonecurse : public CreatureScript
 class npc_kara_restless_bones : public CreatureScript
 {
     public:
-        npc_kara_restless_bones() : CreatureScript("npc_kara_restless_bones")
-        {}
+        npc_kara_restless_bones() : CreatureScript("npc_kara_restless_bones") { }
 
         struct npc_kara_restless_bones_AI : public ScriptedAI
         {
-            explicit npc_kara_restless_bones_AI(Creature* me) : ScriptedAI(me)
-            {}
+            explicit npc_kara_restless_bones_AI(Creature* me) : ScriptedAI(me) { }
 
             void JustDied(Unit* /**/) override
             {
@@ -437,8 +431,7 @@ class npc_kara_restless_bones : public CreatureScript
 class spell_nightbane_charred_earth : public SpellScriptLoader
 {
     public:
-        spell_nightbane_charred_earth() : SpellScriptLoader("spell_nightbane_charred_earth")
-        {}
+        spell_nightbane_charred_earth() : SpellScriptLoader("spell_nightbane_charred_earth") { }
 
         class spell_charred_earth_SpellScript : public SpellScript
         {
@@ -468,8 +461,7 @@ class spell_nightbane_charred_earth : public SpellScriptLoader
 class spell_nightbane_ignite_soul : public SpellScriptLoader
 {
     public:
-        spell_nightbane_ignite_soul() : SpellScriptLoader("spell_nightbane_ignite_soul")
-        {}
+        spell_nightbane_ignite_soul() : SpellScriptLoader("spell_nightbane_ignite_soul") { }
 
         class spell_ignite_soul_AuraScript : public AuraScript
         {
@@ -500,8 +492,7 @@ class spell_nightbane_ignite_soul : public SpellScriptLoader
 class spell_nightbane_burning_bones : public SpellScriptLoader
 {
     public:
-        spell_nightbane_burning_bones() : SpellScriptLoader("spell_nightbane_burning_bones")
-        {}
+        spell_nightbane_burning_bones() : SpellScriptLoader("spell_nightbane_burning_bones") { }
 
         class spell_burning_bones_AuraScript : public AuraScript
         {
@@ -555,8 +546,7 @@ class spell_nightbane_burning_bones : public SpellScriptLoader
 class spell_kara_absorb_vitality : public SpellScriptLoader
 {
     public:
-        spell_kara_absorb_vitality() : SpellScriptLoader("spell_kara_absorb_vitality")
-        {}
+        spell_kara_absorb_vitality() : SpellScriptLoader("spell_kara_absorb_vitality") { }
 
         class spell_absorb_vitality_AuraScript : public AuraScript
         {
@@ -604,13 +594,11 @@ class spell_kara_absorb_vitality : public SpellScriptLoader
 class at_kara_charred_earth : public AreaTriggerEntityScript
 {
     public:
-        at_kara_charred_earth() : AreaTriggerEntityScript("at_kara_charred_earth")
-        {}
+        at_kara_charred_earth() : AreaTriggerEntityScript("at_kara_charred_earth") { }
 
         struct at_kara_charred_earth_AI : public AreaTriggerAI
         {
-            explicit at_kara_charred_earth_AI(AreaTrigger* at) : AreaTriggerAI(at)
-            {}
+            explicit at_kara_charred_earth_AI(AreaTrigger* at) : AreaTriggerAI(at) { }
             
             void OnUnitEnter(Unit* target) override
             {
@@ -631,9 +619,9 @@ class at_kara_charred_earth : public AreaTriggerEntityScript
         }
 };
 
-void AddSC_boss_nightbane()
+void AddSC_boss_new_nightbane()
 {
-    new boss_nightbane();
+    new boss_new_nightbane();
     new npc_kara_bonecurse();
     new npc_kara_restless_bones();
     new spell_nightbane_ignite_soul();

@@ -15,123 +15,116 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ScriptMgr.h"
-#include "emerald_nightmare.h"
-#include "CreatureGroups.h"
-#include "LFGMgr.h"
-#include "LFGQueue.h"
-#include "LFGPackets.h"
-#include "DynamicObject.h"
-#include "ScriptedEscortAI.h"
-#include "CreatureTextMgr.h"
-#include "MiscPackets.h"
-#include "GameObjectAI.h"
-#include "ScriptMgr.h"
-#include "ScriptedCreature.h"
-#include "Player.h"
-#include "ObjectMgr.h"
+#include "Chat.h"
+#include "CombatAI.h"
+#include "Conversation.h"
 #include "Creature.h"
+#include "CreatureGroups.h"
+#include "CreatureTextMgr.h"
+#include "DBCEnums.h"
+#include "DynamicObject.h"
+#include "emerald_nightmare.h"
+#include "GameObject.h"
+#include "GameObjectAI.h"
+#include "LFGMgr.h"
+#include "LFGPackets.h"
+#include "LFGQueue.h"
+#include "InstanceScript.h"
+#include "Map.h"
+#include "MiscPackets.h"
+#include "MotionMaster.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
-#include "ScriptedGossip.h"
-#include "Vehicle.h"
-#include "MotionMaster.h"
-#include "TemporarySummon.h"
-#include "GameObject.h"
-#include "CombatAI.h"
-#include "SpellInfo.h"
-#include "Conversation.h"
+#include "Player.h"
 #include "PhasingHandler.h"
-#include "SpellScript.h"
-#include "Chat.h"
-#include "GameObjectAI.h"
-#include "Map.h"
-#include "Transport.h"
-#include "InstanceScript.h"
-#include "DBCEnums.h"
 #include "SceneMgr.h"
-#include "MotionMaster.h"
-#include "InstanceScript.h"
-#include "GameObject.h"
-#include "Creature.h"
-#include "Unit.h"
+#include "ScriptedCreature.h"
+#include "ScriptedEscortAI.h"
+#include "ScriptedGossip.h"
+#include "ScriptMgr.h"
 #include "SpellAuras.h"
+#include "SpellScript.h"
+#include "SpellInfo.h"
+#include "TemporarySummon.h"
+#include "Transport.h"
+#include "Unit.h"
+#include "Vehicle.h"
 
 enum Says
 {
-    SAY_AGGRO = 0,
-    SAY_ANNOUNCE = 4,
-    SAY_EVADE = 5,
-    SAY_DEATH = 6,
+    SAY_AGGRO 		= 0,
+    SAY_ANNOUNCE 	= 4,
+    SAY_EVADE 		= 5,
+    SAY_DEATH 		= 6,
 };
 
 enum Spells
 {
     //ilgynoth
-    SPELL_DARK_RECONSTITUTION = 210781,
-    SPELL_FINAL_TORPOR = 223121,
-    SPELL_CURSED_BLOOD = 215128,
-    SPELL_CURSED_BLOOD_EXPLOSION = 215143,
-    SPELL_DARKEST_NIGHTMARE_AT = 210786,
-    SPELL_KNOCKBACK_AT = 224929,
-    SPELL_INTERFERE_TARGETTING = 210780,
-    SPELL_RECOVERY_TELEPORT = 222531,
-    SPELL_KILL_WHISPER = 222173, //? Il'gynoth Kill Whisper
+    SPELL_DARK_RECONSTITUTION 		= 210781,
+    SPELL_FINAL_TORPOR 				= 223121,
+    SPELL_CURSED_BLOOD 				= 215128,
+    SPELL_CURSED_BLOOD_EXPLOSION 	= 215143,
+    SPELL_DARKEST_NIGHTMARE_AT 		= 210786,
+    SPELL_KNOCKBACK_AT 				= 224929,
+    SPELL_INTERFERE_TARGETTING 		= 210780,
+    SPELL_RECOVERY_TELEPORT 		= 222531,
+    SPELL_KILL_WHISPER 				= 222173,
 
-                                 //Eye ilgynoth
-                                 SPELL_NIGHTMARE_GAZE = 210931,
-                                 SPELL_SUM_NIGHTMARE_HORROR = 210289,
+    //Eye ilgynoth
+    SPELL_NIGHTMARE_GAZE 			= 210931,
+    SPELL_SUM_NIGHTMARE_HORROR 		= 210289,
 
-                                 //Mythic
-                                 SPELL_DEATH_BLOSSOM = 218415, //Remove AT cast
-                                 SPELL_DEATH_BLOSSOM_AT = 215761,
-                                 SPELL_DEATH_BLOSSOM_VISUAL = 215763,
-                                 SPELL_DEATH_BLOSSOM_DMG = 215836,
-                                 SPELL_DISPERSED_SPORES = 215845,
-                                 SPELL_VIOLENT_BLOODBURST = 215971,
-                                 SPELL_VIOLENT_BLOODBURST_AT = 215975,
-                                 SPELL_SUM_SHRIVELED_EYESTALK = 216131,
+    //Mythic
+    SPELL_DEATH_BLOSSOM 			= 218415,
+    SPELL_DEATH_BLOSSOM_AT 			= 215761,
+    SPELL_DEATH_BLOSSOM_VISUAL 		= 215763,
+    SPELL_DEATH_BLOSSOM_DMG 		= 215836,
+    SPELL_DISPERSED_SPORES 			= 215845,
+    SPELL_VIOLENT_BLOODBURST 		= 215971,
+    SPELL_VIOLENT_BLOODBURST_AT 	= 215975,
+    SPELL_SUM_SHRIVELED_EYESTALK 	= 216131,
 
-                                 //Dominator Tentacle - 105304
-                                 SPELL_NIGHTMARISH_FURY = 215234,
-                                 SPELL_GROUND_SLAM_DMG = 208689,
-                                 SPELL_GROUND_SLAM_VISUAL = 212723,
-                                 SPELL_RUPTURING_ROAR = 208685,
+    //Dominator Tentacle - 105304
+    SPELL_NIGHTMARISH_FURY 			= 215234,
+    SPELL_GROUND_SLAM_DMG 			= 208689,
+    SPELL_GROUND_SLAM_VISUAL 		= 212723,
+    SPELL_RUPTURING_ROAR 			= 208685,
 
-                                 //Deathglare Tentacle - 105322
-                                 SPELL_MIND_FLAY = 208697,
+    //Deathglare Tentacle - 105322
+    SPELL_MIND_FLAY 				= 208697,
 
-                                 //Corruptor Tentacle - 105383
-                                 SPELL_SPEW_CORRUPTION = 208928,
+    //Corruptor Tentacle - 105383
+    SPELL_SPEW_CORRUPTION 			= 208928,
 
-                                 //Nightmare Horror - 105591
-                                 SPELL_SEEPING_CORRUPTION = 209387,
-                                 SPELL_EYE_OF_FATE = 210984,
+    //Nightmare Horror - 105591
+    SPELL_SEEPING_CORRUPTION 		= 209387,
+    SPELL_EYE_OF_FATE 				= 210984,
 
-                                 //Nightmare Ichor - 105721
-                                 SPELL_FIXATE = 210099,
-                                 SPELL_NIGHTMARE_EXPLOSION = 209471,
-                                 SPELL_NIGHTMARE_EXPLOSION_PCT = 210048,
-                                 SPELL_REABSORPTION = 212942,
+    //Nightmare Ichor - 105721
+    SPELL_FIXATE 					= 210099,
+    SPELL_NIGHTMARE_EXPLOSION 		= 209471,
+    SPELL_NIGHTMARE_EXPLOSION_PCT 	= 210048,
+    SPELL_REABSORPTION 				= 212942,
 
-                                 //Other
-                                 SPELL_SPAWN_BLOOD = 209965,
+    //Other
+    SPELL_SPAWN_BLOOD 				= 209965,
 };
 
 enum eEvents
 {
-    EVENT_SUMMON_1 = 1,
-    EVENT_SUMMON_2 = 2,
-    EVENT_SUMMON_3 = 3,
-    EVENT_SUMMON_4 = 4,
-    EVENT_SUMMON_5 = 5,
-    EVENT_SUMMON_6 = 6,
-    EVENT_SUMMON_7 = 7,
-    EVENT_DARK_RECONSTITUTION = 8,
-    EVENT_CURSED_BLOOD = 9,
-    EVENT_EYE_RESPAWN = 10,
-    EVENT_ANNOUNCE = 11,
-    EVENT_ANNOUNCE_FINAL = 12,
+    EVENT_SUMMON_1 				= 1,
+    EVENT_SUMMON_2 				= 2,
+    EVENT_SUMMON_3 				= 3,
+    EVENT_SUMMON_4 				= 4,
+    EVENT_SUMMON_5 				= 5,
+    EVENT_SUMMON_6 				= 6,
+    EVENT_SUMMON_7 				= 7,
+    EVENT_DARK_RECONSTITUTION 	= 8,
+    EVENT_CURSED_BLOOD 			= 9,
+    EVENT_EYE_RESPAWN 			= 10,
+    EVENT_ANNOUNCE 				= 11,
+    EVENT_ANNOUNCE_FINAL 		= 12,
     EVENT_CHECK_TARGET_DISTANCE = 13,
 
     //Mythic
@@ -141,10 +134,10 @@ enum eEvents
 
 Position const sumPos[4] =
 {
-    { -12818.1f, 12328.3f, -245.72f, 3.79f }, //105906 - Eye of Ilgynoth
+    { -12818.10f, 12328.30f, -245.72f, 3.79f },
     { -12843.59f, 12331.40f, -246.01f, 3.56f },
     { -12821.79f, 12302.79f, -246.01f, 3.83f },
-    { -12856.12f, 12296.79f, -253.16f, 0.72f } //Horror
+    { -12856.12f, 12296.79f, -253.16f, 0.72f }
 };
 
 Position const blossPos[22] =
@@ -173,7 +166,7 @@ Position const blossPos[22] =
     { -12864.3f, 12307.0f, -253.70f }
 };
 
-//105393
+// 105393 - Il'gynoth
 class boss_ilgynoth : public CreatureScript
 {
 public:
@@ -357,7 +350,7 @@ public:
                     break;
                 case EVENT_SUMMON_7:
                     SummomRandPos(1, NPC_DEATHGLARE_TENTACLE);
-                    events.ScheduleEvent(EVENT_SUMMON_6, 30000); //Next: ??? ????. ?????????
+                    events.ScheduleEvent(EVENT_SUMMON_6, 30000); //Next:
                     break;
                 case EVENT_DARK_RECONSTITUTION:
                     DoCast(finalTorpor ? SPELL_FINAL_TORPOR : SPELL_DARK_RECONSTITUTION);
@@ -467,7 +460,7 @@ public:
     }
 };
 
-//105906
+// 105906 - Eye of Il'gynoth
 class npc_eye_of_ilgynoth : public CreatureScript
 {
 public:
@@ -593,7 +586,10 @@ public:
     }
 };
 
-//105304, 105322, 105383, 108821
+// 105304 - Dominator Tentacle
+// 105322 - Deathglare Tentacle
+// 105383 - Corruptor Tentacle
+// 108821 - Shriveled Eyestalk
 class npc_ilgynoth_tentacles : public CreatureScript
 {
 public:
@@ -729,7 +725,7 @@ public:
     }
 };
 
-//105591
+// 105591 - Nightmare Horror
 class npc_ilgynoth_nightmare_horror : public CreatureScript
 {
 public:
@@ -819,7 +815,7 @@ public:
     }
 };
 
-//105721
+// 105721 - Nightmare Ichor
 class npc_ilgynoth_nightmare_ichor : public CreatureScript
 {
 public:
@@ -932,7 +928,7 @@ public:
     }
 };
 
-//218415
+// 218415 - Death Blossom
 class spell_ilgynoth_death_blossom : public SpellScriptLoader
 {
 public:
@@ -968,7 +964,7 @@ public:
     }
 };
 
-//215128
+// 215128 - Cursed Blood
 class spell_ilgynoth_cursed_blood : public SpellScriptLoader
 {
 public:
@@ -998,7 +994,7 @@ public:
     }
 };
 
-//209471 - HACK!!!
+// 209471 - Nightmare Explosion
 class spell_ilgynoth_nightmare_explosion : public SpellScriptLoader
 {
 public:
@@ -1026,7 +1022,7 @@ public:
     }
 };
 
-//210048
+// 210048 - Nightmare Explosion
 class spell_ilgynoth_nightmare_explosion_pct : public SpellScriptLoader
 {
 public:

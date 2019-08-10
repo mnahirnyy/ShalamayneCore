@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2008-2019 by MAGICSTORMTEAM
+ * Copyright (C) 2008-2019 TrinityCore <http://www.trinitycore.org/>
 *
 * This program is free software; you can redistribute it and/or modify it
 * under the terms of the GNU General Public License as published by the
@@ -43,9 +43,7 @@ public:
 
     struct boss_drugon_frostbloodAI : ScriptedAI
     {
-        boss_drugon_frostbloodAI(Creature* creature) : ScriptedAI(creature)
-        {
-        }
+        boss_drugon_frostbloodAI(Creature* creature) : ScriptedAI(creature) { }
 
         EventMap _events;
 
@@ -217,7 +215,6 @@ public:
         return new spell_gen_snow_crash_SpellScript();
     }
 };
-
 
 void AddSC_boss_drugon_the_frostblood()
 {

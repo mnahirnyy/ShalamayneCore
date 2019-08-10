@@ -31,7 +31,7 @@ void AddSC_valsharah();
 void AddSC_zone_argus_krokuun();
 void AddSC_zone_argus_antoran_wastes();
 void AddSC_zone_argus_macaree();
-void AddSC_zone_violet_hold();
+void AddSC_zone_violet_hold_special();
 
 // Demon Hunter start zone
 void AddSC_zone_mardum();
@@ -53,6 +53,7 @@ void AddSC_class_hall_warrior();
 
 // Professions
 void AddSC_legion_profession_blacksmithing();
+void AddSC_legion_profession_jewelcrafting();
 
 // WorldBoss
 void AddSC_boss_nithogg();
@@ -163,7 +164,7 @@ void AddSC_instance_seat_of_triumvirate();
 void AddSC_nythendra();
 void AddSC_ilgynoth();
 void AddSC_elerethe_renferal();
-void AddSC_ursoc();
+void AddSC_boss_ursoc();
 void AddSC_boss_dragons_of_nightmare();
 void AddSC_boss_cenarius();
 void AddSC_xavius();
@@ -179,6 +180,7 @@ void AddSC_boss_harjatan();
 void AddSC_boss_tos_kiljaeden();
 void AddSC_boss_maiden_of_vigilance();
 void AddSC_boss_sasszine();
+void AddSC_boss_sisters_of_moon();
 void AddSC_tomb_of_sargeras();
 void AddSC_instance_tomb_of_sargeras();
 
@@ -191,17 +193,17 @@ void AddSC_boss_trilliax();
 void AddSC_boss_aluriel();
 
 // Return to Karazhan
-// void AddSC_instance_new_karazhan();
-// void AddSC_boss_maiden_of_virtue();
-// void AddSC_boss_curator();
-// void AddSC_boss_mana_devourer();
-// void AddSC_boss_shade_of_medivh();
-// void AddSC_boss_moroes();
-// void AddSC_boss_attumen();
-// void AddSC_boss_opera();
-// void AddSC_boss_vizaduum();
-// void AddSC_boss_nightbane();
-// void AddSC_new_karazhan();
+void AddSC_instance_new_karazhan();
+void AddSC_new_karazhan();
+void AddSC_boss_new_maiden_of_virtue();
+void AddSC_boss_new_curator();
+void AddSC_boss_new_mana_devourer();
+void AddSC_boss_new_shade_of_medivh();
+void AddSC_boss_new_moroes();
+void AddSC_boss_new_attumen();
+void AddSC_boss_new_opera();
+void AddSC_boss_new_vizaduum();
+void AddSC_boss_new_nightbane();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -220,7 +222,7 @@ void AddBrokenIslesScripts()
     AddSC_zone_argus_krokuun();
     AddSC_zone_argus_antoran_wastes();
     AddSC_zone_argus_macaree();
-    AddSC_zone_violet_hold();
+    AddSC_zone_violet_hold_special();
 
     // Demon Hunter start zone
     AddSC_zone_mardum();
@@ -242,6 +244,7 @@ void AddBrokenIslesScripts()
 
     // Professions
     AddSC_legion_profession_blacksmithing();
+    AddSC_legion_profession_jewelcrafting();
 
     // WorldBoss
     AddSC_boss_ana_mouz();
@@ -345,7 +348,7 @@ void AddBrokenIslesScripts()
     AddSC_nythendra();
     AddSC_ilgynoth();
     AddSC_elerethe_renferal();
-    AddSC_ursoc();
+    AddSC_boss_ursoc();
     AddSC_boss_dragons_of_nightmare();
     AddSC_boss_cenarius();
     AddSC_xavius();
@@ -361,6 +364,7 @@ void AddBrokenIslesScripts()
     AddSC_boss_tos_kiljaeden();
     AddSC_boss_maiden_of_vigilance();
     AddSC_boss_sasszine();
+    AddSC_boss_sisters_of_moon();
     AddSC_tomb_of_sargeras();
     AddSC_instance_tomb_of_sargeras();
 	
@@ -373,15 +377,15 @@ void AddBrokenIslesScripts()
     AddSC_boss_aluriel();
   
     // Return to Karazhan
-    // AddSC_instance_new_karazhan();
-    // AddSC_boss_maiden_of_virtue();
-    // AddSC_boss_curator();
-    // AddSC_boss_mana_devourer();
-    // AddSC_boss_shade_of_medivh();
-    // AddSC_boss_moroes();
-    // AddSC_boss_attumen();
-    // AddSC_boss_opera();
-    // AddSC_boss_vizaduum();
-    // AddSC_boss_nightbane();
-    // AddSC_new_karazhan();
+    AddSC_instance_new_karazhan();
+    AddSC_new_karazhan();
+    AddSC_boss_new_maiden_of_virtue();
+    AddSC_boss_new_curator();
+    AddSC_boss_new_mana_devourer();
+    AddSC_boss_new_shade_of_medivh();
+    AddSC_boss_new_moroes();
+    AddSC_boss_new_attumen();
+    AddSC_boss_new_opera();
+    AddSC_boss_new_vizaduum();
+    AddSC_boss_new_nightbane();
 }

@@ -27,13 +27,13 @@ enum Spells
 
 enum Events
 {
-    EVENT_ARCANE_BOMB           = 1,
-    EVENT_COALESCE_POWER        = 2,
-    EVENT_CHECK_ENERGY          = 3,
-    EVENT_ENERGY_VOID           = 4,
-    EVENT_ENERGY_DISCHARGE      = 5,
-    EVENT_DECIMATING_ESSENCE    = 6,
-    EVENT_MOVE_POINT            = 7,
+    EVENT_ARCANE_BOMB               = 1,
+    EVENT_COALESCE_POWER            = 2,
+    EVENT_CHECK_ENERGY              = 3,
+    EVENT_ENERGY_VOID               = 4,
+    EVENT_ENERGY_DISCHARGE          = 5,
+    EVENT_DECIMATING_ESSENCE        = 6,
+    EVENT_MOVE_POINT                = 7,
 };
 
 constexpr uint32 ACTION_FULL_MANA   = 1;
@@ -41,16 +41,14 @@ constexpr uint32 NPC_LOOSE_MANA     = 98080;
 
 const Position GuardianStudyPos = { 4145.191f, -2030.723f, 730.595f };
 
-class boss_mana_devourer : public CreatureScript
+class boss_new_mana_devourer : public CreatureScript
 {
     public:
-        boss_mana_devourer() : CreatureScript("boss_mana_devourer")
-        {}
+        boss_new_mana_devourer() : CreatureScript("boss_new_mana_devourer") { }
 
-        struct boss_mana_devourer_AI : public BossAI
+        struct boss_new_mana_devourer_AI : public BossAI
         {
-            explicit boss_mana_devourer_AI(Creature* creature) : BossAI(creature, DATA_MANA_DEVOURER)
-            {}
+            explicit boss_new_mana_devourer_AI(Creature* creature) : BossAI(creature, DATA_MANA_DEVOURER) { }
 
             void EnterCombat(Unit* /**/) override
             {
@@ -59,10 +57,10 @@ class boss_mana_devourer : public CreatureScript
                 DoCast(me, SPELL_RESTORE_MANA_AURA, true);
                 _EnterCombat();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                events.ScheduleEvent(EVENT_ARCANE_BOMB, Seconds(5));
-                events.ScheduleEvent(EVENT_COALESCE_POWER, Seconds(30));
-                events.ScheduleEvent(EVENT_ENERGY_VOID, Seconds(15));
-                events.ScheduleEvent(EVENT_ENERGY_DISCHARGE, Seconds(urand(25,30)));
+                events.ScheduleEvent(EVENT_ARCANE_BOMB, 5s);
+                events.ScheduleEvent(EVENT_COALESCE_POWER, 30s);
+                events.ScheduleEvent(EVENT_ENERGY_VOID, 15s);
+                events.ScheduleEvent(EVENT_ENERGY_DISCHARGE, 25s, 30s);
             }
 
             void JustDied(Unit* /**/) override
@@ -91,7 +89,7 @@ class boss_mana_devourer : public CreatureScript
             void DoAction(int32 action) override
             {
                 if (action == ACTION_FULL_MANA)
-                    events.ScheduleEvent(EVENT_DECIMATING_ESSENCE, 100);
+                    events.ScheduleEvent(EVENT_DECIMATING_ESSENCE, 100ms);
             }
 
             void ExecuteEvent(uint32 eventId) override
@@ -103,27 +101,27 @@ class boss_mana_devourer : public CreatureScript
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                             DoCast(target, SPELL_ARCANE_BOMB);
                         
-                        events.ScheduleEvent(EVENT_ARCANE_BOMB, Seconds(15));
+                        events.ScheduleEvent(EVENT_ARCANE_BOMB, 15s);
                         break;
                     }
 
                     case EVENT_ENERGY_VOID:
                     {
                         DoCast(me, SPELL_ENERGY_VOID);
-                        events.ScheduleEvent(EVENT_ENERGY_VOID, Seconds(20));
+                        events.ScheduleEvent(EVENT_ENERGY_VOID, 20s);
                         break;
                     }
 
                     case EVENT_COALESCE_POWER:
                     {
                         DoCast(me, SPELL_COALESCE_POWER);
-                        events.ScheduleEvent(EVENT_COALESCE_POWER, Seconds(30));
+                        events.ScheduleEvent(EVENT_COALESCE_POWER, 30s);
                     }
 
                     case EVENT_ENERGY_DISCHARGE:
                     {
                         DoCast(me, SPELL_ENERGY_DISCHARGE);
-                        events.ScheduleEvent(EVENT_ENERGY_DISCHARGE, Seconds(urand(25, 30)));
+                        events.ScheduleEvent(EVENT_ENERGY_DISCHARGE, 25s, 30s);
                         break;
                     }
 
@@ -138,15 +136,14 @@ class boss_mana_devourer : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const override
         {
-            return new boss_mana_devourer_AI(creature);
+            return new boss_new_mana_devourer_AI(creature);
         }
 };
 
 class spell_devourer_coalesce_power : public SpellScriptLoader
 {
     public:
-        spell_devourer_coalesce_power() : SpellScriptLoader("spell_devourer_coalesce_power")
-        {}
+        spell_devourer_coalesce_power() : SpellScriptLoader("spell_devourer_coalesce_power") { }
 
         class spell_coalesce_AuraScript : public AuraScript
         {
@@ -190,8 +187,7 @@ class spell_devourer_coalesce_power : public SpellScriptLoader
 class spell_devourer_mana_restore : public SpellScriptLoader
 {
     public:
-        spell_devourer_mana_restore() : SpellScriptLoader("spell_devourer_mana_restore")
-        {}
+        spell_devourer_mana_restore() : SpellScriptLoader("spell_devourer_mana_restore") { }
 
         class spell_mana_restore_AuraScript : public AuraScript
         {
@@ -224,8 +220,7 @@ class spell_devourer_mana_restore : public SpellScriptLoader
 class spell_devourer_energy_void : public SpellScriptLoader
 {
     public:
-        spell_devourer_energy_void() : SpellScriptLoader("spell_devourer_energy_void")
-        {}
+        spell_devourer_energy_void() : SpellScriptLoader("spell_devourer_energy_void") { }
 
         class spell_energy_void_AuraScript : public AuraScript
         {
@@ -262,8 +257,7 @@ class spell_devourer_energy_void : public SpellScriptLoader
 class at_kara_energy_void : public AreaTriggerEntityScript
 {
     public:
-        at_kara_energy_void() : AreaTriggerEntityScript("at_kara_energy_void")
-        {}
+        at_kara_energy_void() : AreaTriggerEntityScript("at_kara_energy_void") { }
 
         struct at_kara_energy_void_AI : public AreaTriggerAI
         {
@@ -318,8 +312,7 @@ class at_kara_energy_void : public AreaTriggerEntityScript
 class at_kara_loose_mana : public AreaTriggerEntityScript
 {
     public:
-        at_kara_loose_mana() : AreaTriggerEntityScript("at_kara_loose_mana")
-        {}
+        at_kara_loose_mana() : AreaTriggerEntityScript("at_kara_loose_mana") { }
 
         struct at_kara_loose_mana_AI : public AreaTriggerAI
         {
@@ -358,9 +351,9 @@ class at_kara_loose_mana : public AreaTriggerEntityScript
         }
 };
 
-void AddSC_boss_mana_devourer()
+void AddSC_boss_new_mana_devourer()
 {
-    new boss_mana_devourer();
+    new boss_new_mana_devourer();
     new spell_devourer_coalesce_power();
     new spell_devourer_energy_void();
     new spell_devourer_mana_restore();

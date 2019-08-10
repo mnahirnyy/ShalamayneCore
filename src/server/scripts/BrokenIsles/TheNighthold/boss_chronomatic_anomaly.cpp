@@ -673,7 +673,6 @@ public:
                 target->CastCustomSpell(SPELL_TIME_RELEASE_RED, SPELLVALUE_BASE_POINT0, GetEffectValue(), target, TRIGGERED_FULL_MASK);
             }
 
-
             if (caster->HasAura(SPELL_SPEED_SLOW))
             {
                 if (Aura* timeReleaseAbsorb = target->GetAura(SPELL_TIME_RELEASE_ABSORB))
@@ -902,7 +901,6 @@ public:
             OnEffectApply += AuraEffectApplyFn(spell_chronomatic_anomaly_chronometric_particles_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
         }
     };
-
     AuraScript* GetAuraScript() const override
     {
         return new spell_chronomatic_anomaly_chronometric_particles_AuraScript();

@@ -5,23 +5,22 @@
 #include "ScriptedCreature.h"
 #include "new_karazhan.h"
 
-constexpr uint32 SPELL_MEDIVH_ECHO      = 229074;
-constexpr uint32 SPELL_MEDIVH_PRESSENCE = 229077;
+constexpr uint32 SPELL_MEDIVH_ECHO       = 229074;
+constexpr uint32 SPELL_MEDIVH_PRESSENCE  = 229077;
 constexpr uint32 NIGHTBANE_ACHIEVEMENT   = 11430;
 
 enum Actions
 {
-    ACTION_SUMMON_NIGHTBANE     = 1,
-    ACTION_REPLY_ARCHANAGOS     = 2,
-    ACTION_REPLY_2_ARCHANAGOS   = 3,
-    ACTION_REPLY_3_ARCHANAGOS   = 4,
+    ACTION_SUMMON_NIGHTBANE              = 1,
+    ACTION_REPLY_ARCHANAGOS              = 2,
+    ACTION_REPLY_2_ARCHANAGOS            = 3,
+    ACTION_REPLY_3_ARCHANAGOS            = 4,
 };
 
 class npc_kara_image_of_medivh : public CreatureScript
 {
     public:
-        npc_kara_image_of_medivh() : CreatureScript("npc_kara_image_of_medivh")
-        {}
+        npc_kara_image_of_medivh() : CreatureScript("npc_kara_image_of_medivh") { }
 
         bool OnGossipHello(Player* player, Creature* creature) override
         {
@@ -51,8 +50,7 @@ class npc_kara_image_of_medivh : public CreatureScript
 
         struct npc_kara_image_of_medivh_AI : public ScriptedAI
         {
-            explicit npc_kara_image_of_medivh_AI(Creature* me) : ScriptedAI(me)
-            {}
+            explicit npc_kara_image_of_medivh_AI(Creature* me) : ScriptedAI(me) { }
 
             void Reset()
             {
@@ -100,8 +98,7 @@ class npc_kara_image_of_medivh : public CreatureScript
 class go_door_entrance : public GameObjectScript
 {
     public:
-        go_door_entrance() : GameObjectScript("go_door_entrance")
-        {}
+        go_door_entrance() : GameObjectScript("go_door_entrance") { }
 
         bool OnGossipHello(Player* /*player*/, GameObject* go) override
         {
@@ -123,13 +120,11 @@ class go_door_entrance : public GameObjectScript
 class npc_kara_soul_fragment : public CreatureScript
 {
     public:
-        npc_kara_soul_fragment() : CreatureScript("npc_kara_soul_fragment")
-        {}
+        npc_kara_soul_fragment() : CreatureScript("npc_kara_soul_fragment") { }
 
         struct npc_kara_soul_fragment_AI : public ScriptedAI
         {
-            explicit npc_kara_soul_fragment_AI(Creature* me) : ScriptedAI(me)
-            {}
+            explicit npc_kara_soul_fragment_AI(Creature* me) : ScriptedAI(me) { }
 
             void OnSpellClick(Unit* /*clicker*/, bool& /*result*/)
             {

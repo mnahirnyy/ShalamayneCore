@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2008-2019 by MAGICSTORM
+ * Copyright (C) 2008-2019 TrinityCore <http://www.trinitycore.org/>
 *
 * This program is free software; you can redistribute it and/or modify it
 * under the terms of the GNU General Public License as published by the
@@ -34,15 +34,15 @@
 #include "GridNotifiersImpl.h"
 #include "AreaTriggerAI.h"
 #include "AreaTriggerPackets.h"
- 
+
 Position const Waypointspawn[6] =
 {
- { -1110.553f, 6949.951f, 0.0006f },
- { -1082.276f, 7001.35f, 0.0006f },
- { -1131.501f, 7029.581f, 0.0006f },
- { -1175.358f, 6998.841f, 0.0006f },
- { -1173.099f, 6950.416f, 0.0006f },
- { -1106.778f, 6947.764f, 0.0006f },
+    { -1110.553f, 6949.951f, 0.0006f },
+    { -1082.276f, 7001.35f, 0.0006f },
+    { -1131.501f, 7029.581f, 0.0006f },
+    { -1175.358f, 6998.841f, 0.0006f },
+    { -1173.099f, 6950.416f, 0.0006f },
+    { -1106.778f, 6947.764f, 0.0006f },
 };
 
 class boss_levantus : public CreatureScript
@@ -106,7 +106,6 @@ public:
                     {
                         me->CastSpell(Waypointspawn[i].GetPositionX() + urand(0, 25), Waypointspawn[i].GetPositionY() + urand(0, 25), Waypointspawn[i].GetPositionZ(), 217212, true);
                     }
-
                     _events.ScheduleEvent(1, 10000);
                     break;
                 }
@@ -236,7 +235,6 @@ public:
                 caster->GetAttackableUnitListInRange(targetList, radius);
 
                 if (!targetList.empty())
-
                     for (auto itr : targetList)
                     {
                         if (!itr->HasAura(217352) && itr->IsInWater())
@@ -260,7 +258,7 @@ public:
 };
 
 class areatrigger_gen_massive_spout : public AreaTriggerEntityScript
- {
+{
 public:
     areatrigger_gen_massive_spout() : AreaTriggerEntityScript("areatrigger_gen_massive_spout") { }
 
@@ -279,14 +277,13 @@ public:
             if (!caster)
                 return;
 
-
             if (timer <= diff)
             {
                 std::list<Unit*> targetList;
                 float radius = 200.0f; // 217277
 
                 caster->GetAttackableUnitListInRange(targetList, radius);
- 
+
                 if (!targetList.empty())
                     for (auto itr : targetList)
                     {
@@ -297,7 +294,6 @@ public:
             }
             else
                 timer -= diff;
-
         }
 
     private:
@@ -306,7 +302,6 @@ public:
     };
 
     AreaTriggerAI* GetAI(AreaTrigger* areatrigger) const override
-
     {
         return new areatrigger_gen_massive_spoutAI(areatrigger);
     }
@@ -318,6 +313,4 @@ void AddSC_boss_levantus()
     new areatrigger_gen_gust_of_wind();
     new areatrigger_gen_electrify();
     new areatrigger_gen_massive_spout();
-
 }
-

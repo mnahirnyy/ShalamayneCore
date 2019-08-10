@@ -33,82 +33,82 @@ enum Spells
     // Intangible Pressence
     SPELL_GHOST_VISUAL                  = 188272,
     SPELL_GHOST_VISUAL_2                = 221829,
-    SPELL_GHOSTLY_COSMETIC              = 65202,
+    SPELL_GHOSTLY_COSMETIC              = 65202
 };
 
 enum Events
 {
     // Attumen the horseman
-    EVENT_MORTAL_STRIKE         = 1,
-    EVENT_SHARED_SUFFERING      = 2,
-    EVENT_INTAGIBLE_PRESSENCE   = 3,
-    EVENT_MOUNTED_STRIKE        = 4,
+    EVENT_MORTAL_STRIKE                 = 1,
+    EVENT_SHARED_SUFFERING              = 2,
+    EVENT_INTAGIBLE_PRESSENCE           = 3,
+    EVENT_MOUNTED_STRIKE                = 4,
 
     // Midnight
-    EVENT_SPECTRAL_CHARGE       = 5,
-    EVENT_MIGHTY_STOMP          = 6,
-    EVENT_MEZAIR                = 7,
-    EVENT_STAMP                 = 8,
-    EVENT_FOLLOW_TARGET         = 9,
-    EVENT_MOUNT_VEHICLE         = 10,
+    EVENT_SPECTRAL_CHARGE               = 5,
+    EVENT_MIGHTY_STOMP                  = 6,
+    EVENT_MEZAIR                        = 7,
+    EVENT_STAMP                         = 8,
+    EVENT_FOLLOW_TARGET                 = 9,
+    EVENT_MOUNT_VEHICLE                 = 10
 };
 
 enum Actions
 {
-    ACTION_MOUNT_MIDNIGHT       = 1,
-    ACTION_DISMOUNT_MIDNIGHT    = 2,
-    ACTION_END_ENCOUNTER        = 3,
-    ACTION_ATTUMEN_DIED         = 4,
-    ACTION_FULL_HEALTH          = 5,
-    ACTION_MIDNIGHT_BOARDED     = 6,
+    ACTION_MOUNT_MIDNIGHT               = 1,
+    ACTION_DISMOUNT_MIDNIGHT            = 2,
+    ACTION_END_ENCOUNTER                = 3,
+    ACTION_ATTUMEN_DIED                 = 4,
+    ACTION_FULL_HEALTH                  = 5,
+    ACTION_MIDNIGHT_BOARDED             = 6
 };
 
 enum Points
 {
-    POINT_SPECTRAL_CHARGE   = 1,
-    POINT_MEZAIR            = 2,
-    POINT_HOME              = 3,
+    POINT_SPECTRAL_CHARGE               = 1,
+    POINT_MEZAIR                        = 2,
+    POINT_HOME                          = 3
 };
 
 enum Adds
 {
-    NPC_MIDNIGHT            = 114264,
-    NPC_INTAGIBLE_PRESENCE  = 114315,
+    NPC_MIDNIGHT                        = 114264,
+    NPC_INTAGIBLE_PRESENCE              = 114315
 };
 
 enum Says
 {
-    SAY_INTRO               = 0,
-    SAY_AGGRO               = 1,
-    SAY_INTAGIBLE_PRESSENCE = 2,
-    SAY_MIGHTY_STOMP        = 3,
-    SAY_FOOT_PHASE          = 4,
-    SAY_RIDE_PHASE          = 5,
-    SAY_SPECTRAL_CHARGE     = 6,
-    SAY_KILL                = 7,
-    SAY_KILL_MIDNIGHT       = 8,
-    SAY_WIPE                = 9,
-    SAY_DEATH               = 10,
+    SAY_INTRO                           = 0,
+    SAY_AGGRO                           = 1,
+    SAY_INTAGIBLE_PRESSENCE             = 2,
+    SAY_MIGHTY_STOMP                    = 3,
+    SAY_FOOT_PHASE                      = 4,
+    SAY_RIDE_PHASE                      = 5,
+    SAY_SPECTRAL_CHARGE                 = 6,
+    SAY_KILL                            = 7,
+    SAY_KILL_MIDNIGHT                   = 8,
+    SAY_WIPE                            = 9,
+    SAY_DEATH                           = 10
 };
 
-constexpr uint32 PHASE_ONE      = 1;
-constexpr uint32 PHASE_TWO      = 2;
-constexpr int32 DATA_PASSENGER  = 1;
+constexpr uint32 PHASE_ONE              = 1;
+constexpr uint32 PHASE_TWO              = 2;
+constexpr int32 DATA_PASSENGER          = 1;
 
 Position CenterOfRoom;
 
 using G3D::Vector3;
 using G3D::Vector2;
 
-class boss_attumen : public CreatureScript
+class boss_new_attumen : public CreatureScript
 {
     public:
-        boss_attumen() : CreatureScript("boss_attumen")
+        boss_new_attumen() : CreatureScript("boss_new_attumen")
         {}
 
-        struct boss_attumen_AI : public BossAI
+        struct boss_new_attumen_AI : public BossAI
         {
-            explicit boss_attumen_AI(Creature* creature) : BossAI(creature, DATA_ATTUMEN)
+            explicit boss_new_attumen_AI(Creature* creature) : BossAI(creature, DATA_ATTUMEN)
             {
                 CenterOfRoom = me->GetHomePosition();
             }
@@ -137,10 +137,10 @@ class boss_attumen : public CreatureScript
                 Talk(SAY_AGGRO);
                 _EnterCombat();
                 
-                events.ScheduleEvent(EVENT_MIGHTY_STOMP, Seconds(17), PHASE_ONE);
-                events.ScheduleEvent(EVENT_MOUNTED_STRIKE, Seconds(urand(8, 12)), PHASE_ONE);
-                events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, Seconds(10), PHASE_ONE);
-                events.ScheduleEvent(EVENT_STAMP, Seconds(urand(5, 8)), PHASE_ONE);
+                events.ScheduleEvent(EVENT_MIGHTY_STOMP, 17s, PHASE_ONE);
+                events.ScheduleEvent(EVENT_MOUNTED_STRIKE, 8s, 12s, PHASE_ONE);
+                events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, 10s, PHASE_ONE);
+                events.ScheduleEvent(EVENT_STAMP, 5s, 8s, PHASE_ONE);
             }
 
             void JustDied(Unit* /**/) override
@@ -168,18 +168,18 @@ class boss_attumen : public CreatureScript
                         Talk(SAY_FOOT_PHASE);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                         events.CancelEventGroup(PHASE_ONE);
-                        events.ScheduleEvent(EVENT_MORTAL_STRIKE, Seconds(10), PHASE_TWO);
-                        events.ScheduleEvent(EVENT_SHARED_SUFFERING, Seconds(15), PHASE_TWO);
-                        events.ScheduleEvent(EVENT_MEZAIR, Seconds(5), PHASE_TWO);
+                        events.ScheduleEvent(EVENT_MORTAL_STRIKE, 10s, PHASE_TWO);
+                        events.ScheduleEvent(EVENT_SHARED_SUFFERING, 15s, PHASE_TWO);
+                        events.ScheduleEvent(EVENT_MEZAIR, 5s, PHASE_TWO);
                         break;
                     }
 
                     case ACTION_MIDNIGHT_BOARDED:
                     {
-                        events.ScheduleEvent(EVENT_SPECTRAL_CHARGE, Seconds(5), PHASE_ONE);
-                        events.ScheduleEvent(EVENT_MIGHTY_STOMP, Seconds(17), PHASE_ONE);
-                        events.ScheduleEvent(EVENT_MOUNTED_STRIKE, Seconds(urand(8, 12)), PHASE_ONE);
-                        events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, Seconds(30), PHASE_ONE);
+                        events.ScheduleEvent(EVENT_SPECTRAL_CHARGE, 5s, PHASE_ONE);
+                        events.ScheduleEvent(EVENT_MIGHTY_STOMP, 17s, PHASE_ONE);
+                        events.ScheduleEvent(EVENT_MOUNTED_STRIKE, 8s, 12s, PHASE_ONE);
+                        events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, 30s, PHASE_ONE);
                         break;
                     }
 
@@ -241,7 +241,7 @@ class boss_attumen : public CreatureScript
                     case EVENT_MOUNTED_STRIKE:
                     {
                         DoCastVictim(SPELL_MOUNTED_STRIKE);
-                        events.ScheduleEvent(EVENT_MOUNTED_STRIKE, Seconds(urand(10, 13)), PHASE_ONE);
+                        events.ScheduleEvent(EVENT_MOUNTED_STRIKE, 10s, 13s, PHASE_ONE);
                         break;
                     }
 
@@ -256,15 +256,14 @@ class boss_attumen : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const override
         {
-            return new boss_attumen_AI(creature);
+            return new boss_new_attumen_AI(creature);
         }
 };
 
 class npc_kara_midnight : public CreatureScript
 {
     public:
-        npc_kara_midnight() : CreatureScript("npc_kara_midnight")
-        {}
+        npc_kara_midnight() : CreatureScript("npc_kara_midnight") { }
 
         struct npc_kara_midnight_AI : public ScriptedAI
         {
@@ -294,11 +293,11 @@ class npc_kara_midnight : public CreatureScript
 
                             me->SetReactState(REACT_AGGRESSIVE);
                             _events.CancelEventGroup(PHASE_TWO);
-                            _events.ScheduleEvent(EVENT_FOLLOW_TARGET, 500, PHASE_ONE);
-                            _events.ScheduleEvent(EVENT_SPECTRAL_CHARGE, Seconds(10), PHASE_ONE);
-                            _events.ScheduleEvent(EVENT_MIGHTY_STOMP, Seconds(30), PHASE_ONE);
-                            _events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, Seconds(15), PHASE_ONE);
-                            _events.ScheduleEvent(EVENT_STAMP, Seconds(urand(8, 12)), PHASE_ONE);
+                            _events.ScheduleEvent(EVENT_FOLLOW_TARGET, 500ms, PHASE_ONE);
+                            _events.ScheduleEvent(EVENT_SPECTRAL_CHARGE, 10s, PHASE_ONE);
+                            _events.ScheduleEvent(EVENT_MIGHTY_STOMP, 30s, PHASE_ONE);
+                            _events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, 15s, PHASE_ONE);
+                            _events.ScheduleEvent(EVENT_STAMP, 8s, 12s, PHASE_ONE);
                             break;
                         }
 
@@ -312,7 +311,7 @@ class npc_kara_midnight : public CreatureScript
                                 me->SetFacingToObject(attumen, true);
                                 DoCastSelf(SPELL_MEZAIR);
                             }
-                            _events.ScheduleEvent(EVENT_MEZAIR, 5000, PHASE_TWO);
+                            _events.ScheduleEvent(EVENT_MEZAIR, 5s, PHASE_TWO);
                             break;
                         }
 
@@ -320,11 +319,11 @@ class npc_kara_midnight : public CreatureScript
                         {
                             DoCastSelf(SPELL_SPECTRAL_CHARGE);
                             if (_chargesDone++ < 3)
-                                _events.ScheduleEvent(EVENT_SPECTRAL_CHARGE, Seconds(5), PHASE_ONE);
+                                _events.ScheduleEvent(EVENT_SPECTRAL_CHARGE, 5s, PHASE_ONE);
                             else
                             {
-                                _events.ScheduleEvent(EVENT_FOLLOW_TARGET, 500, PHASE_ONE);
-                                _events.ScheduleEvent(EVENT_SPECTRAL_CHARGE, Seconds(15), PHASE_ONE);
+                                _events.ScheduleEvent(EVENT_FOLLOW_TARGET, 500ms, PHASE_ONE);
+                                _events.ScheduleEvent(EVENT_SPECTRAL_CHARGE, 15s, PHASE_ONE);
                             }
                             break;
                         }
@@ -390,9 +389,9 @@ class npc_kara_midnight : public CreatureScript
                 if (Creature* rider = ObjectAccessor::GetCreature(*me, _attumenGUID))
                     rider->AI()->EnterCombat(nullptr);
                 
-                _events.ScheduleEvent(EVENT_MIGHTY_STOMP, Seconds(17), PHASE_ONE);
-                _events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, Seconds(10), PHASE_ONE);
-                _events.ScheduleEvent(EVENT_STAMP, Seconds(urand(5, 8)), PHASE_ONE);
+                _events.ScheduleEvent(EVENT_MIGHTY_STOMP, 17s, PHASE_ONE);
+                _events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, 10s, PHASE_ONE);
+                _events.ScheduleEvent(EVENT_STAMP, 5s, 8s, PHASE_ONE);
             }
 
             void DoAction(int32 action) override
@@ -417,7 +416,7 @@ class npc_kara_midnight : public CreatureScript
                         me->SetReactState(REACT_AGGRESSIVE);
                         me->RemoveAurasDueToSpell(SPELL_RIDERLESS);
                         _events.CancelEventGroup(PHASE_TWO);
-                        _events.RescheduleEvent(EVENT_MIGHTY_STOMP, Seconds(15));
+                        _events.RescheduleEvent(EVENT_MIGHTY_STOMP, 15s);
                         me->CastSpell(me, SPELL_ENRAGE, true);
                         break;
                     }
@@ -454,7 +453,7 @@ class npc_kara_midnight : public CreatureScript
 
                     me->CastSpell(me, SPELL_RIDERLESS, true);
                     me->SetReactState(REACT_PASSIVE);
-                    _events.ScheduleEvent(EVENT_MEZAIR, 2500, PHASE_TWO);
+                    _events.ScheduleEvent(EVENT_MEZAIR, 2s + 500ms, PHASE_TWO);
                 }
             }
 
@@ -467,13 +466,14 @@ class npc_kara_midnight : public CreatureScript
                         if (me->GetVictim())
                             me->GetMotionMaster()->MoveChase(me->GetVictim());
                         
-                        _events.ScheduleEvent(EVENT_FOLLOW_TARGET, 500);
+                        _events.ScheduleEvent(EVENT_FOLLOW_TARGET, 500ms);
                         break;
                     }
+
                     case EVENT_STAMP:
                     {
                         DoCastVictim(SPELL_STAMP);
-                        _events.ScheduleEvent(EVENT_STAMP, Seconds(urand(8, 12)), PHASE_ONE);
+                        _events.ScheduleEvent(EVENT_STAMP, 8s, 12s, PHASE_ONE);
                         break;
                     }
 
@@ -482,7 +482,7 @@ class npc_kara_midnight : public CreatureScript
                         if (Creature* attumen = ObjectAccessor::GetCreature(*me, _attumenGUID))
                             attumen->AI()->Talk(SAY_INTAGIBLE_PRESSENCE);
                         DoCast(SPELL_INTANGIBLE_PRESENCE);
-                        _events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, Seconds(30), PHASE_ONE);
+                        _events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, 30s, PHASE_ONE);
                         break;
                     }
 
@@ -495,7 +495,7 @@ class npc_kara_midnight : public CreatureScript
 
                         }
                         DoCast(SPELL_MIGHTY_STOMP);
-                        _events.ScheduleEvent(EVENT_MIGHTY_STOMP, Seconds(65), PHASE_ONE);
+                        _events.ScheduleEvent(EVENT_MIGHTY_STOMP, 65s, PHASE_ONE);
                         break;
                     }
 
@@ -547,8 +547,7 @@ class npc_kara_midnight : public CreatureScript
 class npc_kara_intagible_presence : public CreatureScript
 {
     public:
-        npc_kara_intagible_presence() : CreatureScript("npc_kara_intagible_presence")
-        {}
+        npc_kara_intagible_presence() : CreatureScript("npc_kara_intagible_presence") { }
 
         struct npc_kara_intagible_presence_AI : public ScriptedAI
         {
@@ -569,8 +568,8 @@ class npc_kara_intagible_presence : public CreatureScript
 
             void IsSummonedBy(Unit* /**/) override
             {
-                _events.ScheduleEvent(EVENT_MOUNT_VEHICLE, 1000);
-                _events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, 3000);
+                _events.ScheduleEvent(EVENT_MOUNT_VEHICLE, 1s);
+                _events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, 3s);
             }
 
             void SetGUID(ObjectGuid guid, int32 id) override
@@ -593,7 +592,7 @@ class npc_kara_intagible_presence : public CreatureScript
                         case EVENT_INTAGIBLE_PRESSENCE:
                         {
                             DoCastSelf(SPELL_INTANGIBLE_PRESENCE_DMG, true);
-                            _events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, 2000);
+                            _events.ScheduleEvent(EVENT_INTAGIBLE_PRESSENCE, 2s);
                             break;
                         }
 
@@ -627,8 +626,7 @@ class npc_kara_intagible_presence : public CreatureScript
 class spell_attumen_riderless : public SpellScriptLoader
 {
     public:
-        spell_attumen_riderless() : SpellScriptLoader("spell_attumen_riderless")
-        {}
+        spell_attumen_riderless() : SpellScriptLoader("spell_attumen_riderless") { }
 
         class spell_riderless_AuraScript : public AuraScript
         {
@@ -659,8 +657,7 @@ class spell_attumen_riderless : public SpellScriptLoader
 class spell_attumen_intagible_presence : public SpellScriptLoader
 {
     public:
-        spell_attumen_intagible_presence() : SpellScriptLoader("spell_attumen_intagible_presence")
-        {}
+        spell_attumen_intagible_presence() : SpellScriptLoader("spell_attumen_intagible_presence") { }
 
         class spell_intagible_presence_SpellScript : public SpellScript
         {
@@ -734,9 +731,10 @@ class spell_attumen_intagible_presence : public SpellScriptLoader
             return new spell_intagible_presence_AuraScript();
         }
 };
-void AddSC_boss_attumen()
+
+void AddSC_boss_new_attumen()
 {
-    new boss_attumen();
+    new boss_new_attumen();
     new npc_kara_midnight();
     new npc_kara_intagible_presence();
     new spell_attumen_riderless();

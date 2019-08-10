@@ -30,31 +30,29 @@ enum Events
 
 enum Says
 {
-    SAY_AGGRO           = 0,
-    SAY_HOLY_BOLT       = 1,
-    SAY_HOLY_SHOCK      = 2,
-    SAY_SACRED_GROUND   = 3,
-    SAY_MASS_REPETANCE  = 4,
-    SAY_HOLY_BULWARK    = 5,
-    SAY_HOLY_WRATH      = 6,
-    SAY_KILL            = 7,
-    SAY_WIPE            = 8,
-    SAY_DEATH           = 9,
+    SAY_AGGRO               = 0,
+    SAY_HOLY_BOLT           = 1,
+    SAY_HOLY_SHOCK          = 2,
+    SAY_SACRED_GROUND       = 3,
+    SAY_MASS_REPETANCE      = 4,
+    SAY_HOLY_BULWARK        = 5,
+    SAY_HOLY_WRATH          = 6,
+    SAY_KILL                = 7,
+    SAY_WIPE                = 8,
+    SAY_DEATH               = 9,
 };
 
 constexpr int32 ACTION_HOLY_BULWARK         = 1;
 constexpr int32 ACTION_PREPARE_HOLY_WRATH   = 2;
 
-class boss_maiden_of_virtue : public CreatureScript
+class boss_new_maiden_of_virtue : public CreatureScript
 {
     public:
-        boss_maiden_of_virtue() : CreatureScript("boss_maiden_of_virtue")
-        {}
+        boss_new_maiden_of_virtue() : CreatureScript("boss_new_maiden_of_virtue") { }
 
-        struct boss_maiden_of_virtue_AI : public BossAI
+        struct boss_new_maiden_of_virtue_AI : public BossAI
         {
-            explicit boss_maiden_of_virtue_AI(Creature* creature) : BossAI(creature, DATA_MAIDEN_OF_VIRTUE)
-            {}
+            explicit boss_new_maiden_of_virtue_AI(Creature* creature) : BossAI(creature, DATA_MAIDEN_OF_VIRTUE) { }
 
             void KilledUnit(Unit* victim) override
             {
@@ -85,7 +83,7 @@ class boss_maiden_of_virtue : public CreatureScript
             void DoAction(int32 action) override
             {
                 if (action == ACTION_HOLY_BULWARK)
-                    events.ScheduleEvent(EVENT_HOLY_BULWARK, 500);
+                    events.ScheduleEvent(EVENT_HOLY_BULWARK, 500ms);
                 else if (action == ACTION_PREPARE_HOLY_WRATH)
                 {
                     events.DelayEvents(5000);
@@ -96,10 +94,10 @@ class boss_maiden_of_virtue : public CreatureScript
             void EnterCombat(Unit* /**/) override
             {
                 Talk(SAY_AGGRO);
-                events.ScheduleEvent(EVENT_MASS_REPETANCE, Seconds(50));
-                events.ScheduleEvent(EVENT_HOLY_SHOCK, Seconds(15));
-                events.ScheduleEvent(EVENT_SACRED_GROUND, Seconds(12));
-                events.ScheduleEvent(EVENT_HOLY_BOLT, Seconds(10));
+                events.ScheduleEvent(EVENT_MASS_REPETANCE, 50s);
+                events.ScheduleEvent(EVENT_HOLY_SHOCK, 15s);
+                events.ScheduleEvent(EVENT_SACRED_GROUND, 12s);
+                events.ScheduleEvent(EVENT_HOLY_BOLT, 10s);
             }
 
             void ExecuteEvent(uint32 eventId) override
@@ -110,7 +108,7 @@ class boss_maiden_of_virtue : public CreatureScript
                     {
                         Talk(SAY_MASS_REPETANCE);
                         DoCast(me, SPELL_MASS_REPETANCE);
-                        events.ScheduleEvent(EVENT_MASS_REPETANCE, Seconds(50));
+                        events.ScheduleEvent(EVENT_MASS_REPETANCE, 50s);
                         break;
                     }
 
@@ -120,7 +118,7 @@ class boss_maiden_of_virtue : public CreatureScript
                             Talk(SAY_HOLY_BULWARK);
                         
                         me->CastSpell(me, SPELL_HOLY_BULWARK, false);
-                        events.ScheduleEvent(EVENT_HOLY_WRATH, 1000);
+                        events.ScheduleEvent(EVENT_HOLY_WRATH, 1s);
                         break;
                     }
 
@@ -137,7 +135,7 @@ class boss_maiden_of_virtue : public CreatureScript
                             Talk(SAY_HOLY_SHOCK);
                             
                         DoCastVictim(SPELL_HOLY_SHOCK);
-                        events.ScheduleEvent(EVENT_HOLY_SHOCK, Seconds(15));
+                        events.ScheduleEvent(EVENT_HOLY_SHOCK, 15s);
                         break;
                     }
 
@@ -149,7 +147,7 @@ class boss_maiden_of_virtue : public CreatureScript
                             DoCast(target, SPELL_HOLY_BOLT);
                         }
                         
-                        events.ScheduleEvent(EVENT_HOLY_BOLT, Seconds(10));
+                        events.ScheduleEvent(EVENT_HOLY_BOLT, 10s);
                         break;
                     }
 
@@ -163,7 +161,7 @@ class boss_maiden_of_virtue : public CreatureScript
                         else
                             DoCast(target, SPELL_SACRED_GROUND);
                         
-                        events.ScheduleEvent(EVENT_SACRED_GROUND, Seconds(urand(23, 25)));
+                        events.ScheduleEvent(EVENT_SACRED_GROUND, 23s, 25s);
                         break;
                     }
                 }
@@ -172,15 +170,14 @@ class boss_maiden_of_virtue : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const override
         {
-            return new boss_maiden_of_virtue_AI(creature);
+            return new boss_new_maiden_of_virtue_AI(creature);
         }
 };
 
 class spell_maiden_holy_bulwark : public SpellScriptLoader
 {
     public:
-        spell_maiden_holy_bulwark() : SpellScriptLoader("spell_maiden_holy_bulwark")
-        {}
+        spell_maiden_holy_bulwark() : SpellScriptLoader("spell_maiden_holy_bulwark") { }
 
         class spell_holy_bulwark_AuraScript : public AuraScript
         {
@@ -219,8 +216,7 @@ class spell_maiden_holy_bulwark : public SpellScriptLoader
 class spell_maiden_mass_repetance : public SpellScriptLoader
 {
     public:
-        spell_maiden_mass_repetance() : SpellScriptLoader("spell_maiden_mass_repetance")
-        {}
+        spell_maiden_mass_repetance() : SpellScriptLoader("spell_maiden_mass_repetance") { }
 
         class spell_mass_repentance_SpellScript : public SpellScript
         {
@@ -248,8 +244,7 @@ class spell_maiden_mass_repetance : public SpellScriptLoader
 class spell_maiden_holy_wrath : public SpellScriptLoader
 {
     public:
-        spell_maiden_holy_wrath() : SpellScriptLoader("spell_maiden_holy_wrath")
-        {}
+        spell_maiden_holy_wrath() : SpellScriptLoader("spell_maiden_holy_wrath") { }
 
         class spell_holy_wrath_SpellScript : public SpellScript
         {
@@ -277,8 +272,7 @@ class spell_maiden_holy_wrath : public SpellScriptLoader
 class at_sacred_ground : public AreaTriggerEntityScript
 {
     public:
-        at_sacred_ground() : AreaTriggerEntityScript("at_sacred_ground")
-        {}
+        at_sacred_ground() : AreaTriggerEntityScript("at_sacred_ground") { }
 
         struct at_sacred_ground_AI : public AreaTriggerAI
         {
@@ -317,9 +311,9 @@ class at_sacred_ground : public AreaTriggerEntityScript
         }
 };
 
-void AddSC_boss_maiden_of_virtue()
+void AddSC_boss_new_maiden_of_virtue()
 {
-    new boss_maiden_of_virtue();
+    new boss_new_maiden_of_virtue();
     new at_sacred_ground();
     new spell_maiden_holy_bulwark();
     new spell_maiden_mass_repetance();

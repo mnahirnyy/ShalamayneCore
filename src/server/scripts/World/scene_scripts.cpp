@@ -17,7 +17,6 @@
 
 #include "ScriptMgr.h"
 #include "Player.h"
-#include "SpellMgr.h"
 
 enum SceneSpells
 {
@@ -37,22 +36,7 @@ class scene_deathwing_simulator : public SceneScript
     }
 };
 
-class scene_jewelcrafting_game : public SceneScript
-{
-    public:
-        scene_jewelcrafting_game() : SceneScript("scene_jewelcrafting_game") { }
-
-    // Called when a player receive trigger from scene
-    void OnSceneTriggerEvent(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/, std::string const& triggerName) override
-    {
-		if(player)
-			if (triggerName == "achievement")
-				player->CompletedAchievement(10587);// Jewel crafting Achievement (HOT SWAPPER)
-    }
-};
-
 void AddSC_scene_scripts()
 {
     new scene_deathwing_simulator();
-    new scene_jewelcrafting_game();
 }

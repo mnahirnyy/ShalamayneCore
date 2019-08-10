@@ -7,7 +7,7 @@
 #define TNScriptName "instance_the_nighthold"
 #define DataHeader    "TN"
 
-static const Position scorpidSpawnPosition = { 133.3403f, 3399.205f, -250.1467f };
+static const Position scorpidSpawnPosition 		= { 133.3403f, 3399.205f, -250.1467f };
 static const Position temporalOrbsSpawnPosition = { 276.3507f, 3136.081f, -236.9497f };
 
 static const Movement::PointsArray WaypointScorpid1 =

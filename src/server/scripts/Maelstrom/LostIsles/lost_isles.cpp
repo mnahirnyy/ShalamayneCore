@@ -718,7 +718,7 @@ struct npc_warchief_revenge_cyclone : public npc_escortAI
                         if (player->GetQuestStatus(QUEST_WARCHIEF_REVENGE) == QUEST_STATUS_COMPLETE)
                         {
                             SetEscortPaused(true);
-                            me->SetSpeed(MOVE_FLIGHT, 14.0f);
+                            me->SetSpeed(MOVE_FLIGHT, 35.0f);
                             me->GetMotionMaster()->MovePoint(1002, 885.869568f, 3104.882324f, 175.560944f, false);
                         }
                         else
@@ -737,7 +737,7 @@ struct npc_warchief_revenge_cyclone : public npc_escortAI
                 Start(false, true, ObjectGuid::Empty, nullptr, false, true);
                 break;
             case 1002:
-                me->GetMotionMaster()->MovePoint(1003, 846.170532f, 2781.281738f, 111.278549f, false);
+                me->GetMotionMaster()->MovePoint(1003, 863.672180f, 2778.023193f, 126.243454f, false);
                 break;
             case 1003:
                 me->DespawnOrUnsummon();

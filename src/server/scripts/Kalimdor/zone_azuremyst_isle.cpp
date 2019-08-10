@@ -320,305 +320,251 @@ public:
 };
 
 /*######
-## npc_magwin
+## PlayerScript for quest 9531 "Tree's Company"
 ######*/
-
-enum Magwin
-{
-    SAY_START                   = 0,
-    SAY_AGGRO                   = 1,
-    SAY_PROGRESS                = 2,
-    SAY_END1                    = 3,
-    SAY_END2                    = 4,
-    EMOTE_HUG                   = 5,
-    NPC_COWLEN                  = 17311,
-    SAY_COWLEN                  = 0,
-    EVENT_ACCEPT_QUEST          = 1,
-    EVENT_START_ESCORT          = 2,
-    EVENT_STAND                 = 3,
-    EVENT_TALK_END              = 4,
-    EVENT_COWLEN_TALK           = 5,
-    QUEST_A_CRY_FOR_HELP        = 9528,
-    FACTION_QUEST               = 113
-};
-
-class npc_magwin : public CreatureScript
-{
+class PlayerScript_start_conversation_under_tree : public PlayerScript {
 public:
-    npc_magwin() : CreatureScript("npc_magwin") { }
+    PlayerScript_start_conversation_under_tree() : PlayerScript("PlayerScript_start_conversation_under_tree") {}
 
-    struct npc_magwinAI : public npc_escortAI
-    {
-        npc_magwinAI(Creature* creature) : npc_escortAI(creature) { }
-
-        void Reset() override
-        {
-            _events.Reset();
-        }
-
-        void EnterCombat(Unit* who) override
-        {
-            Talk(SAY_AGGRO, who);
-        }
-
-        void sQuestAccept(Player* player, Quest const* quest) override
-        {
-            if (quest->GetQuestId() == QUEST_A_CRY_FOR_HELP)
-            {
-                _player = player->GetGUID();
-                _events.ScheduleEvent(EVENT_ACCEPT_QUEST, Seconds(2));
-            }
-        }
-
-        void WaypointReached(uint32 waypointId) override
-        {
-            if (Player* player = GetPlayerForEscort())
-            {
-                switch (waypointId)
-                {
-                    case 17:
-                        Talk(SAY_PROGRESS, player);
-                        break;
-                    case 28:
-                        player->GroupEventHappens(QUEST_A_CRY_FOR_HELP, me);
-                        _events.ScheduleEvent(EVENT_TALK_END, Seconds(2));
-                        SetRun(true);
-                        break;
-                    case 29:
-                        if (Creature* cowlen = me->FindNearestCreature(NPC_COWLEN, 50.0f, true))
-                            Talk(EMOTE_HUG, cowlen);
-                        Talk(SAY_END2, player);
-                        break;
-                }
-            }
-        }
-
-        void UpdateEscortAI(uint32 diff) override
-        {
-            _events.Update(diff);
-
-            if (uint32 eventId = _events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                    case EVENT_ACCEPT_QUEST:
-                        if (Player* player = ObjectAccessor::GetPlayer(*me, _player))
-                            Talk(SAY_START, player);
-                        me->setFaction(FACTION_QUEST);
-                        _events.ScheduleEvent(EVENT_START_ESCORT, Seconds(1));
-                        break;
-                    case EVENT_START_ESCORT:
-                        if (Player* player = ObjectAccessor::GetPlayer(*me, _player))
-                            npc_escortAI::Start(true, false, player->GetGUID());
-                        _events.ScheduleEvent(EVENT_STAND, Seconds(2));
-                        break;
-                    case EVENT_STAND: // Remove kneel standstate. Using a separate delayed event because it causes unwanted delay before starting waypoint movement.
-                        me->SetByteValue(UNIT_FIELD_BYTES_1, 0, 0);
-                        break;
-                    case EVENT_TALK_END:
-                        if (Player* player = ObjectAccessor::GetPlayer(*me, _player))
-                            Talk(SAY_END1, player);
-                        _events.ScheduleEvent(EVENT_COWLEN_TALK, Seconds(2));
-                        break;
-                    case EVENT_COWLEN_TALK:
-                        if (Creature* cowlen = me->FindNearestCreature(NPC_COWLEN, 50.0f, true))
-                            cowlen->AI()->Talk(SAY_COWLEN);
-                        break;
-                }
-            }
-
-            npc_escortAI::UpdateEscortAI(diff);
-        }
-
-    private:
-        EventMap _events;
-        ObjectGuid _player;
+    enum Geezle {
+        QUEST_TREES_COMPANY = 9531,
+        SPELL_TREE_DISGUISE = 30298,
+        NPC_GEEZLE = 17318,
+        DATA_START_EVENT = 27,
+        AREA_TRAITORS_CAVE = 3579,
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_magwinAI(creature);
+    uint32 checkTimer = 1000;
+
+    void OnUpdate(Player* player, uint32 diff) override {
+        if (checkTimer <= diff) {
+            if (player->GetAreaId() == AREA_TRAITORS_CAVE &&
+                player->GetQuestStatus(QUEST_TREES_COMPANY) == QUEST_STATUS_INCOMPLETE &&
+                player->HasAura(SPELL_TREE_DISGUISE)
+                ) {
+                if (Creature* Geezle = player->FindNearestCreature(NPC_GEEZLE, 50.0f, true)) {
+                    Geezle->AI()->SetData(DATA_START_EVENT, DATA_START_EVENT);
+                }
+            }
+
+            checkTimer = 1000;
+        }
+        else checkTimer -= diff;
     }
 };
 
 /*######
-## npc_geezle
+## npc geezle 17318 for quest 9531 "Tree's Company"
 ######*/
-
-enum Geezle
-{
-    QUEST_TREES_COMPANY = 9531,
-
-    SPELL_TREE_DISGUISE = 30298,
-
-    GEEZLE_SAY_1    = 0,
-    SPARK_SAY_2     = 3,
-    SPARK_SAY_3     = 4,
-    GEEZLE_SAY_4    = 1,
-    SPARK_SAY_5     = 5,
-    SPARK_SAY_6     = 6,
-    GEEZLE_SAY_7    = 2,
-
-    EMOTE_SPARK     = 7,
-
-    NPC_SPARK       = 17243,
-    GO_NAGA_FLAG    = 181694
-};
-
-Position const SparkPos = {-5029.91f, -11291.79f, 8.096f, 0.0f};
-
-class npc_geezle : public CreatureScript
-{
+class npc_geezle : public CreatureScript {
 public:
-    npc_geezle() : CreatureScript("npc_geezle") { }
+    npc_geezle() : CreatureScript("npc_geezle_17318") { }
 
-    struct npc_geezleAI : public ScriptedAI
-    {
-        npc_geezleAI(Creature* creature) : ScriptedAI(creature)
-        {
+    enum Geezle {
+        QUEST_TREES_COMPANY = 9531,
+        SPELL_TREE_DISGUISE = 30298,
+        GEEZLE_SAY_1 = 0,
+        SPARK_SAY_2 = 3,
+        SPARK_SAY_3 = 4,
+        GEEZLE_SAY_4 = 1,
+        SPARK_SAY_5 = 5,
+        SPARK_SAY_6 = 6,
+        GEEZLE_SAY_7 = 2,
+        EMOTE_SPARK = 7,
+        NPC_SPARK = 17243,
+        GO_NAGA_FLAG = 181694,
+        EVENT_START_ANIM = 100,
+        SPELL_DEATH_INVIS = 117555,
+        DATA_START_EVENT = 27,
+    };
+
+    struct npc_geezle_AI : public ScriptedAI {
+        npc_geezle_AI(Creature* creature) : ScriptedAI(creature) {
             Initialize();
         }
 
-        void Initialize()
-        {
-            SparkGUID.Clear();
-            Step = 0;
+        void Initialize() {
+            SparkGUID = ObjectGuid::Empty;
             EventStarted = false;
-            SayTimer = 0;
         }
 
-        ObjectGuid SparkGUID;
-
-        uint8 Step;
-        uint32 SayTimer;
-
-        bool EventStarted;
-
-        void Reset() override
-        {
+        void Reset() override {
+            _events.Reset();
             Initialize();
-            StartEvent();
         }
 
-        void EnterCombat(Unit* /*who*/) override { }
-
-        void StartEvent()
-        {
-            Step = 0;
+        void StartEvent() {
             EventStarted = true;
-            if (Creature* Spark = me->SummonCreature(NPC_SPARK, SparkPos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000))
-            {
+            if (Creature* Spark = me->SummonCreature(NPC_SPARK, -5029.91f, -11291.79f, 8.096f, 0.0f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000)) {
                 SparkGUID = Spark->GetGUID();
                 Spark->setActive(true);
                 Spark->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             }
-            SayTimer = 8000;
+            _events.ScheduleEvent(EVENT_START_ANIM, 8000);
         }
 
-        uint32 NextStep(uint8 step)
-        {
-            Creature* Spark = ObjectAccessor::GetCreature(*me, SparkGUID);
-            if (!Spark)
-                return 99999999;
-
-            switch (step)
-            {
-                case 0:
-                    Spark->GetMotionMaster()->MovePoint(0, -5080.70f, -11253.61f, 0.56f);
-                    me->GetMotionMaster()->MovePoint(0, -5092.26f, -11252, 0.71f);
-                    return 9000;
-                case 1:
-                    DespawnNagaFlag(true);
-                    Spark->AI()->Talk(EMOTE_SPARK);
-                    return 1000;
-                case 2:
-                    Talk(GEEZLE_SAY_1, Spark);
-                    Spark->SetInFront(me);
-                    me->SetInFront(Spark);
-                    return 5000;
-                case 3:
-                    Spark->AI()->Talk(SPARK_SAY_2);
-                    return 7000;
-                case 4:
-                    Spark->AI()->Talk(SPARK_SAY_3);
-                    return 8000;
-                case 5:
-                    Talk(GEEZLE_SAY_4, Spark);
-                    return 8000;
-                case 6:
-                    Spark->AI()->Talk(SPARK_SAY_5);
-                    return 9000;
-                case 7:
-                    Spark->AI()->Talk(SPARK_SAY_6);
-                    return 8000;
-                case 8:
-                    Talk(GEEZLE_SAY_7, Spark);
-                    return 2000;
-                case 9:
-                    me->GetMotionMaster()->MoveTargetedHome();
-                    Spark->GetMotionMaster()->MovePoint(0, SparkPos);
-                    CompleteQuest();
-                    return 9000;
-                case 10:
-                    Spark->DisappearAndDie();
-                    DespawnNagaFlag(false);
-                    me->DisappearAndDie();
-                default: return 99999999;
-            }
-        }
-
-        // will complete Tree's company quest for all nearby players that are disguised as trees
-        void CompleteQuest()
-        {
-            float radius = 50.0f;
+        void CompleteQuest() {
             std::list<Player*> players;
-            Trinity::AnyPlayerInObjectRangeCheck checker(me, radius);
-            Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
-            Cell::VisitWorldObjects(me, searcher, radius);
-
-            for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                if ((*itr)->GetQuestStatus(QUEST_TREES_COMPANY) == QUEST_STATUS_INCOMPLETE && (*itr)->HasAura(SPELL_TREE_DISGUISE))
-                    (*itr)->KilledMonsterCredit(NPC_SPARK);
-        }
-
-        void DespawnNagaFlag(bool despawn)
-        {
-            std::list<GameObject*> FlagList;
-            me->GetGameObjectListWithEntryInGrid(FlagList, GO_NAGA_FLAG, 100.0f);
-
-            if (!FlagList.empty())
-            {
-                for (std::list<GameObject*>::const_iterator itr = FlagList.begin(); itr != FlagList.end(); ++itr)
-                {
-                    if (despawn)
-                        (*itr)->SetLootState(GO_JUST_DEACTIVATED);
-                    else
-                        (*itr)->Respawn();
+            me->GetPlayerListInGrid(players, me->GetVisibilityRange());
+            for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr) {
+                if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_TREES_COMPANY) == QUEST_STATUS_INCOMPLETE &&
+                    (*itr)->ToPlayer()->HasAura(SPELL_TREE_DISGUISE)) {
+                    (*itr)->KilledMonsterCredit(NPC_SPARK, ObjectGuid::Empty);
                 }
             }
-            else
-                TC_LOG_ERROR("scripts", "SD2 ERROR: FlagList is empty!");
         }
 
-        void UpdateAI(uint32 diff) override
-        {
-            if (SayTimer <= diff)
-            {
-                if (EventStarted)
-                    SayTimer = NextStep(Step++);
+        void UpdateAI(uint32 diff) override {
+
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent()) {
+                if (Creature* Spark = me->FindNearestCreature(NPC_SPARK, me->GetVisibilityRange(), true)) {
+                    switch (eventId) {
+                    case EVENT_START_ANIM:
+                        me->SetWalk(true);
+                        Spark->SetWalk(true);
+                        Spark->GetMotionMaster()->MovePoint(0, -5080.70f, -11253.61f, 0.56f);
+                        me->GetMotionMaster()->MovePoint(0, -5092.26f, -11252, 0.71f);
+                        _events.ScheduleEvent(EVENT_START_ANIM + 1, 9000);
+                        break;
+                    case EVENT_START_ANIM + 1:
+                        Spark->AI()->Talk(EMOTE_SPARK);
+                        _events.ScheduleEvent(EVENT_START_ANIM + 2, 1000);
+                        break;
+                    case EVENT_START_ANIM + 2:
+                        Talk(GEEZLE_SAY_1, Spark);
+                        Spark->SetInFront(me);
+                        me->SetInFront(Spark);
+                        _events.ScheduleEvent(EVENT_START_ANIM + 3, 5000);
+                        break;
+                    case EVENT_START_ANIM + 3:
+                        Spark->AI()->Talk(SPARK_SAY_2);
+                        _events.ScheduleEvent(EVENT_START_ANIM + 4, 7000);
+                        break;
+                    case EVENT_START_ANIM + 4:
+                        Spark->AI()->Talk(SPARK_SAY_3);
+                        _events.ScheduleEvent(EVENT_START_ANIM + 5, 8000);
+                        break;
+                    case EVENT_START_ANIM + 5:
+                        Talk(GEEZLE_SAY_4, Spark);
+                        _events.ScheduleEvent(EVENT_START_ANIM + 6, 9000);
+                        break;
+                    case EVENT_START_ANIM + 6:
+                        Spark->AI()->Talk(SPARK_SAY_5);
+                        _events.ScheduleEvent(EVENT_START_ANIM + 7, 8000);
+                        break;
+                    case EVENT_START_ANIM + 7:
+                        Spark->AI()->Talk(SPARK_SAY_6);
+                        _events.ScheduleEvent(EVENT_START_ANIM + 8, 9000);
+                        break;
+                    case EVENT_START_ANIM + 8:
+                        Talk(GEEZLE_SAY_7, Spark);
+                        _events.ScheduleEvent(EVENT_START_ANIM + 9, 2000);
+                        break;
+                    case EVENT_START_ANIM + 9:
+                        me->GetMotionMaster()->MoveTargetedHome();
+                        Spark->GetMotionMaster()->MovePoint(0, -5029.91f, -11291.79f, 8.096f, 0.0f);
+                        CompleteQuest();
+                        _events.ScheduleEvent(EVENT_START_ANIM + 10, 9000);
+                        break;
+                    case EVENT_START_ANIM + 10:
+                        DoCastSelf(SPELL_DEATH_INVIS, true);
+                        Spark->DespawnOrUnsummon(5000, Seconds(20));
+                        me->DespawnOrUnsummon(5000, Seconds(20));
+                        EventStarted = false;
+                        break;
+                    default:
+                        break;
+                    }
+                }
             }
-            else
-                SayTimer -= diff;
+            DoMeleeAttackIfReady();
         }
+
+        void SetData(uint32 id, uint32 /*value*/) override {
+            switch (id) {
+            case DATA_START_EVENT:
+                if (!EventStarted) {
+                    StartEvent();
+                }
+                break;
+            }
+        }
+
+    private:
+        EventMap _events;
+        ObjectGuid SparkGUID;
+        bool EventStarted;
     };
 
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_geezleAI(creature);
+    CreatureAI* GetAI(Creature* creature) const override {
+        return new npc_geezle_AI(creature);
     }
 };
 
-enum RavegerCage
+/*######
+## npc magwin 17312 for quest 9528 "A Cry For Help"
+######*/
+class npc_magwin : public CreatureScript {
+public:
+    npc_magwin() : CreatureScript("npc_magwin_17312") { }
+
+    enum Magwin {
+        QUEST_A_CRY_FOR_HELP = 9528,
+        SAY_START = 0,
+        SAY_AGGRO = 1,
+        SAY_PROGRESS = 2,
+        SAY_END1 = 3,
+        SAY_END2 = 4,
+        EMOTE_HUG = 5,
+        FACTION_QUEST = 113
+    };
+
+    struct npc_magwin_AI : public npc_escortAI {
+        npc_magwin_AI(Creature* creature) : npc_escortAI(creature) { }
+
+        void Reset() override { }
+
+        void EnterCombat(Unit* who) override {
+            Talk(SAY_AGGRO, who);
+        }
+
+        void sQuestAccept(Player* player, Quest const* quest) override {
+            if (quest->GetQuestId() == QUEST_A_CRY_FOR_HELP) {
+                me->setFaction(FACTION_QUEST);
+                npc_escortAI::Start(true, false, player->GetGUID());
+            }
+        }
+
+        void WaypointReached(uint32 waypointId) override {
+            if (Player* player = GetPlayerForEscort()) {
+                switch (waypointId) {
+                case 0:
+                    Talk(SAY_START, player);
+                    break;
+                case 17:
+                    Talk(SAY_PROGRESS, player);
+                    break;
+                case 28:
+                    Talk(SAY_END1, player);
+                    break;
+                case 29:
+                    Talk(EMOTE_HUG, player);
+                    Talk(SAY_END2, player);
+                    player->GroupEventHappens(QUEST_A_CRY_FOR_HELP, me);
+                    break;
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override {
+        return new npc_magwin_AI(creature);
+    }
+};
+
+enum RavagerCage
 {
     NPC_DEATH_RAVAGER       = 17556,
 
@@ -819,14 +765,19 @@ class go_bristlelimb_cage : public GameObjectScript
         }
 };
 
+/*######
+## AddSC
+######*/
 void AddSC_azuremyst_isle()
 {
     new npc_draenei_survivor();
     new npc_engineer_spark_overgrind();
     new npc_injured_draenei();
-    new npc_magwin();
     new npc_death_ravager();
     new go_ravager_cage();
     new npc_stillpine_capitive();
     new go_bristlelimb_cage();
+    new npc_geezle();
+    new npc_magwin();
+    new PlayerScript_start_conversation_under_tree();
 }

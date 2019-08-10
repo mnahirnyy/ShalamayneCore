@@ -44,61 +44,61 @@ enum Spells
 enum Events
 {
     // Moroes
-    EVENT_GARROTE           = 1,
-    EVENT_COAT_CHECK        = 2,
-    EVENT_GHASTLY_PURGE     = 3,
+    EVENT_GARROTE               = 1,
+    EVENT_COAT_CHECK            = 2,
+    EVENT_GHASTLY_PURGE         = 3,
 
     // Keira Berrybuck
-    EVENT_EMPOWERED_ARMS    = 1,
+    EVENT_EMPOWERED_ARMS        = 1,
 
     // Robin Daris
-    EVENT_WHIRLING_EDGE     = 2,
+    EVENT_WHIRLING_EDGE         = 2,
 
     // Rafe Dreuger
-    EVENT_IRON_WHIRLWIND    = 3,
+    EVENT_IRON_WHIRLWIND        = 3,
 
     // Crispin Ference
-    EVENT_WILL_BREAKER      = 4,
+    EVENT_WILL_BREAKER          = 4,
 
     // Dorothea Millstipe
-    EVENT_ARCANE_BLAST      = 5,
-    EVENT_MANA_DRAIN        = 6,
+    EVENT_ARCANE_BLAST          = 5,
+    EVENT_MANA_DRAIN            = 6,
 
     // Catriona Von'Indi
-    EVENT_SMITE             = 7,
-    EVENT_HEALING_STREAM    = 8,
+    EVENT_SMITE                 = 7,
+    EVENT_HEALING_STREAM        = 8,
 };
 
 enum Says
 {
-    SAY_INTRO   = 0,
-    SAY_AGGRO   = 1,
-    SAY_COAT    = 2,
-    SAY_VANISH  = 3,
-    SAY_GHASTLY = 4,
-    SAY_KILL    = 5,
-    SAY_WIPE    = 6,
-    SAY_DEATH   = 7,
+    SAY_INTRO                   = 0,
+    SAY_AGGRO                   = 1,
+    SAY_COAT                    = 2,
+    SAY_VANISH                  = 3,
+    SAY_GHASTLY                 = 4,
+    SAY_KILL                    = 5,
+    SAY_WIPE                    = 6,
+    SAY_DEATH                   = 7,
 };
 
 enum Adds
 {
-    NPC_KEIRA_BERRYBUCK     = 114319,
-    NPC_ROBIN_DARRIS        = 114320,
-    NPC_RAFE_DREUGER        = 114318,
-    NPC_CRISPIN_FERENCE     = 114321,
-    NPC_DOROTHEA_MILLSTIPE  = 114316,
-    NPC_CATRIONA_VONINDI    = 114317,
+    NPC_KEIRA_BERRYBUCK         = 114319,
+    NPC_ROBIN_DARRIS            = 114320,
+    NPC_RAFE_DREUGER            = 114318,
+    NPC_CRISPIN_FERENCE         = 114321,
+    NPC_DOROTHEA_MILLSTIPE      = 114316,
+    NPC_CATRIONA_VONINDI        = 114317,
 };
 
 uint32 DinnerGuests[] = 
 {
-    NPC_KEIRA_BERRYBUCK   ,
-    NPC_ROBIN_DARRIS      ,
-    NPC_RAFE_DREUGER      ,
-    NPC_CRISPIN_FERENCE   ,
+    NPC_KEIRA_BERRYBUCK,
+    NPC_ROBIN_DARRIS,
+    NPC_RAFE_DREUGER,
+    NPC_CRISPIN_FERENCE,
     NPC_DOROTHEA_MILLSTIPE,
-    NPC_CATRIONA_VONINDI  ,
+    NPC_CATRIONA_VONINDI
 };
 
 constexpr uint32 NPC_WHIRLING_EDGE = 114327;
@@ -111,15 +111,14 @@ Position const GuestSummonPosition[] =
     { -10978.35f, -1877.719f, 81.81189f, 4.872f }
 };
 
-class boss_moroes : public CreatureScript
+class boss_new_moroes : public CreatureScript
 {
     public:
-        boss_moroes() : CreatureScript("boss_moroes")
-        {}
+        boss_new_moroes() : CreatureScript("boss_new_moroes") { }
 
-        struct boss_moroes_AI : public BossAI
+        struct boss_new_moroes_AI : public BossAI
         {
-            explicit boss_moroes_AI(Creature* creature) : BossAI(creature, DATA_MOROES)
+            explicit boss_new_moroes_AI(Creature* creature) : BossAI(creature, DATA_MOROES)
             {
                 _IsPurged = false;
                 Trinity::Containers::RandomShuffle(DinnerGuests);
@@ -132,7 +131,7 @@ class boss_moroes : public CreatureScript
                 {
                     Talk(SAY_GHASTLY);
                     _IsPurged = true;
-                    events.ScheduleEvent(EVENT_GHASTLY_PURGE, 100);
+                    events.ScheduleEvent(EVENT_GHASTLY_PURGE, 100ms);
                 }
             }
 
@@ -180,8 +179,8 @@ class boss_moroes : public CreatureScript
                 _IsPurged = false;
                 _EnterCombat();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                events.ScheduleEvent(EVENT_GARROTE, Seconds(8));
-                events.ScheduleEvent(EVENT_COAT_CHECK, Seconds(30));
+                events.ScheduleEvent(EVENT_GARROTE, 8s);
+                events.ScheduleEvent(EVENT_COAT_CHECK, 30s);
             }
 
             void ExecuteEvent(uint32 eventId) override
@@ -202,14 +201,14 @@ class boss_moroes : public CreatureScript
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                             DoCast(target, SPELL_VANISH);
                         
-                        events.ScheduleEvent(EVENT_GARROTE, Seconds(15));
+                        events.ScheduleEvent(EVENT_GARROTE, 15s);
                         break;
                     }
 
                     case EVENT_COAT_CHECK:
                     {
                         DoCastVictim(SPELL_COAT_CHECK);
-                        events.ScheduleEvent(EVENT_COAT_CHECK, Seconds(30));
+                        events.ScheduleEvent(EVENT_COAT_CHECK, 30s);
                         break;
                     }
                 }
@@ -221,22 +220,19 @@ class boss_moroes : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const override
         {
-            return new boss_moroes_AI(creature);
+            return new boss_new_moroes_AI(creature);
         }
 };
 
 class npc_kara_moroes_guest : public CreatureScript
 {
     public:
-        npc_kara_moroes_guest() : CreatureScript("npc_kara_moroes_guest")
-        {}
+        npc_kara_moroes_guest() : CreatureScript("npc_kara_moroes_guest") { }
 
         struct npc_kara_moroes_guest_AI : public ScriptedAI
         {
             public:
-                explicit npc_kara_moroes_guest_AI(Creature* creature) : ScriptedAI(creature), _summons(me)
-                {
-                }
+                explicit npc_kara_moroes_guest_AI(Creature* creature) : ScriptedAI(creature), _summons(me) { }
 
                 void Reset()
                 {
@@ -286,38 +282,38 @@ class npc_kara_moroes_guest : public CreatureScript
                     {
                         case NPC_KEIRA_BERRYBUCK:
                         {
-                            _events.ScheduleEvent(EVENT_EMPOWERED_ARMS, Seconds(15));
+                            _events.ScheduleEvent(EVENT_EMPOWERED_ARMS, 15s);
                             break;
                         }
 
                         case NPC_ROBIN_DARRIS:
                         {
-                            _events.ScheduleEvent(EVENT_WHIRLING_EDGE, Seconds(2));
+                            _events.ScheduleEvent(EVENT_WHIRLING_EDGE, 2s);
                             break;
                         }
 
                         case NPC_CATRIONA_VONINDI:
                         {
-                            _events.ScheduleEvent(EVENT_SMITE, Seconds(5));
-                            _events.ScheduleEvent(EVENT_HEALING_STREAM, Seconds(15));
+                            _events.ScheduleEvent(EVENT_SMITE, 5s);
+                            _events.ScheduleEvent(EVENT_HEALING_STREAM, 15s);
                             break;
                         }
 
                         case NPC_DOROTHEA_MILLSTIPE:
                         {
-                            _events.ScheduleEvent(EVENT_ARCANE_BLAST, Seconds(5));
-                            _events.ScheduleEvent(EVENT_MANA_DRAIN, Seconds(15));
+                            _events.ScheduleEvent(EVENT_ARCANE_BLAST, 5s);
+                            _events.ScheduleEvent(EVENT_MANA_DRAIN, 15s);
                         }
 
                         case NPC_RAFE_DREUGER:
                         {
-                            _events.ScheduleEvent(EVENT_IRON_WHIRLWIND, Seconds(10));
+                            _events.ScheduleEvent(EVENT_IRON_WHIRLWIND, 10s);
                             break;
                         }
 
                         case NPC_CRISPIN_FERENCE:
                         {
-                            _events.ScheduleEvent(EVENT_WILL_BREAKER, Seconds(15));
+                            _events.ScheduleEvent(EVENT_WILL_BREAKER, 15s);
                             break;
                         }
                     }
@@ -331,7 +327,7 @@ class npc_kara_moroes_guest : public CreatureScript
                         {
                             if (Creature* moroes = me->FindNearestCreature(BOSS_MOROES, 500.f))
                                 DoCast(moroes, SPELL_EMPOWERED_ARMS);
-                            _events.ScheduleEvent(EVENT_EMPOWERED_ARMS, Seconds(30));
+                            _events.ScheduleEvent(EVENT_EMPOWERED_ARMS, 30s);
                             break;
                         }
 
@@ -339,7 +335,7 @@ class npc_kara_moroes_guest : public CreatureScript
                         {
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                                 DoCast(target, SPELL_WHIRLING_EDGE);
-                            _events.ScheduleEvent(EVENT_WHIRLING_EDGE, Seconds(15));
+                            _events.ScheduleEvent(EVENT_WHIRLING_EDGE, 15s);
                             break;
                         }
 
@@ -348,7 +344,7 @@ class npc_kara_moroes_guest : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                                 DoCast(target, SPELL_SMITE);
                             
-                            _events.ScheduleEvent(EVENT_SMITE, Seconds(5));
+                            _events.ScheduleEvent(EVENT_SMITE, 5s);
                             break;
                         }
 
@@ -357,7 +353,7 @@ class npc_kara_moroes_guest : public CreatureScript
                             if (Creature* moroes = me->FindNearestCreature(BOSS_MOROES, 500.f))
                                 DoCast(moroes, SPELL_HEALING_STREAM);
                             
-                            _events.ScheduleEvent(EVENT_HEALING_STREAM, Seconds(15));
+                            _events.ScheduleEvent(EVENT_HEALING_STREAM, 15s);
                             break;
                         }
 
@@ -366,7 +362,7 @@ class npc_kara_moroes_guest : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                                 DoCast(target, SPELL_MANA_DRAIN);
                             
-                            _events.ScheduleEvent(EVENT_MANA_DRAIN, Seconds(15));
+                            _events.ScheduleEvent(EVENT_MANA_DRAIN, 15s);
                             break;
                         }
 
@@ -375,21 +371,21 @@ class npc_kara_moroes_guest : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                                 DoCast(target, SPELL_ARCANE_BLAST);
                             
-                            _events.ScheduleEvent(EVENT_ARCANE_BLAST, Seconds(5));
+                            _events.ScheduleEvent(EVENT_ARCANE_BLAST, 5s);
                             break;
                         }
 
                         case EVENT_IRON_WHIRLWIND:
                         {
                             DoCast(me, SPELL_IRON_WHIRLWIND);
-                            _events.ScheduleEvent(EVENT_IRON_WHIRLWIND, Seconds(15));
+                            _events.ScheduleEvent(EVENT_IRON_WHIRLWIND, 15s);
                             break;
                         }
 
                         case EVENT_WILL_BREAKER:
                         {
                             DoCastVictim(SPELL_WILL_BREAKER);
-                            _events.ScheduleEvent(EVENT_WILL_BREAKER, Seconds(30));
+                            _events.ScheduleEvent(EVENT_WILL_BREAKER, 30s);
                             break;
                         }
                     }
@@ -436,8 +432,7 @@ class npc_kara_moroes_guest : public CreatureScript
 class spell_kara_will_breaker : public SpellScriptLoader
 {
     public:
-        spell_kara_will_breaker() : SpellScriptLoader("spell_kara_will_breaker")
-        {}
+        spell_kara_will_breaker() : SpellScriptLoader("spell_kara_will_breaker") { }
 
         class spell_will_breaker_SpellScript : public SpellScript
         {
@@ -496,8 +491,7 @@ class spell_kara_will_breaker : public SpellScriptLoader
 class spell_moroes_ghastly_purge : public SpellScriptLoader
 {
     public:
-        spell_moroes_ghastly_purge() : SpellScriptLoader("spell_moroes_ghastly_purge")
-        {}
+        spell_moroes_ghastly_purge() : SpellScriptLoader("spell_moroes_ghastly_purge") { }
 
         class spell_ghastly_purge_SpellScript : public SpellScript
         {
@@ -550,8 +544,7 @@ class spell_moroes_ghastly_purge : public SpellScriptLoader
 class spell_moroes_vanish : public SpellScriptLoader
 {
     public:
-        spell_moroes_vanish() : SpellScriptLoader("spell_moroes_vanish")
-        {}
+        spell_moroes_vanish() : SpellScriptLoader("spell_moroes_vanish") { }
 
         class spell_vanish_SpellScript : public SpellScript
         {
@@ -581,14 +574,12 @@ class spell_moroes_vanish : public SpellScriptLoader
 class at_kara_whirling_edge : public AreaTriggerEntityScript
 {
     public:
-        at_kara_whirling_edge() : AreaTriggerEntityScript("at_kara_whirling_edge")
-        {}
+        at_kara_whirling_edge() : AreaTriggerEntityScript("at_kara_whirling_edge") { }
 
         class at_kara_whirling_edge_AI : public AreaTriggerAI
         {
             public:
-                explicit at_kara_whirling_edge_AI(AreaTrigger* at) : AreaTriggerAI(at)
-                {}
+                explicit at_kara_whirling_edge_AI(AreaTrigger* at) : AreaTriggerAI(at) { }
 
                 void OnUnitEnter(Unit* target) override
                 {
@@ -615,9 +606,9 @@ class at_kara_whirling_edge : public AreaTriggerEntityScript
         }
 };
 
-void AddSC_boss_moroes()
+void AddSC_boss_new_moroes()
 {
-    new boss_moroes();
+    new boss_new_moroes();
     new npc_kara_moroes_guest();
     new spell_moroes_vanish();
     new spell_moroes_ghastly_purge();

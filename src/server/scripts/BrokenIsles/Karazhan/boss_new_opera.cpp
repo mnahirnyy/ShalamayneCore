@@ -82,120 +82,120 @@ enum Spells
 enum Events
 {
     // Coggleston
-    EVENT_KARA_KAZHAM           = 1,
-    EVENT_DENT_ARMOR            = 2,
-    EVENT_DINNER_BELL           = 3,
+    EVENT_KARA_KAZHAM                   = 1,
+    EVENT_DENT_ARMOR                    = 2,
+    EVENT_DINNER_BELL                   = 3,
 
     // Babblet
-    EVENT_SEVERE_DUSTING        = 1,
+    EVENT_SEVERE_DUSTING                = 1,
 
     // Luminore
-    EVENT_BURNING_BLAZE         = 1,
-    EVENT_HEAT_WAVE             = 2,
+    EVENT_BURNING_BLAZE                 = 1,
+    EVENT_HEAT_WAVE                     = 2,
 
     // Mrs Cauldrons
-    EVENT_SOUP_SPRAY            = 1,
-    EVENT_LEFTOVERS             = 2,
+    EVENT_SOUP_SPRAY                    = 1,
+    EVENT_LEFTOVERS                     = 2,
 
     // Galindre
-    EVENT_MAGIC_MAFNIFICENT     = 1,
-    EVENT_FLASHY_BOLT           = 2,
-    EVENT_WONDROUS_RADIANCE     = 3,
+    EVENT_MAGIC_MAFNIFICENT             = 1,
+    EVENT_FLASHY_BOLT                   = 2,
+    EVENT_WONDROUS_RADIANCE             = 3,
 
     // Elfyra
-    EVENT_DEFY_GRAVITY          = 4,
-    EVENT_DREARY_BOLT           = 5,
-    EVENT_SUMMON_ASSISTANT      = 6,
-    EVENT_THROW_STUFF           = 7,
+    EVENT_DEFY_GRAVITY                  = 4,
+    EVENT_DREARY_BOLT                   = 5,
+    EVENT_SUMMON_ASSISTANT              = 6,
+    EVENT_THROW_STUFF                   = 7,
 
     // Toe Knee
-    EVENT_BURNING_LEG_SWEEP     = 8,
-    EVENT_DASHING_FLAME_GALE    = 9,
-    EVENT_POISONOUS_SHANK       = 10,
-    EVENT_DASHING_FLAME_GALE_DMG= 11,
+    EVENT_BURNING_LEG_SWEEP             = 8,
+    EVENT_DASHING_FLAME_GALE            = 9,
+    EVENT_POISONOUS_SHANK               = 10,
+    EVENT_DASHING_FLAME_GALE_DMG        = 11,
 
     // Mrrgria
-    EVENT_THUNDER_RITUAL        = 12,
-    EVENT_WASH_AWAY             = 13,
-    EVENT_BUBBLE_BLAST          = 14,
+    EVENT_THUNDER_RITUAL                = 12,
+    EVENT_WASH_AWAY                     = 13,
+    EVENT_BUBBLE_BLAST                  = 14,
 
     // Flashing Fork
-    EVENT_FLASHING_FORK         = 15,
-    EVENT_BLOODY_JAB            = 16,
+    EVENT_FLASHING_FORK                 = 15,
+    EVENT_BLOODY_JAB                    = 16,
 };
 
 enum Adds
 {
-    NPC_WINGED_ASSISTANT        = 114324,
-    NPC_GANG_RUFFIAN            = 114265,
-    NPC_SHORELINE_TIDESPEAKER   = 114266,
+    NPC_WINGED_ASSISTANT                = 114324,
+    NPC_GANG_RUFFIAN                    = 114265,
+    NPC_SHORELINE_TIDESPEAKER           = 114266,
 };
 
 enum Says
 {
     // Coggleston
-    SAY_COGGLESTON_AGGRO        = 0,
-    SAY_KARA_KHAZAN             = 1,
-    SAY_COGGLESTON_KILL         = 2,
-    SAY_COGGLESTON_WIPE         = 3,
-    SAY_COGGLESTON_DEATH        = 4,
-    SAY_COGGLESTON_CONVER_1     = 5,
-    SAY_COGGLESTON_CONVER_2     = 6,
+    SAY_COGGLESTON_AGGRO                = 0,
+    SAY_KARA_KHAZAN                     = 1,
+    SAY_COGGLESTON_KILL                 = 2,
+    SAY_COGGLESTON_WIPE                 = 3,
+    SAY_COGGLESTON_DEATH                = 4,
+    SAY_COGGLESTON_CONVER_1             = 5,
+    SAY_COGGLESTON_CONVER_2             = 6,
 
     // Luminore
-    SAY_LUMINORE_HEAT_WAVE      = 0,
-    SAY_LUMINORE_KILL           = 1,
-    SAY_LUMINORE_DEATH          = 2,
+    SAY_LUMINORE_HEAT_WAVE              = 0,
+    SAY_LUMINORE_KILL                   = 1,
+    SAY_LUMINORE_DEATH                  = 2,
 
     // Bablet
-    SAY_BABLET_KILL             = 0,
-    SAY_BABLET_DEATH            = 1,
+    SAY_BABLET_KILL                     = 0,
+    SAY_BABLET_DEATH                    = 1,
 
     // Mrs Cauldron
-    SAY_MRS_CAULDRON_SOUP_SPRAY = 0,
-    SAY_MRS_CAULDRON_KILL       = 1,
-    SAY_MRS_CAULDRON_DEATH      = 2,
+    SAY_MRS_CAULDRON_SOUP_SPRAY         = 0,
+    SAY_MRS_CAULDRON_KILL               = 1,
+    SAY_MRS_CAULDRON_DEATH              = 2,
 
     // Toe Knee
-    SAY_TOE_AGGRO               = 0,
-    SAY_TOE_THIRD_PHASE         = 1,
-    SAY_TOE_DASHING_GALE        = 2,
-    SAY_TOE_BURNING_LEG         = 3,
-    SAY_TOE_KILL                = 4,
-    SAY_TOE_WIPE                = 5,
-    SAY_TOE_DEATH               = 6,
+    SAY_TOE_AGGRO                       = 0,
+    SAY_TOE_THIRD_PHASE                 = 1,
+    SAY_TOE_DASHING_GALE                = 2,
+    SAY_TOE_BURNING_LEG                 = 3,
+    SAY_TOE_KILL                        = 4,
+    SAY_TOE_WIPE                        = 5,
+    SAY_TOE_DEATH                       = 6,
 
     //Galindre
-    SAY_GALINDRE_INTRO_0    = 0,
-    SAY_GALINDRE_INTRO_1    = 1,
-    SAY_GALINDRE_INTRO_2    = 2,
-    SAY_GALINDRE_AGGRO      = 3,
-    SAY_MAGIC_MAGNIFICENT   = 4,
-    SAY_GALINDRE_KILL       = 5,
+    SAY_GALINDRE_INTRO_0                = 0,
+    SAY_GALINDRE_INTRO_1                = 1,
+    SAY_GALINDRE_INTRO_2                = 2,
+    SAY_GALINDRE_AGGRO                  = 3,
+    SAY_MAGIC_MAGNIFICENT               = 4,
+    SAY_GALINDRE_KILL                   = 5,
 
     // Elfyra
-    SAY_ELFIRA_INTRO_0      = 0,
-    SAY_ELFIRA_INTRO_1      = 1,
-    SAY_ELFIRA_AGGRO        = 2,
-    SAY_DEFY_GRAVITY        = 3,
-    SAY_SUMMON_ASSISTANTS   = 4,
-    SAY_ELFYRA_KILL         = 5,
-    SAY_ELFYRA_DEATH        = 6,
+    SAY_ELFIRA_INTRO_0                  = 0,
+    SAY_ELFIRA_INTRO_1                  = 1,
+    SAY_ELFIRA_AGGRO                    = 2,
+    SAY_DEFY_GRAVITY                    = 3,
+    SAY_SUMMON_ASSISTANTS               = 4,
+    SAY_ELFYRA_KILL                     = 5,
+    SAY_ELFYRA_DEATH                    = 6,
 };
 
 enum Actions
 {
-    ACTION_MINION_DEAD      = 1,
-    ACTION_OPERA_SELECT     = 2,
-    ACTION_DASHING_FLAME    = 3,
-    ACTION_THE_FINS         = 4,
-    ACTION_SOMEWHERE        = 5,
+    ACTION_MINION_DEAD                  = 1,
+    ACTION_OPERA_SELECT                 = 2,
+    ACTION_DASHING_FLAME                = 3,
+    ACTION_THE_FINS                     = 4,
+    ACTION_SOMEWHERE                    = 5,
 };
 
 enum Data
 {
-    DATA_MARKED_PLAYER  = 1,
-    DATA_DASHING_FLAME  = 2,
+    DATA_MARKED_PLAYER                  = 1,
+    DATA_DASHING_FLAME                  = 2,
 };
 
 const Position SpawnPositions[] = 
@@ -330,13 +330,11 @@ class npc_kara_barnes : public CreatureScript
 class boss_opera_toe_knee : public CreatureScript
 {
     public:
-        boss_opera_toe_knee() : CreatureScript("boss_opera_toe_knee")
-        {}
+        boss_opera_toe_knee() : CreatureScript("boss_opera_toe_knee") { }
 
         struct boss_opera_toe_knee_AI : public BossAI
         {
-            explicit boss_opera_toe_knee_AI(Creature* creature) : BossAI(creature, DATA_OPERA)
-            {}
+            explicit boss_opera_toe_knee_AI(Creature* creature) : BossAI(creature, DATA_OPERA) { }
 
             void EnterCombat(Unit* /**/) override
             {
@@ -344,7 +342,7 @@ class boss_opera_toe_knee : public CreatureScript
                 _secondPhase = false;
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 _EnterCombat();
-                events.ScheduleEvent(EVENT_BURNING_LEG_SWEEP, 5000);
+                events.ScheduleEvent(EVENT_BURNING_LEG_SWEEP, 5s);
             }
 
             void JustDied(Unit* /**/) override
@@ -427,7 +425,7 @@ class boss_opera_toe_knee : public CreatureScript
             void DoAction(int32 action) override
             {
                 if (action == ACTION_DASHING_FLAME)
-                    events.ScheduleEvent(EVENT_DASHING_FLAME_GALE_DMG, 500);
+                    events.ScheduleEvent(EVENT_DASHING_FLAME_GALE_DMG, 500ms);
                 else if (action == ACTION_SOMEWHERE)
                 {
                     Talk(SAY_TOE_THIRD_PHASE);
@@ -435,9 +433,10 @@ class boss_opera_toe_knee : public CreatureScript
                     me->SetInt32Value(UNIT_NPC_EMOTESTATE, Emote::EMOTE_STATE_NONE);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                     me->SetReactState(REACT_AGGRESSIVE);
-                    events.ScheduleEvent(EVENT_BURNING_LEG_SWEEP, Seconds(8));
+                    events.ScheduleEvent(EVENT_BURNING_LEG_SWEEP, 8s);
                 }
             }
+
             void ExecuteEvent(uint32 eventId) override
             {
                 me->GetSpellHistory()->ResetAllCooldowns();
@@ -449,8 +448,8 @@ class boss_opera_toe_knee : public CreatureScript
                             Talk(SAY_TOE_BURNING_LEG);
 
                         DoCastSelf(SPELL_BURNING_LEG_SWEEP);
-                        events.ScheduleEvent(EVENT_DASHING_FLAME_GALE, 5000);
-                        events.ScheduleEvent(EVENT_BURNING_LEG_SWEEP, Seconds(25));
+                        events.ScheduleEvent(EVENT_DASHING_FLAME_GALE, 5s);
+                        events.ScheduleEvent(EVENT_BURNING_LEG_SWEEP, 25s);
                         break;
                     }
 
@@ -473,7 +472,7 @@ class boss_opera_toe_knee : public CreatureScript
                             if (Unit* target = ObjectAccessor::GetPlayer(*me, targetGUID))
                                 DoCast(target, SPELL_DASHING_FLAME_MISSILE);
                             
-                            events.ScheduleEvent(EVENT_DASHING_FLAME_GALE_DMG, 500);
+                            events.ScheduleEvent(EVENT_DASHING_FLAME_GALE_DMG, 500ms);
                         }
                         break;
                     }
@@ -496,14 +495,11 @@ class boss_opera_toe_knee : public CreatureScript
 class boss_opera_mrrgria : public CreatureScript
 {
     public:
-        boss_opera_mrrgria() : CreatureScript("boss_opera_mrrgria")
-        {}
+        boss_opera_mrrgria() : CreatureScript("boss_opera_mrrgria") { }
 
         struct boss_opera_mrrgria_AI : public BossAI
         {
-            explicit boss_opera_mrrgria_AI(Creature* creature) : BossAI(creature, DATA_OPERA)
-            {
-            }
+            explicit boss_opera_mrrgria_AI(Creature* creature) : BossAI(creature, DATA_OPERA) { }
 
             void Reset() override
             {
@@ -521,8 +517,8 @@ class boss_opera_mrrgria : public CreatureScript
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                     DoZoneInCombat();
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                    events.ScheduleEvent(EVENT_THUNDER_RITUAL, Seconds(10));
-                    events.ScheduleEvent(EVENT_WASH_AWAY, Seconds(23));
+                    events.ScheduleEvent(EVENT_THUNDER_RITUAL, 10s);
+                    events.ScheduleEvent(EVENT_WASH_AWAY, 23s);
 
                     std::list<Creature*> adds;
 
@@ -572,14 +568,14 @@ class boss_opera_mrrgria : public CreatureScript
                     case EVENT_THUNDER_RITUAL:
                     {
                         DoCast(me, SPELL_THUNDER_RITUAL);
-                        events.ScheduleEvent(EVENT_THUNDER_RITUAL, Seconds(urand(15, 20)));
+                        events.ScheduleEvent(EVENT_THUNDER_RITUAL, 15s, 20s);
                         break;
                     }
 
                     case EVENT_WASH_AWAY:
                     {
                         DoCast(me, SPELL_WASH_AWAY);
-                        events.ScheduleEvent(EVENT_WASH_AWAY, Seconds(23));
+                        events.ScheduleEvent(EVENT_WASH_AWAY, 23s);
                         break;
                     }
                 }
@@ -598,8 +594,7 @@ class boss_opera_mrrgria : public CreatureScript
 class boss_opera_coggleston : public CreatureScript
 {
     public:
-        boss_opera_coggleston() : CreatureScript("boss_opera_coggleston")
-        {}
+        boss_opera_coggleston() : CreatureScript("boss_opera_coggleston") { }
 
         struct boss_opera_coggleston_AI : public BossAI
         {
@@ -641,9 +636,9 @@ class boss_opera_coggleston : public CreatureScript
                     if (_minionsDead >= 3)
                     {
                         me->RemoveAurasDueToSpell(SPELL_SPECTRAL_SERVICE);
-                        events.ScheduleEvent(EVENT_KARA_KAZHAM, Seconds(3));
-                        events.ScheduleEvent(EVENT_DENT_ARMOR, Seconds(15));
-                        events.ScheduleEvent(EVENT_DINNER_BELL, Seconds(10));
+                        events.ScheduleEvent(EVENT_KARA_KAZHAM, 3s);
+                        events.ScheduleEvent(EVENT_DENT_ARMOR, 15s);
+                        events.ScheduleEvent(EVENT_DINNER_BELL, 10s);
                     }
                 }
             }
@@ -718,7 +713,7 @@ class boss_opera_coggleston : public CreatureScript
                     case EVENT_DINNER_BELL:
                     {
                         DoCast(me, SPELL_DINNER_BELL);
-                        events.ScheduleEvent(EVENT_DINNER_BELL, Seconds(20));
+                        events.ScheduleEvent(EVENT_DINNER_BELL, 20s);
                         break;
                     }
 
@@ -726,14 +721,14 @@ class boss_opera_coggleston : public CreatureScript
                     {
                         Talk(SAY_KARA_KHAZAN);
                         DoCast(me, SPELL_KARA_KAZHAM);
-                        events.ScheduleEvent(EVENT_KARA_KAZHAM, Seconds(30));
+                        events.ScheduleEvent(EVENT_KARA_KAZHAM, 30s);
                         break;
                     }
 
                     case EVENT_DENT_ARMOR:
                     {
                         DoCastVictim(SPELL_DENT_ARMOR);
-                        events.ScheduleEvent(EVENT_DENT_ARMOR, Seconds(15));
+                        events.ScheduleEvent(EVENT_DENT_ARMOR, 15s);
                         break;
                     }
                 }
@@ -753,19 +748,17 @@ class boss_opera_coggleston : public CreatureScript
 class boss_opera_luminore : public CreatureScript
 {
     public:
-        boss_opera_luminore() : CreatureScript("boss_opera_luminore")
-        {}
+        boss_opera_luminore() : CreatureScript("boss_opera_luminore") { }
 
         struct boss_opera_luminore_AI : public BossAI
         {
-            explicit boss_opera_luminore_AI(Creature* creature) : BossAI(creature, DATA_OPERA)
-            {}
+            explicit boss_opera_luminore_AI(Creature* creature) : BossAI(creature, DATA_OPERA) { }
 
             void EnterCombat(Unit* /**/) override
             {
                 _EnterCombat();
-                events.ScheduleEvent(EVENT_BURNING_BLAZE, 2000);
-                events.ScheduleEvent(EVENT_HEAT_WAVE, Seconds(30));
+                events.ScheduleEvent(EVENT_BURNING_BLAZE, 2s);
+                events.ScheduleEvent(EVENT_HEAT_WAVE, 30s);
             }
 
             void JustDied(Unit* /**/) override
@@ -804,13 +797,13 @@ class boss_opera_luminore : public CreatureScript
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                         DoCast(target, SPELL_BURNING_BLAZE);
-                    events.ScheduleEvent(EVENT_BURNING_BLAZE, 3000);
+                    events.ScheduleEvent(EVENT_BURNING_BLAZE, 3s);
                 }
                 else if (eventId == EVENT_HEAT_WAVE)
                 {
                     Talk(SAY_LUMINORE_HEAT_WAVE);
                     DoCastSelf(SPELL_HEAT_WAVE);
-                    events.ScheduleEvent(EVENT_HEAT_WAVE, Seconds(30));
+                    events.ScheduleEvent(EVENT_HEAT_WAVE, 30s);
                 }
             }
         };
@@ -824,23 +817,18 @@ class boss_opera_luminore : public CreatureScript
 class boss_opera_mrs_cauldrons : public CreatureScript
 {
     public:
-        boss_opera_mrs_cauldrons() : CreatureScript("boss_opera_mrs_cauldrons")
-        {
-            
-        }
+        boss_opera_mrs_cauldrons() : CreatureScript("boss_opera_mrs_cauldrons") { }
 
         struct boss_opera_mrs_cauldrons_AI : public BossAI
         {
-            explicit boss_opera_mrs_cauldrons_AI(Creature* creature) : BossAI(creature, DATA_OPERA)
-            {
-            }
+            explicit boss_opera_mrs_cauldrons_AI(Creature* creature) : BossAI(creature, DATA_OPERA) { }
 
             void EnterCombat(Unit* /**/) override
             {
                 _EnterCombat();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                events.ScheduleEvent(EVENT_LEFTOVERS, 1000);
-                events.ScheduleEvent(EVENT_SOUP_SPRAY, 2000);
+                events.ScheduleEvent(EVENT_LEFTOVERS, 1s);
+                events.ScheduleEvent(EVENT_SOUP_SPRAY, 2s);
             }
 
             void EnterEvadeMode(EvadeReason why) override
@@ -885,7 +873,7 @@ class boss_opera_mrs_cauldrons : public CreatureScript
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                             DoCast(target, SPELL_SOUP_SPRAY);
                         
-                        events.ScheduleEvent(EVENT_SOUP_SPRAY, 2000);
+                        events.ScheduleEvent(EVENT_SOUP_SPRAY, 2s);
                         break;
                     }
 
@@ -908,10 +896,10 @@ class boss_opera_mrs_cauldrons : public CreatureScript
                         if (founded)
                         {
                             DoCast(SPELL_LEFTOVERS);
-                            events.ScheduleEvent(EVENT_LEFTOVERS, Seconds(18));
+                            events.ScheduleEvent(EVENT_LEFTOVERS, 18s);
                         }
                         else
-                            events.ScheduleEvent(EVENT_LEFTOVERS, 1000);
+                            events.ScheduleEvent(EVENT_LEFTOVERS, 1s);
 
                         break;
                     }
@@ -928,20 +916,17 @@ class boss_opera_mrs_cauldrons : public CreatureScript
 class boss_opera_bablet : public CreatureScript
 {
     public:
-        boss_opera_bablet() : CreatureScript("boss_opera_bablet")
-        {}
+        boss_opera_bablet() : CreatureScript("boss_opera_bablet") { }
 
         struct boss_opera_bablet_AI : public BossAI
         {
-            explicit boss_opera_bablet_AI(Creature* creature) : BossAI(creature, DATA_OPERA)
-            {
-            }
+            explicit boss_opera_bablet_AI(Creature* creature) : BossAI(creature, DATA_OPERA) { }
 
             void EnterCombat(Unit* /**/) override
             {
                 _EnterCombat();
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                events.ScheduleEvent(EVENT_SEVERE_DUSTING, 1000);
+                events.ScheduleEvent(EVENT_SEVERE_DUSTING, 1s);
             }
 
             void KilledUnit(Unit* victim) override
@@ -980,7 +965,7 @@ class boss_opera_bablet : public CreatureScript
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                         me->CastSpell(target, SPELL_SEVERE_DUSTING, false);
                     
-                    events.ScheduleEvent(EVENT_SEVERE_DUSTING, 1000);
+                    events.ScheduleEvent(EVENT_SEVERE_DUSTING, 1s);
                 }
             }
 
@@ -997,13 +982,11 @@ class boss_opera_bablet : public CreatureScript
 class boss_opera_elfyra : public CreatureScript
 {
     public:
-        boss_opera_elfyra() : CreatureScript("boss_opera_elfyra")
-        {}
+        boss_opera_elfyra() : CreatureScript("boss_opera_elfyra") { }
 
         struct boss_opera_elfyra_AI : public BossAI
         {
-            explicit boss_opera_elfyra_AI(Creature* creature) : BossAI(creature, DATA_OPERA)
-            {}
+            explicit boss_opera_elfyra_AI(Creature* creature) : BossAI(creature, DATA_OPERA) { }
 
             void KilledUnit(Unit* victim) override
             {
@@ -1026,9 +1009,9 @@ class boss_opera_elfyra : public CreatureScript
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 _EnterCombat();
-                events.ScheduleEvent(EVENT_DEFY_GRAVITY, Seconds(urand(10, 15)));
-                events.ScheduleEvent(EVENT_DREARY_BOLT, Seconds(5));
-                events.ScheduleEvent(EVENT_SUMMON_ASSISTANT, Seconds(30));
+                events.ScheduleEvent(EVENT_DEFY_GRAVITY, 10s, 15s);
+                events.ScheduleEvent(EVENT_DREARY_BOLT, 5s);
+                events.ScheduleEvent(EVENT_SUMMON_ASSISTANT, 30s);
             }
 
             void JustDied(Unit* /**/) override
@@ -1056,14 +1039,14 @@ class boss_opera_elfyra : public CreatureScript
                             Talk(SAY_DEFY_GRAVITY);
 
                         DoCast(me, SPELL_DEFY_GRAVITY);
-                        events.ScheduleEvent(EVENT_DEFY_GRAVITY, Seconds(urand(10, 15)));
+                        events.ScheduleEvent(EVENT_DEFY_GRAVITY, 10s, 15s);
                         break;
                     }
 
                     case EVENT_DREARY_BOLT:
                     {
                         DoCastVictim(SPELL_DREARY_BOLT);
-                        events.ScheduleEvent(EVENT_DREARY_BOLT, Seconds(7));
+                        events.ScheduleEvent(EVENT_DREARY_BOLT, 7s);
                         break;
                     }
 
@@ -1071,7 +1054,7 @@ class boss_opera_elfyra : public CreatureScript
                     {
                         Talk(SAY_SUMMON_ASSISTANTS);
                         DoCast(me, SPELL_SUMMON_ASSISTANTS);
-                        events.ScheduleEvent(EVENT_SUMMON_ASSISTANT, Seconds(35));
+                        events.ScheduleEvent(EVENT_SUMMON_ASSISTANT, 35s);
                         break;
                     }
                 }
@@ -1087,8 +1070,7 @@ class boss_opera_elfyra : public CreatureScript
 class boss_opera_galyndre : public CreatureScript
 {
     public:
-        boss_opera_galyndre() : CreatureScript("boss_opera_galyndre")
-        {}
+        boss_opera_galyndre() : CreatureScript("boss_opera_galyndre") { }
 
         struct boss_opera_galyndre_AI : public BossAI
         {
@@ -1100,9 +1082,9 @@ class boss_opera_galyndre : public CreatureScript
             void EnterCombat(Unit* /**/) override
             {
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
-                events.ScheduleEvent(EVENT_WONDROUS_RADIANCE, Seconds(10));
-                events.ScheduleEvent(EVENT_MAGIC_MAFNIFICENT, Seconds(45));
-                events.ScheduleEvent(EVENT_FLASHY_BOLT, 2000);
+                events.ScheduleEvent(EVENT_WONDROUS_RADIANCE, 10s);
+                events.ScheduleEvent(EVENT_MAGIC_MAFNIFICENT, 45s);
+                events.ScheduleEvent(EVENT_FLASHY_BOLT, 2s);
             }
 
             void DamageTaken(Unit* owner, uint32 & damage) override
@@ -1145,21 +1127,21 @@ class boss_opera_galyndre : public CreatureScript
                         Talk(SAY_MAGIC_MAGNIFICENT);
                         me->CastSpell(me, SPELL_MAGIC_MAGNIFICENT_IMMUNITY, true);
                         me->CastSpell(me, SPELL_MAGIC_MAGNIFICENT_AOE, false);
-                        events.ScheduleEvent(EVENT_MAGIC_MAFNIFICENT, Seconds(45));
+                        events.ScheduleEvent(EVENT_MAGIC_MAFNIFICENT, 45s);
                         break;
                     }
 
                     case EVENT_FLASHY_BOLT:
                     {
                         DoCast(me, SPELL_FLASHY_BOLT);
-                        events.ScheduleEvent(EVENT_FLASHY_BOLT, Seconds(5));
+                        events.ScheduleEvent(EVENT_FLASHY_BOLT, 5s);
                         break;
                     }
 
                     case EVENT_WONDROUS_RADIANCE:
                     {
                         DoCastVictim(SPELL_WONDROUS_RADIANCE);
-                        events.ScheduleEvent(EVENT_WONDROUS_RADIANCE, Seconds(10));
+                        events.ScheduleEvent(EVENT_WONDROUS_RADIANCE, 10s);
                         break;
                     }
                 }
@@ -1175,13 +1157,11 @@ class boss_opera_galyndre : public CreatureScript
 class npc_kara_winged_assistant : public CreatureScript
 {
     public:
-        npc_kara_winged_assistant() : CreatureScript("npc_kara_winged_assistant")
-        {}
+        npc_kara_winged_assistant() : CreatureScript("npc_kara_winged_assistant") { }
 
         struct npc_kara_winged_assistant_AI : public ScriptedAI
         {
-            explicit npc_kara_winged_assistant_AI(Creature* creature) : ScriptedAI(creature)
-            {}
+            explicit npc_kara_winged_assistant_AI(Creature* creature) : ScriptedAI(creature) { }
 
             void Reset()
             {
@@ -1190,7 +1170,7 @@ class npc_kara_winged_assistant : public CreatureScript
 
             void EnterCombat(Unit* /**/) override
             {
-                _events.ScheduleEvent(EVENT_THROW_STUFF, 500);
+                _events.ScheduleEvent(EVENT_THROW_STUFF, 500ms);
             }
 
             void UpdateAI(uint32 diff) override
@@ -1209,7 +1189,7 @@ class npc_kara_winged_assistant : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                                 DoCast(target, SPELL_THROW_STUFF);
                             
-                            _events.ScheduleEvent(EVENT_THROW_STUFF, 2000);
+                            _events.ScheduleEvent(EVENT_THROW_STUFF, 2s);
                             break;
                         }
                     }
@@ -1229,13 +1209,11 @@ class npc_kara_winged_assistant : public CreatureScript
 class npc_kara_gang_ruffian : public CreatureScript
 {
     public:
-        npc_kara_gang_ruffian() : CreatureScript("npc_kara_gang_ruffian")
-        {}
+        npc_kara_gang_ruffian() : CreatureScript("npc_kara_gang_ruffian") { }
 
         struct npc_kara_gang_ruffian_AI : public ScriptedAI
         {
-            explicit npc_kara_gang_ruffian_AI(Creature* creature) : ScriptedAI(creature)
-            {}
+            explicit npc_kara_gang_ruffian_AI(Creature* creature) : ScriptedAI(creature) { }
 
             void Reset() override
             {
@@ -1246,7 +1224,7 @@ class npc_kara_gang_ruffian : public CreatureScript
             void EnterCombat(Unit* /**/) override
             {
                 DoZoneInCombat();
-                _events.ScheduleEvent(EVENT_POISONOUS_SHANK, Seconds(10));
+                _events.ScheduleEvent(EVENT_POISONOUS_SHANK, 10s);
             }
 
             void MovementInform(uint32 type, uint32 id) override
@@ -1275,7 +1253,7 @@ class npc_kara_gang_ruffian : public CreatureScript
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                         DoCast(target, SPELL_POISONOUS_SHANK);
 
-                    _events.ScheduleEvent(EVENT_POISONOUS_SHANK, Seconds(10));
+                    _events.ScheduleEvent(EVENT_POISONOUS_SHANK, 10s);
                 }
             }
 
@@ -1307,18 +1285,16 @@ class npc_kara_gang_ruffian : public CreatureScript
 class npc_kara_flashing_forks : public CreatureScript
 {
     public:
-        npc_kara_flashing_forks() : CreatureScript("npc_kara_flashing_forks")
-        {}
+        npc_kara_flashing_forks() : CreatureScript("npc_kara_flashing_forks") { }
 
         struct npc_kara_flashing_forks_AI : public ScriptedAI
         {
-            explicit npc_kara_flashing_forks_AI(Creature* creature) : ScriptedAI(creature)
-            {}
+            explicit npc_kara_flashing_forks_AI(Creature* creature) : ScriptedAI(creature) { }
 
             void EnterCombat(Unit* /**/) override
             {
-                _events.ScheduleEvent(EVENT_FLASHING_FORK, 2000);
-                _events.ScheduleEvent(EVENT_BLOODY_JAB, Seconds(urand(8, 12)));
+                _events.ScheduleEvent(EVENT_FLASHING_FORK, 2s);
+                _events.ScheduleEvent(EVENT_BLOODY_JAB, 8s, 12s);
             }
 
             void Reset() override
@@ -1335,14 +1311,14 @@ class npc_kara_flashing_forks : public CreatureScript
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                             DoCast(target, SPELL_FLASHING_FORKS);
                         
-                        _events.ScheduleEvent(EVENT_FLASHING_FORK, Seconds(urand(15, 20)));
+                        _events.ScheduleEvent(EVENT_FLASHING_FORK, 15s, 20s);
                         break;
                     }
 
                     case EVENT_BLOODY_JAB:
                     {
                         DoCastVictim(SPELL_BLOODY_JAB);
-                        _events.ScheduleEvent(EVENT_BLOODY_JAB, Seconds(urand(8, 12)));
+                        _events.ScheduleEvent(EVENT_BLOODY_JAB, 8s, 12s);
                         break;
                     }
                 }
@@ -1374,14 +1350,11 @@ class npc_kara_flashing_forks : public CreatureScript
 class npc_kara_shoreline_speaker : public CreatureScript
 {
     public:
-        npc_kara_shoreline_speaker() : CreatureScript("npc_kara_shoreline_speaker")
-        {}
+        npc_kara_shoreline_speaker() : CreatureScript("npc_kara_shoreline_speaker") { }
 
         struct npc_kara_shoreline_speaker_AI : public ScriptedAI
         {
-            explicit npc_kara_shoreline_speaker_AI(Creature* creature) : ScriptedAI(creature)
-            {
-            }
+            explicit npc_kara_shoreline_speaker_AI(Creature* creature) : ScriptedAI(creature) { }
 
             void Reset() override
             {
@@ -1421,7 +1394,7 @@ class npc_kara_shoreline_speaker : public CreatureScript
                 {
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                    _events.ScheduleEvent(EVENT_BUBBLE_BLAST, Seconds(10));
+                    _events.ScheduleEvent(EVENT_BUBBLE_BLAST, 10s);
                 }
             }
 
@@ -1432,7 +1405,7 @@ class npc_kara_shoreline_speaker : public CreatureScript
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                         DoCast(target, SPELL_BUBBLE_BLAST);
 
-                    _events.ScheduleEvent(EVENT_BUBBLE_BLAST, Seconds(10));
+                    _events.ScheduleEvent(EVENT_BUBBLE_BLAST, 10s);
                 }
             }
 
@@ -1465,8 +1438,7 @@ class npc_kara_shoreline_speaker : public CreatureScript
 class spell_opera_magic_magnificient : public SpellScriptLoader
 {
     public:
-        spell_opera_magic_magnificient() : SpellScriptLoader("spell_opera_magic_magnificient")
-        {}
+        spell_opera_magic_magnificient() : SpellScriptLoader("spell_opera_magic_magnificient") { }
 
         class spell_magic_magnificient_SpellScript : public SpellScript
         {
@@ -1505,8 +1477,7 @@ class spell_opera_magic_magnificient : public SpellScriptLoader
 class spell_opera_defy_gravity : public SpellScriptLoader
 {
     public:
-        spell_opera_defy_gravity() : SpellScriptLoader("spell_opera_defy_gravity")
-        {}
+        spell_opera_defy_gravity() : SpellScriptLoader("spell_opera_defy_gravity") { }
 
         class spell_defy_gravity_SpellScript : public SpellScript
         {
@@ -1536,8 +1507,7 @@ class spell_opera_defy_gravity : public SpellScriptLoader
 class spell_opera_severe_dusting : public SpellScriptLoader
 {
     public:
-        spell_opera_severe_dusting() : SpellScriptLoader("spell_opera_severe_dusting")
-        {}
+        spell_opera_severe_dusting() : SpellScriptLoader("spell_opera_severe_dusting") { }
 
         class spell_severe_dusting_AuraScript : public AuraScript
         {
@@ -1591,8 +1561,7 @@ class spell_opera_severe_dusting : public SpellScriptLoader
 class spell_opera_summon_assistants : public SpellScriptLoader
 {
     public:
-        spell_opera_summon_assistants() : SpellScriptLoader("spell_opera_summon_assistants")
-        {}
+        spell_opera_summon_assistants() : SpellScriptLoader("spell_opera_summon_assistants") { }
 
         class spell_summon_assistants_SpellScript : public SpellScript
         {
@@ -1623,8 +1592,7 @@ class spell_opera_summon_assistants : public SpellScriptLoader
 class spell_opera_dashing_gale : public SpellScriptLoader
 {
     public:
-        spell_opera_dashing_gale() : SpellScriptLoader("spell_opera_dashing_gale")
-        {}
+        spell_opera_dashing_gale() : SpellScriptLoader("spell_opera_dashing_gale") { }
 
         class spell_dashing_gale_SpellScript : public SpellScript
         {
@@ -1661,8 +1629,7 @@ class spell_opera_dashing_gale : public SpellScriptLoader
 class spell_opera_dashing_gale_area : public SpellScriptLoader
 {
     public:
-        spell_opera_dashing_gale_area() : SpellScriptLoader("spell_opera_dashing_gale_area")
-        {}
+        spell_opera_dashing_gale_area() : SpellScriptLoader("spell_opera_dashing_gale_area") { }
 
         class spell_dashing_gale_area_SpellScript : public SpellScript
         {
@@ -1692,8 +1659,7 @@ class spell_opera_dashing_gale_area : public SpellScriptLoader
 class spell_opera_thunder_ritual : public SpellScriptLoader
 {
     public:
-        spell_opera_thunder_ritual() : SpellScriptLoader("spell_opera_thunder_ritual")
-        {}
+        spell_opera_thunder_ritual() : SpellScriptLoader("spell_opera_thunder_ritual") { }
 
         class spell_thunder_ritual_AuraScript : public AuraScript
         {
@@ -1723,8 +1689,7 @@ class spell_opera_thunder_ritual : public SpellScriptLoader
 class spell_opera_wash_away : public SpellScriptLoader
 {
     public:
-        spell_opera_wash_away() : SpellScriptLoader("spell_opera_wash_away")
-        {}
+        spell_opera_wash_away() : SpellScriptLoader("spell_opera_wash_away") { }
 
         class spell_wash_away_SpellScript : public SpellScript
         {
@@ -1758,8 +1723,7 @@ class spell_opera_wash_away : public SpellScriptLoader
 class at_kara_defy_gravity : public AreaTriggerEntityScript
 {
     public:
-        at_kara_defy_gravity() : AreaTriggerEntityScript("at_kara_defy_gravity")
-        {}
+        at_kara_defy_gravity() : AreaTriggerEntityScript("at_kara_defy_gravity") { }
 
         struct at_kara_defy_gravity_AI : public AreaTriggerAI
         {
@@ -1806,13 +1770,11 @@ class at_kara_defy_gravity : public AreaTriggerEntityScript
 class at_kara_burning_blaze : public AreaTriggerEntityScript
 {
     public:
-        at_kara_burning_blaze() : AreaTriggerEntityScript("at_kara_burning_blaze")
-        {}
+        at_kara_burning_blaze() : AreaTriggerEntityScript("at_kara_burning_blaze") { }
 
         struct at_kara_burning_blaze_AI : public AreaTriggerAI
         {
-            explicit at_kara_burning_blaze_AI(AreaTrigger* at) : AreaTriggerAI(at)
-            {}
+            explicit at_kara_burning_blaze_AI(AreaTrigger* at) : AreaTriggerAI(at) { }
 
             void OnUnitEnter(Unit* target) override
             {
@@ -1846,13 +1808,11 @@ class at_kara_burning_blaze : public AreaTriggerEntityScript
 class at_kara_dashing_gale : public AreaTriggerEntityScript
 {
     public:
-        at_kara_dashing_gale() : AreaTriggerEntityScript("at_kara_dashing_gale")
-        {}
+        at_kara_dashing_gale() : AreaTriggerEntityScript("at_kara_dashing_gale") { }
 
         struct at_kara_dashing_gale_AI : public AreaTriggerAI
         {
-            explicit at_kara_dashing_gale_AI(AreaTrigger* at) : AreaTriggerAI(at)
-            {}
+            explicit at_kara_dashing_gale_AI(AreaTrigger* at) : AreaTriggerAI(at) { }
 
             void OnUnitEnter(Unit* target) override
             {
@@ -1873,7 +1833,7 @@ class at_kara_dashing_gale : public AreaTriggerEntityScript
         }
 };
 
-void AddSC_boss_opera()
+void AddSC_boss_new_opera()
 {
     new npc_kara_barnes();
 
@@ -1887,7 +1847,7 @@ void AddSC_boss_opera()
     new spell_opera_thunder_ritual();
     new spell_opera_wash_away();
     new at_kara_dashing_gale();
-    
+
     // Beatiful Beast
     new boss_opera_coggleston();
     new boss_opera_bablet();
@@ -1896,7 +1856,7 @@ void AddSC_boss_opera()
     new npc_kara_flashing_forks();
     new spell_opera_severe_dusting();
     new at_kara_burning_blaze();
-    
+
     // Wikket
     new boss_opera_elfyra();
     new boss_opera_galyndre();
@@ -1905,5 +1865,4 @@ void AddSC_boss_opera()
     new spell_opera_summon_assistants();
     new spell_opera_magic_magnificient();
     new at_kara_defy_gravity();
-    
 }

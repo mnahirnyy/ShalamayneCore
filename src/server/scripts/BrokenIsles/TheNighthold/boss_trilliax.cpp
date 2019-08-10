@@ -25,12 +25,13 @@ enum Texts
 {
     SAY_PHASE1_END  = 0,
     SAY_ACTIVATE    = 1, 
-    SAY_NORTHREND = 2, // not use
-    SAY_START     = 3, //new
-    SAY_START2    = 4,
-    SAY_PHASE1    = 5,
-    SAY_PHASE1_1  = 6
+    SAY_NORTHREND 	= 2, // not use
+    SAY_START     	= 3, //new
+    SAY_START2    	= 4,
+    SAY_PHASE1    	= 5,
+    SAY_PHASE1_1  	= 6
 };
+
 enum Spells
 {
     //putrid sludge
@@ -63,7 +64,6 @@ enum Events
     EVENT_ACTIVATE            = 3,
 
     EVENT_SLIME_POOL          = 1,
-
 };
 
 class boss_trilliax : public CreatureScript {
@@ -71,9 +71,7 @@ public:
     boss_trilliax() : CreatureScript("boss_trilliax") { }
 
     struct boss_trilliaxAI : public BossAI {
-        boss_trilliaxAI(Creature* creature) : BossAI(creature, BOSS_TRILLIAX)
-        {
-        }
+        boss_trilliaxAI(Creature* creature) : BossAI(creature, BOSS_TRILLIAX){}
 
         uint8 curID;
         EventMap events;
@@ -209,9 +207,7 @@ public:
     npc_putrid_sludge() : CreatureScript("npc_putrid_sludge") { }
 
     struct npc_putrid_sludgeAI : public ScriptedAI {
-        npc_putrid_sludgeAI(Creature* creature) : ScriptedAI(creature)
-        {
-        }
+        npc_putrid_sludgeAI(Creature* creature) : ScriptedAI(creature){}
 
         EventMap events;
 
@@ -233,7 +229,6 @@ public:
         {
             me->GetMotionMaster()->MoveTargetedHome();
             Reset();
-
             _EnterEvadeMode();
         }
 
@@ -302,8 +297,7 @@ public:
         EventMap events;
 
         void EnterCombat(Unit* who) override
-        {
-           
+        {           
         }
 
         void Reset() override
@@ -379,8 +373,7 @@ public:
         EventMap events;
 
         void EnterCombat(Unit* who) override
-        {
-           
+        {           
         }
 
         void Reset() override
@@ -398,14 +391,12 @@ public:
                     me->AI()->DoAction(1);
                 }
             }
-
         }
 
         void EnterEvadeMode(EvadeReason /*why*/) override
         {
             me->GetMotionMaster()->MoveTargetedHome();
             Reset();
-
             _EnterEvadeMode();
         }
 
@@ -471,8 +462,8 @@ public:
             {
                 trillax->AI()->DoAction(1);
             }
-
         }
+
     private:
         InstanceScript* _instance;
     };

@@ -28,32 +28,32 @@ enum Spells
 
 enum Events
 {
-    EVENT_PIERCING_MISSILES = 1,
-    EVENT_INFERNO_BOLT      = 2,
-    EVENT_FROSTBITE         = 3,
-    EVENT_CEASELESS_WINTER  = 4,
-    EVENT_FLAME_WREATH      = 5,
-    EVENT_GUARDIAN_IMAGE    = 6,
-    EVENT_REGEN_ENERGY      = 7,
-    EVENT_RESTORE_STATE     = 8,
-    EVENT_INVISIBLE         = 9,
+    EVENT_PIERCING_MISSILES         = 1,
+    EVENT_INFERNO_BOLT              = 2,
+    EVENT_FROSTBITE                 = 3,
+    EVENT_CEASELESS_WINTER          = 4,
+    EVENT_FLAME_WREATH              = 5,
+    EVENT_GUARDIAN_IMAGE            = 6,
+    EVENT_REGEN_ENERGY              = 7,
+    EVENT_RESTORE_STATE             = 8,
+    EVENT_INVISIBLE                 = 9,
 
-    EVENT_ARCANE_BOLT       = 8,
+    EVENT_ARCANE_BOLT               = 8,
 };
 
 enum Says
 {
-    SAY_INTRO           = 0,
-    SAY_AGGRO           = 1,
-    SAY_MISSILES        = 2,
-    SAY_INFERNO_BOLT    = 3,
-    SAY_FROSTBITE       = 4,
-    SAY_WINTER          = 5,
-    SAY_FLAME_WREATH    = 6,
-    SAY_GUARDIAN        = 7,
-    SAY_KILL            = 8,
-    SAY_WIPE            = 9,
-    SAY_DEATH           = 10,
+    SAY_INTRO                       = 0,
+    SAY_AGGRO                       = 1,
+    SAY_MISSILES                    = 2,
+    SAY_INFERNO_BOLT                = 3,
+    SAY_FROSTBITE                   = 4,
+    SAY_WINTER                      = 5,
+    SAY_FLAME_WREATH                = 6,
+    SAY_GUARDIAN                    = 7,
+    SAY_KILL                        = 8,
+    SAY_WIPE                        = 9,
+    SAY_DEATH                       = 10,
 };
 
 Position GuardianImagesPos [] = 
@@ -63,30 +63,28 @@ Position GuardianImagesPos [] =
     { -4619.883f, -2517.877f, 2876.509f, 0.008949f },
 };
 
-constexpr int32 ACTION_FULL_MANA = 1;
+constexpr int32 ACTION_FULL_MANA     = 1;
 constexpr uint32 NPC_GUARDIAN_IMAGE  = 114675;
 
-class boss_shade_of_medivh : public CreatureScript
+class boss_new_shade_of_medivh : public CreatureScript
 {
     public:
-        explicit boss_shade_of_medivh() : CreatureScript("boss_shade_of_medivh")
-        {}
+        explicit boss_new_shade_of_medivh() : CreatureScript("boss_new_shade_of_medivh") { }
 
-        struct boss_shade_of_medivh_AI : public BossAI
+        struct boss_new_shade_of_medivh_AI : public BossAI
         {
-            explicit boss_shade_of_medivh_AI(Creature* creature) : BossAI(creature, DATA_SHADE_OF_MEDIVH)
-            {}
+            explicit boss_new_shade_of_medivh_AI(Creature* creature) : BossAI(creature, DATA_SHADE_OF_MEDIVH) { }
 
             void ScheduleTasks()
             {
                 uint8 order = urand(0, 2);
 
                 if (order == 0)
-                    events.RescheduleEvent(EVENT_INFERNO_BOLT, Seconds(8));
+                    events.RescheduleEvent(EVENT_INFERNO_BOLT, 8s);
                 else if (order == 1)
-                    events.RescheduleEvent(EVENT_FROSTBITE, Seconds(8));
+                    events.RescheduleEvent(EVENT_FROSTBITE, 8s);
                 else if (order == 2)
-                    events.RescheduleEvent(EVENT_PIERCING_MISSILES, Seconds(8));
+                    events.RescheduleEvent(EVENT_PIERCING_MISSILES, 8s);
             }
 
             void DoAction(int32 action) override
@@ -97,11 +95,11 @@ class boss_shade_of_medivh : public CreatureScript
                     events.Reset();
                     
                     if (order == 0)
-                        events.RescheduleEvent(EVENT_FLAME_WREATH, 500);
+                        events.RescheduleEvent(EVENT_FLAME_WREATH, 500ms);
                     else if (order == 1)
-                        events.RescheduleEvent(EVENT_CEASELESS_WINTER, 500);
+                        events.RescheduleEvent(EVENT_CEASELESS_WINTER, 500ms);
                     else if (order == 2)
-                        events.RescheduleEvent(EVENT_GUARDIAN_IMAGE, 500);
+                        events.RescheduleEvent(EVENT_GUARDIAN_IMAGE, 500ms);
                 }
             }
 
@@ -112,7 +110,7 @@ class boss_shade_of_medivh : public CreatureScript
                 me->SetMaxPower(POWER_MANA, 100);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 _EnterCombat();
-                events.ScheduleEvent(EVENT_REGEN_ENERGY, IN_MILLISECONDS);
+                events.ScheduleEvent(EVENT_REGEN_ENERGY, 1s);
                 ScheduleTasks();
             }
 
@@ -143,7 +141,7 @@ class boss_shade_of_medivh : public CreatureScript
                     if (_imagesDead >= 3)
                     {
                         _imagesDead = 0;
-                        events.ScheduleEvent(EVENT_RESTORE_STATE, 100);
+                        events.ScheduleEvent(EVENT_RESTORE_STATE, 100ms);
                     }
                 }
             }
@@ -250,7 +248,7 @@ class boss_shade_of_medivh : public CreatureScript
                         me->SetReactState(REACT_PASSIVE);
                         events.Reset();
                         DoCast(me, SPELL_GUARDIAN_IMAGE);
-                        events.ScheduleEvent(EVENT_INVISIBLE, 100);
+                        events.ScheduleEvent(EVENT_INVISIBLE, 100ms);
                         break;
                     }
 
@@ -267,7 +265,7 @@ class boss_shade_of_medivh : public CreatureScript
                         me->SetReactState(REACT_AGGRESSIVE);
                         instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                         ScheduleTasks();
-                        events.ScheduleEvent(EVENT_REGEN_ENERGY, IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_REGEN_ENERGY, 1s);
                     }
 
                     case EVENT_REGEN_ENERGY:
@@ -281,7 +279,7 @@ class boss_shade_of_medivh : public CreatureScript
                             me->SetPower(POWER_MANA, 0);
                             DoAction(ACTION_FULL_MANA);
                         }
-                        events.ScheduleEvent(EVENT_REGEN_ENERGY, IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_REGEN_ENERGY, 1s);
                         break;
                     }
                 }
@@ -293,15 +291,14 @@ class boss_shade_of_medivh : public CreatureScript
 
         CreatureAI* GetAI(Creature* creature) const override
         {
-            return new boss_shade_of_medivh_AI(creature);
+            return new boss_new_shade_of_medivh_AI(creature);
         }
 };
 
 class npc_kara_guardian_image : public CreatureScript
 {
     public:
-        npc_kara_guardian_image() : CreatureScript("npc_kara_guardian_image")
-        {}
+        npc_kara_guardian_image() : CreatureScript("npc_kara_guardian_image") { }
 
         struct npc_kara_guardian_image_AI : public ScriptedAI
         {
@@ -318,7 +315,7 @@ class npc_kara_guardian_image : public CreatureScript
 
             void IsSummonedBy(Unit* /**/) override
             {
-                _events.ScheduleEvent(EVENT_ARCANE_BOLT, Seconds(2));
+                _events.ScheduleEvent(EVENT_ARCANE_BOLT, 2s);
                 InstanceScript* instance = me->GetInstanceScript();
 
                 if (instance)
@@ -345,7 +342,7 @@ class npc_kara_guardian_image : public CreatureScript
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                         DoCast(target, SPELL_ARCANE_BOLT);
                     
-                    _events.ScheduleEvent(EVENT_ARCANE_BOLT, Seconds(2));
+                    _events.ScheduleEvent(EVENT_ARCANE_BOLT, 2s);
                 }
             }
 
@@ -362,8 +359,7 @@ class npc_kara_guardian_image : public CreatureScript
 class spell_shade_medivh_flame_wreath : public SpellScriptLoader
 {
     public:
-        spell_shade_medivh_flame_wreath() : SpellScriptLoader("spell_shade_medivh_flame_wreath")
-        {}
+        spell_shade_medivh_flame_wreath() : SpellScriptLoader("spell_shade_medivh_flame_wreath") { }
 
         class spell_flame_wreath_SpellScript : public SpellScript
         {
@@ -393,8 +389,7 @@ class spell_shade_medivh_flame_wreath : public SpellScriptLoader
 class spell_shade_medivh_guardian_image : public SpellScriptLoader
 {
     public:
-        spell_shade_medivh_guardian_image() : SpellScriptLoader("spell_shade_medivh_guardian_image")
-        {}
+        spell_shade_medivh_guardian_image() : SpellScriptLoader("spell_shade_medivh_guardian_image") { }
 
         class spell_guardian_image_SpellScript : public SpellScript
         {
@@ -427,8 +422,7 @@ class spell_shade_medivh_guardian_image : public SpellScriptLoader
 class spell_shade_medivh_ceaseless_winter : public SpellScriptLoader
 {
     public:
-        spell_shade_medivh_ceaseless_winter() : SpellScriptLoader("spell_shade_medivh_ceaseless_winter")
-        {}
+        spell_shade_medivh_ceaseless_winter() : SpellScriptLoader("spell_shade_medivh_ceaseless_winter") { }
 
         class spell_ceaserless_winter_AuraScript : public AuraScript
         {
@@ -476,8 +470,7 @@ class spell_shade_medivh_ceaseless_winter : public SpellScriptLoader
 class at_kara_ceaseless_winter : public AreaTriggerEntityScript
 {
     public:
-        at_kara_ceaseless_winter() : AreaTriggerEntityScript("at_kara_ceaseless_winter")
-        {}
+        at_kara_ceaseless_winter() : AreaTriggerEntityScript("at_kara_ceaseless_winter") { }
 
         struct at_kara_ceaseless_winter_AI : public AreaTriggerAI
         {
@@ -532,8 +525,7 @@ class at_kara_ceaseless_winter : public AreaTriggerEntityScript
 class at_kara_flame_wreath : public AreaTriggerEntityScript
 {
     public:
-        at_kara_flame_wreath() : AreaTriggerEntityScript("at_kara_flame_wreath")
-        {}
+        at_kara_flame_wreath() : AreaTriggerEntityScript("at_kara_flame_wreath") { }
 
         struct at_kara_flame_wreath_AI : public AreaTriggerAI
         {
@@ -591,9 +583,9 @@ class at_kara_flame_wreath : public AreaTriggerEntityScript
         }
 };
 
-void AddSC_boss_shade_of_medivh()
+void AddSC_boss_new_shade_of_medivh()
 {
-    new boss_shade_of_medivh();
+    new boss_new_shade_of_medivh();
     new npc_kara_guardian_image();
     new spell_shade_medivh_flame_wreath();
     new spell_shade_medivh_guardian_image();

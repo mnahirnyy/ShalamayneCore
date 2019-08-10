@@ -55,21 +55,19 @@ public:
 
     struct boss_withered_jimAI : public ScriptedAI
     {
-        boss_withered_jimAI(Creature* creature) : ScriptedAI(creature), summons(me), countclons(0)
-        {
-        }
+        boss_withered_jimAI(Creature* creature) : ScriptedAI(creature), summons(me), countclons(0) { }
 
         EventMap events;
         SummonList summons;
         uint8 countclons;
-        
+
         void Reset() override
         {
             events.Reset();
             summons.DespawnAll();
             countclons = 0;
         }
-        
+
         void EnterCombat(Unit* unit) override
         {
             events.ScheduleEvent(EVENT_NIGHTSHIFTED_BOLTS, 18000);
@@ -79,11 +77,11 @@ public:
                 events.ScheduleEvent(EVENT_MORE_MORE_MORE, 30000);
             DoCast(SPELL_WITHERED_PRESENCE_AREA_TRIGGER); // AT
             DoCast(SPELL_WITHERED_PRESENCE_BUFF);
-        }  
-        
+        }
+
         void JustSummoned(Creature* summon) override
         {
-            summons.Summon(summon);  
+            summons.Summon(summon);
             DoZoneInCombat(me, 150.0f);
             if (summon->GetEntry() == NPC_ENTRY_WITHERED_JIM_CLONE)
                 summon->CastSpell(summon, SPELL_WITHERED_PRESENCE_BUFF);
@@ -95,26 +93,26 @@ public:
         {
             summons.DespawnAll();
         }
-                
+
         void DamageTaken(Unit* attacker, uint32& /*damage*/) override
         {
             if (attacker->GetTypeId() != TYPEID_PLAYER)
                 return;
-            
+
             if (attacker->GetPositionZ() >= 60.0f)
                 me->Kill(attacker); //cheaters and others
         }
-              
+
         void UpdateAI(uint32 diff) override
         {
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-            
+
             if (!UpdateVictim())
                 return;
 
             events.Update(diff);
-            
+
             while (uint32 eventId = events.ExecuteEvent())
             {
                 switch (eventId)
@@ -140,7 +138,7 @@ public:
                         break;
                     case EVENT_SUMMON_CLONE:
                         if (me->HasAura(SPELL_MORE_MORE_MORE))
-                            events.ScheduleEvent(EVENT_SUMMON_CLONE, 1000);
+                           events.ScheduleEvent(EVENT_SUMMON_CLONE, 1000);
                         else
                         {
                             if (Creature* clone = me->SummonCreature(NPC_ENTRY_WITHERED_JIM_CLONE, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation()))
@@ -149,7 +147,7 @@ public:
                         break;
                 }
             }
-            
+
             DoMeleeAttackIfReady();
         }
     };
