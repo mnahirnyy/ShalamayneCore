@@ -7498,11 +7498,13 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo, Unit* caster) const
     SpellImmuneContainer const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
     for (auto itr = schoolList.begin(); itr != schoolList.end(); ++itr)
     {
+        if (!(itr->first & spellInfo->GetSchoolMask()))
+            continue;
+
         SpellInfo const* immuneSpellInfo = sSpellMgr->GetSpellInfo(itr->second);
-        if ((itr->first & spellInfo->GetSchoolMask())
-            && !(immuneSpellInfo && immuneSpellInfo->IsPositive() && spellInfo->IsPositive() && (caster && IsFriendlyTo(caster)))
-            && !spellInfo->CanPierceImmuneAura(immuneSpellInfo))
-            return true;
+        if (!(immuneSpellInfo && immuneSpellInfo->IsPositive() && spellInfo->IsPositive() && caster && IsFriendlyTo(caster)))
+            if (!spellInfo->CanPierceImmuneAura(immuneSpellInfo))
+                return true;
     }
 
     return false;
@@ -7841,7 +7843,6 @@ void Unit::Mount(uint32 mount, uint32 VehicleId, uint32 creatureEntry)
                 player->UnsummonPetTemporaryIfAny();
         }
 
-        // Core/Pets: Disable pet interface for charmed units while mounted
         // if we have charmed npc, stun him also (everywhere)
         if (Unit* charm = player->GetCharm())
             if (charm->GetTypeId() == TYPEID_UNIT)
@@ -7890,7 +7891,6 @@ void Unit::Dismount()
         else
             player->ResummonPetTemporaryUnSummonedIfAny();
 
-        // Core/Pets: Disable pet interface for charmed units while mounted
         // if we have charmed npc, remove stun also
         if (Unit* charm = player->GetCharm())
             if (charm->GetTypeId() == TYPEID_UNIT && charm->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED) && !charm->HasUnitState(UNIT_STATE_STUNNED))
@@ -13420,7 +13420,6 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
         return false;
     }
 
-    // Core/Auras: Prevent remove of auras interrupted by turning if the turn could be caused by float calculation error
     // Check if angular distance changed
     bool const turn = G3D::fuzzyGt(M_PI - fabs(fabs(GetOrientation() - orientation) - M_PI), 0.0f);
 

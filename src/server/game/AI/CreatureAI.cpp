@@ -280,7 +280,7 @@ bool CreatureAI::_EnterEvadeMode(EvadeReason /*why*/)
     me->ResetPlayerDamageReq();
     me->SetLastDamagedTime(0);
     me->SetCannotReachTarget(false);
-    me->DoNotReacquireTarget(); // Properly clear focused target on evade
+    me->DoNotReacquireTarget();
 
     if (me->IsInEvadeMode())
         return false;

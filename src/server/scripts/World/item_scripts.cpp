@@ -384,11 +384,9 @@ public:
             {
                 pLeviroth->AI()->AttackStart(player);
                 return false;
-            }
-            else
+            } else
                 player->SendEquipError(EQUIP_ERR_OUT_OF_RANGE, item, NULL);
-        }
-        else
+        } else
             player->SendEquipError(EQUIP_ERR_CLIENT_LOCKED_OUT, item, NULL);
         return true;
     }

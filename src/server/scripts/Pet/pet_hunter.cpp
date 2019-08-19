@@ -32,7 +32,6 @@ enum HunterSpells
     SPELL_HUNTER_CRIPPLING_POISON       = 30981, // Viper
     SPELL_HUNTER_DEADLY_POISON_PASSIVE  = 34657, // Venomous Snake
     SPELL_HUNTER_MIND_NUMBING_POISON   = 25810,  // Viper
-
     SPELL_HUNTER_BROKENOUND            = 211117,
 };
 

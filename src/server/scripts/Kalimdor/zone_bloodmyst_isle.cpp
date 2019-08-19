@@ -53,7 +53,7 @@ uint32 const possibleSpawns[31] = {17322, 17661, 17496, 17522, 17340, 17352, 173
 
 enum WebbedCreature
 {
-    NPC_EXPEDITION_RESEARCHER                     = 17681
+    NPC_EXPEDITION_RESEARCHER = 17681
 };
 
 class npc_webbed_creature : public CreatureScript

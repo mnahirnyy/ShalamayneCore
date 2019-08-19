@@ -162,64 +162,61 @@ void WorldSession::HandleOpenItemOpcode(WorldPackets::Spells::OpenItem& packet)
         return;
     }
 
+    // locked item
     uint32 lockId = proto->GetLockID();
-    if (!sScriptMgr->OnItemOpen(player, item))
+    if (lockId)
     {
-        if (lockId)
-        {
-            LockEntry const* lockInfo = sLockStore.LookupEntry(lockId);
+        LockEntry const* lockInfo = sLockStore.LookupEntry(lockId);
 
         if (!lockInfo)
-
-            {
-                player->SendEquipError(EQUIP_ERR_ITEM_LOCKED, item, NULL);
-                TC_LOG_ERROR("network", "WORLD::OpenItem: item [%s] has an unknown lockId: %u!", item->GetGUID().ToString().c_str(), lockId);
-                return;
-            }
-
-            // was not unlocked yet
-            if (item->IsLocked())
-            {
-                player->SendEquipError(EQUIP_ERR_ITEM_LOCKED, item, NULL);
-                return;
-            }
+        {
+            player->SendEquipError(EQUIP_ERR_ITEM_LOCKED, item, NULL);
+            TC_LOG_ERROR("network", "WORLD::OpenItem: item [%s] has an unknown lockId: %u!", item->GetGUID().ToString().c_str(), lockId);
+            return;
         }
 
-    if (item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_WRAPPED))// wrapped?
+        // was not unlocked yet
+        if (item->IsLocked())
         {
-            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_GIFT_BY_ITEM);
+            player->SendEquipError(EQUIP_ERR_ITEM_LOCKED, item, NULL);
+            return;
+        }
+    }
+
+    if (item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_WRAPPED))// wrapped?
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHARACTER_GIFT_BY_ITEM);
 
         stmt->setUInt64(0, item->GetGUID().GetCounter());
 
         PreparedQueryResult result = CharacterDatabase.Query(stmt);
 
         if (result)
-            {
-                Field* fields = result->Fetch();
-                uint32 entry = fields[0].GetUInt32();
-                uint32 flags = fields[1].GetUInt32();
+        {
+            Field* fields = result->Fetch();
+            uint32 entry = fields[0].GetUInt32();
+            uint32 flags = fields[1].GetUInt32();
 
-                item->SetGuidValue(ITEM_FIELD_GIFTCREATOR, ObjectGuid::Empty);
-                item->SetEntry(entry);
-                item->SetUInt32Value(ITEM_FIELD_FLAGS, flags);
-                item->SetState(ITEM_CHANGED, player);
-            }
-            else
-            {
-                TC_LOG_ERROR("network", "Wrapped item %s don't have record in character_gifts table and will deleted", item->GetGUID().ToString().c_str());
-                player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
-                return;
-            }
+            item->SetGuidValue(ITEM_FIELD_GIFTCREATOR, ObjectGuid::Empty);
+            item->SetEntry(entry);
+            item->SetUInt32Value(ITEM_FIELD_FLAGS, flags);
+            item->SetState(ITEM_CHANGED, player);
+        }
+        else
+        {
+            TC_LOG_ERROR("network", "Wrapped item %s don't have record in character_gifts table and will deleted", item->GetGUID().ToString().c_str());
+            player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
+            return;
+        }
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GIFT);
 
         stmt->setUInt64(0, item->GetGUID().GetCounter());
 
         CharacterDatabase.Execute(stmt);
-        }
-        else
-            player->SendLoot(item->GetGUID(), LOOT_CORPSE);
     }
+    else
+        player->SendLoot(item->GetGUID(), LOOT_CORPSE);
 }
 
 void WorldSession::HandleGameObjectUseOpcode(WorldPackets::GameObject::GameObjUse& packet)

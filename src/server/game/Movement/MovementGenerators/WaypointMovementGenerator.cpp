@@ -120,7 +120,6 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
     if (!i_path || i_path->nodes.empty())
         return false;
 
-    // Core/Creatures: Stop falling if corpse is removed
     if (Stopped())
         return true;
 

@@ -1453,7 +1453,6 @@ void Group::CountTheRoll(Rolls::iterator rollI)
                     item->is_blocked = false;
                     item->rollWinnerGUID = player->GetGUID();
                     player->SendEquipError(msg, nullptr, nullptr, roll->itemid);
-
                 }
             }
         }

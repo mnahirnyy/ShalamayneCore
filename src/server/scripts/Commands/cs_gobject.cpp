@@ -430,7 +430,6 @@ public:
 
         object->Relocate(object->GetPositionX(), object->GetPositionY(), object->GetPositionZ(), oz);
         object->SetWorldRotationAngles(oz, oy, ox);
-
         object->SaveToDB();
 
         // Generate a completely new spawn with new guid
@@ -444,7 +443,6 @@ public:
             return false;
 
         handler->PSendSysMessage(LANG_COMMAND_TURNOBJMESSAGE, std::to_string(object->GetSpawnId()).c_str(), object->GetGOInfo()->name.c_str(), object->GetGUID().ToString().c_str(), object->GetOrientation());
-
         return true;
     }
 
@@ -492,7 +490,7 @@ public:
             }
         }
 
-                Map* map = object->GetMap();
+        Map* map = object->GetMap();
 
         object->Relocate(x, y, z, object->GetOrientation());
         object->SaveToDB();
@@ -510,7 +508,6 @@ public:
             return false;
 
         handler->PSendSysMessage(LANG_COMMAND_MOVEOBJMESSAGE, std::to_string(object->GetSpawnId()).c_str(), object->GetGOInfo()->name.c_str(), object->GetGUID().ToString().c_str());
-
         return true;
     }
 

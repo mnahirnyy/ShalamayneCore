@@ -124,7 +124,7 @@ void WorldSession::HandleRideVehicleInteract(WorldPackets::Vehicle::RideVehicleI
 {
     if (Player* player = ObjectAccessor::FindPlayer(rideVehicleInteract.Vehicle))
     {
-        if (!player->GetVehicleKit() || _player->GetVehicleKit())
+        if (!player->GetVehicleKit())
             return;
         if (!player->IsInRaidWith(_player))
             return;

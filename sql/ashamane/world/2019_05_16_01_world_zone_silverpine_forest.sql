@@ -344,26 +344,85 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,
 (15,11901,0,0,9,27069,0,0,0,'','Show gossip option 0 if player has Quest 27069 "Steel Thunder"');
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_webbed_victim_skitterweb' WHERE `entry`=44941;
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_orc_sea_dog' WHERE `entry`=44942;
--- VIOLET HOLD
--- gameobjects for the special violet hold TO DO
-DELETE FROM `gameobject` WHERE `guid` BETWEEN 51014366 AND 51014370;
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) VALUES
-(51014366,246994,1494,0,0,12,0,0,0,-1,4698.6,3996.12,96.72,4.37254,0,0,-0.8165,0.577346,7200,255,1,0,'',22423),
-(51014367,246993,1494,0,0,12,0,0,0,-1,4701.84,4014.68,96.72,4.67504,0,0,-0.720187,0.69378,7200,255,1,0,'',22423),
-(51014368,246992,1494,0,0,12,0,0,0,-1,4699.06,4033.99,96.72,5.01651,0,0,-0.591837,0.806058,7200,255,1,0,'',22423),
-(51014369,247544,1494,0,0,12,0,0,0,-1,4646.22,4038.95,77.6499,3.14159,0,0,-1,0,7200,255,1,0,'',22423),
-(51014370,247385,1494,0,0,12,0,0,0,-1,4681.17,3967.49,76.2686,3.97984,0,0,-0.913445,0.406961,7200,255,1,0,'',22423);
-
--- availbale ones
-DELETE FROM `gameobject` WHERE `guid` in (51014371, 51014372, 51014373, 51014374);
-INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) VALUES
-(51014371,193019,1220,7502,7592,0,0,171,0,-1,-960.317,4325.154,740.212,0.890117,0,0,0.430511,0.902586,300,100,1,0,'',22423),
-(51014372,193609,1220,7502,7592,0,0,171,0,-1,-969.812,4314.12,742.18,0.908608,0,0,0.438837,0.898567,180,0,1,0,'go_violethold_entrance_portal',22423),
-(51014373,193020,1220,7502,7592,0,0,171,0,-1,-970.863,4317.45,739.721,0.890117,0,0,0.430511,0.902586,180,0,1,0,'',22423),
-(51014374,193609,1494,0,0,12,0,0,0,-1,1245.352,-262.682,44.363,3.16211,0,0,0.430511,0.902586,180,0,1,0,'go_violethold_exit_portal',22423);
-
--- creatures for special violet hold
-DELETE FROM `creature` WHERE `guid` in (280000402, 280000403);
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
-(280000402,99473,1494,0,0,12,0,0,0,-1,0,0,1290.730,-264.305,44.364,0.06528,120,0,0,0,0,0,0,0,0,0,0,'npc_warden_alturas_vh',25549), -- Alturas
-(280000403,103156,1494,0,0,12,0,0,0,-1,0,0,1300.655,-259.887,44.272,0.05115,120,0,0,800,0,0,2,0,0,0,0,'',25549); -- Altruis
+-- NO ESCAPE
+DELETE FROM `creature` WHERE `id`=44951 AND `guid`=20343401;
+UPDATE `creature_template` SET `InhabitType`=4 WHERE `entry`=45003;
+UPDATE `creature_template` SET `InhabitType`=4, `HoverHeight`=2 WHERE `entry`=44951;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_agatha_44951' WHERE `entry`=44951;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_camera_45003' WHERE `entry`=45003;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_fenris_keep_stalker_45032' WHERE `entry`=45032;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_lord_darius_crowley_44989' WHERE `entry`=44989;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_phin_odelic_44993' WHERE `entry`=44993;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_bartolo_ginsetti_44994' WHERE `entry`=44994;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_loremaster_dibbs_44995' WHERE `entry`=44995;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_magistrate_henry_maleb_44996' WHERE `entry`=44996;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_caretaker_smithers_44997' WHERE `entry`=44997;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_sophia_zwoski_45002' WHERE `entry`=45002;
+DELETE FROM `creature_text` WHERE `CreatureID`=44989 AND `GroupID` BETWEEN 0 AND 5;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(44989, 0, 0, 'The Forsaken have broken through your defenses, magistrate.', 12, 0, 100, 396, 0, 0, 45161, 0, 'Lord Darius Crowley to Magistrate'),
+(44989, 1, 0, 'You are out of time.', 12, 0, 100, 274, 0, 0, 45162, 0, 'Lord Darius Crowley to Magistrate'),
+(44989, 2, 0, 'A decision must be made!', 12, 0, 100, 5, 0, 0, 45163, 0, 'Lord Darius Crowley to Magistrate'),
+(44989, 3, 0, 'Die in battle and be raised as a servant of the Forsaken or...', 12, 0, 100, 396, 0, 0, 45164, 0, 'Lord Darius Crowley to Magistrate'),
+(44989, 4, 0, 'Drink in my blood and be reborn as worgen, immune to the depravity of the Forsaken.', 12, 0, 100, 396, 0, 0, 45165, 0, 'Lord Darius Crowley to Magistrate'),
+(44989, 5, 0, 'Help us destroy the Forsaken and retake Lordaeron for the Alliance!', 12, 0, 100, 5, 0, 0, 45166, 0, 'Lord Darius Crowley to Magistrate');
+DELETE FROM `creature_text` WHERE `CreatureID`=44996 AND `GroupID` IN (0, 1);
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(44996, 0, 0, 'We would rather die than be turned into worgen, but seeing as how even death provides no relief from the atrocities of this war...', 12, 0, 100, 1, 0, 0, 45167, 0, 'Magistrate Henry to Player'),
+(44996, 1, 0, 'We choose vengeance!', 12, 0, 100, 5, 0, 0, 45168, 0, 'Magistrate Henry to Player');
+DELETE FROM `creature_text` WHERE `CreatureID`=44951 AND `GroupID` BETWEEN 0 AND 3;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(44951, 0, 0, 'This way, $n. We will take them by surprise.', 12, 0, 100, 457, 0, 0, 45193, 0, 'Agatha to Player'),
+(44951, 1, 0, 'Rise, $n! Become Forsaken!', 14, 0, 100, 0, 0, 0, 45091, 0, 'Agatha to Player'),
+(44951, 2, 0, 'Run...', 12, 0, 100, 457, 0, 0, 45184, 0, 'Agatha to Player'),
+(44951, 3, 0, 'RUN!', 12, 0, 100, 457, 0, 0, 45185, 0, 'Agatha to Player');
+SET @GUID=4495101;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_type`, `action`, `action_chance`, `wpguid`) VALUES
+(@GUID, 1, 978.1359, 701.0002, 74.89857, 1.469464, 0, 1, 0, 100, 0),
+(@GUID, 2, 980.0945, 707.5026, 74.89857, 0.53484, 0, 1, 0, 100, 0),
+(@GUID, 3, 983.2339, 707.6531, 74.79117, 0.047892, 0, 1, 0, 100, 0),
+(@GUID, 4, 993.0419, 708.1599, 69.7968, 0.051819, 0, 1, 0, 100, 0),
+(@GUID, 5, 996.8337, 706.6511, 69.7968, 5.903038, 0, 1, 0, 100, 0),
+(@GUID, 6, 997.8134, 685.7626, 69.7968, 4.756361, 0, 1, 0, 100, 0),
+(@GUID, 7, 1000.605, 683.2662, 69.7968, 5.55354, 0, 1, 0, 100, 0),
+(@GUID, 8, 1008.984, 683.5966, 64.96407, 0.051824, 0, 1, 0, 100, 0),
+(@GUID, 9, 1011.667, 683.7565, 64.90376, 0.201049, 0, 1, 0, 100, 0),
+(@GUID, 10, 1013.713, 686.3148, 64.90376, 0.93147, 0, 1, 0, 100, 0),
+(@GUID, 11, 1012.84, 692.0942, 60.97515, 1.720795, 0, 1, 0, 100, 0),
+(@GUID, 12, 1009.927, 696.0195, 60.97515, 2.247012, 0, 1, 0, 100, 0),
+(@GUID, 13, 999.3065, 695.5478, 60.97515, 3.162001, 0, 1, 0, 100, 0),
+(@GUID, 14, 995.6049, 697.9961, 60.97515, 2.557245, 0, 1, 0, 100, 0),
+(@GUID, 15, 996.0381, 708.152, 60.97515, 1.744357, 0, 1, 0, 100, 0),
+(@GUID, 16, 991.2772, 712.1159, 60.97515, 2.447289, 0, 1, 0, 100, 0),
+(@GUID, 17, 987.5659, 711.0661, 60.97515, 3.417256, 0, 1, 0, 100, 0),
+(@GUID, 18, 983.5695, 705.4751, 60.97515, 4.120186, 0, 1, 0, 100, 0),
+(@GUID, 19, 983.7156, 694.2731, 59.48418, 4.701381, 0, 1, 0, 100, 0),
+(@GUID, 20, 978.3207, 688.5763, 59.45862, 3.939546, 0, 1, 0, 100, 0),
+(@GUID, 21, 972.1443, 689.1495, 59.73647, 3.18618, 0, 1, 0, 100, 0),
+(@GUID, 22, 947.125, 688.8077, 59.73647, 3.119421, 0, 1, 0, 100, 0),
+(@GUID, 23, 940.7419, 692.6727, 59.28345, 2.58535, 0, 1, 0, 100, 0),
+(@GUID, 24, 942.0499, 710.1451, 59.30516, 1.411179, 0, 1, 0, 100, 0),
+(@GUID, 25, 962.5223, 728.5516, 59.28381, 0.70432, 0, 1, 0, 100, 0),
+(@GUID, 26, 1005.039, 732.6902, 59.26571, 6.10786, 0, 1, 0, 100, 0),
+(@GUID, 27, 1011.227, 727.5854, 59.5486, 5.593425, 0, 1, 0, 100, 0),
+(@GUID, 28, 1027.919, 725.5515, 58.62294, 6.186398, 0, 1, 0, 100, 0),
+(@GUID, 29, 1034.905, 726.7658, 54.57361, 6.151052, 0, 1, 0, 100, 0),
+(@GUID, 30, 1045.765, 725.6252, 53.04143, 6.178541, 0, 1, 0, 100, 0),
+(@GUID, 31, 1075.915, 722.2546, 45.57275, 6.16676, 0, 1, 0, 100, 0),
+(@GUID, 32, 1093.561, 720.1909, 40.58342, 6.16676, 0, 1, 0, 100, 0),
+(@GUID, 33, 1117.21, 719.6275, 32.31801, 0.068142, 0, 1, 0, 100, 0),
+(@GUID, 34, 1192.305, 909.5518, 32.97552, 1.226605, 0, 1, 0, 100, 0),
+(@GUID, 35, 1204.633, 938.8166, 35.41784, 1.1677, 0, 1, 0, 100, 0),
+(@GUID, 36, 1222.831, 979.2708, 36.98741, 1.12843, 0, 1, 0, 100, 0),
+(@GUID, 37, 1229.703, 991.4185, 36.01954, 1.061671, 0, 1, 0, 100, 0),
+(@GUID, 38, 1252.699, 1031.865, 42.21674, 1.053817, 0, 1, 0, 100, 0),
+(@GUID, 39, 1265.049, 1043.249, 45.64476, 0.712169, 0, 1, 0, 100, 0),
+(@GUID, 40, 1275.689, 1048.93, 54.42715, 0.331248, 0, 1, 0, 100, 0),
+(@GUID, 41, 1311.694, 1060.33, 54.59864, 0.327321, 0, 1, 0, 100, 0),
+(@GUID, 42, 1367.728, 1050.514, 53.25192, 6.103925, 0, 1, 0, 100, 0),
+(@GUID, 43, 1379.508, 1044.309, 54.09616, 5.793697, 0, 1, 0, 100, 0);
+-- make summoned Sylvanas sitting on a horse
+DELETE FROM `creature_template_addon` WHERE `entry` = 45051;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `aiAnimKit`, `movementAnimKit`, `meleeAnimKit`, `auras`) VALUES
+(45051, 0, 10718, 0, 0, 0, 0, 0, 0, '');
