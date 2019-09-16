@@ -1738,9 +1738,11 @@ public:
         QUEST_ORCS_ARE_IN_ORDER = 27096,
         QUEST_RISE_FORSAKEN = 27097,
         QUEST_NO_ESCAPE = 27099,
+        QUEST_LARDAERON = 27098,
         SPELL_SUMMON_AGATHA = 83982,
         SPELL_SEE_QUEST_INVIS_5 = 84241,
         SPELL_DEATH_WALK = 85451,
+        SPELL_SUMMON_SYLVANAS_HORSE = 84128,
     };
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
@@ -1751,6 +1753,8 @@ public:
             player->CastSpell(1380.69f, 1037.616f, 53.046f, SPELL_SUMMON_AGATHA, true);
         else if (quest->GetQuestId() == QUEST_NO_ESCAPE)
             player->CastSpell(1380.69f, 1037.616f, 53.046f, SPELL_SUMMON_AGATHA, true);
+        else if (quest->GetQuestId() == QUEST_LARDAERON)
+            player->CastSpell(1377.98f, 1039.329f, 52.260f, SPELL_SUMMON_SYLVANAS_HORSE, true);
         return false;
     }
 
@@ -3521,6 +3525,284 @@ public:
     }
 };
 
+Position const forsakenHorsePath[] =
+{
+    { 1382.02f, 1036.77f, 53.5615f },
+    { 1378.62f, 1034.99f, 51.4415f },
+    { 1376.69f, 1033.92f, 50.8203f },
+    { 1370.16f ,1030.3f, 51.1979f  },
+    { 1365.76f, 1027.85f, 52.9575f },
+    { 1353.93f, 1021.29f, 52.3865f },
+    { 1342.01f, 1012.71f, 54.5486f },
+    { 1331.81f, 1006.42f, 54.5993f },
+    { 1323.18f, 1004.4f, 54.5993f  },
+    { 1320.6f, 1007.71f, 54.5993f  },
+    { 1314.92f, 1018.28f, 54.5993f },
+    { 1304.12f, 1038.56f, 54.5993f },
+    { 1291.96f, 1057.64f, 54.0229f },
+    { 1266.43f, 1087.83f, 52.3095f },
+    { 1240.92f, 1112.1f, 50.9396f  },
+    { 1186.92f, 1151.85f, 49.2966f },
+    { 1103.56f, 1205.04f, 46.405f  },
+    { 1087.08f, 1220.02f, 46.3391f },
+    { 1027.13f, 1273.88f, 46.0058f },
+    { 1006.07f, 1289.54f, 45.9183f },
+    { 958.819f, 1319.75f, 46.3413f },
+    { 937.089f, 1333.16f, 46.8987f },
+    { 901.874f, 1348.65f, 49.0243f },
+    { 882.262f, 1353.33f, 51.6486f },
+    { 864.572f, 1357.55f, 54.6863f },
+    { 845.214f, 1358.95f, 55.5383f },
+    { 747.317f, 1358.59f, 69.6343f },
+    { 720.427f, 1349.57f, 73.8387f },
+    { 699.874f, 1333.29f, 77.7755f },
+    { 667.782f, 1305.19f, 81.7202f },
+    { 643.957f, 1296.31f, 85.2994f },
+    { 638.748f, 1296.82f, 85.6868f },
+    { 634.856f, 1301.78f, 85.909f  },
+    { 626.351f, 1319.04f, 84.3054f },
+    { 587.723f, 1393.71f, 92.1448f },
+    { 560.69f, 1441.25f, 101.771f  },
+    { 537.474f, 1465.67f, 110.813f },
+    { 517.445f, 1482.97f, 119.81f  },
+    { 507.389f, 1491.66f, 124.016f },
+    { 500.267f, 1505.83f, 127.459f },
+    { 495.328f, 1528.53f, 129.898f },
+    { 494.859f, 1549.98f, 128.962f },
+};
+size_t const pathSize = std::extent<decltype(forsakenHorsePath)>::value;
+
+// npc 45057 Forsaken Warhorse for the quest 27098 'Lordaeron'
+class npc_forsaken_warhorse_45057 : public CreatureScript
+{
+public:
+    npc_forsaken_warhorse_45057() : CreatureScript("npc_forsaken_warhorse_45057") { }
+
+    enum eNPC
+    {
+        QUEST_LORDAERON = 27098,
+        DATA_LORDAERON_RIDE = 54,
+        EVENT_START_PATH = 545,
+        EVENT_WARHORSE_DESPAWN = 546,
+        EVENT_CAST_CAMERA = 547,
+        EVENT_RIDE_WARHORSE = 548,
+        SYLVANAS_ACCOMPANIED_TO_THE_SEPULCHER = 45051,
+        SPELL_RIDE_VEHICLE = 84109,
+        SPELL_CAMERA = 84112,
+        SPELL_RIDE_VEHICLE_HARD_CODED = 46598,
+        SPELL_EJECT_ALL_PASSENGERS = 50630,
+        NPC_SYLVANAS = 45051,
+    };
+
+    struct npc_forsaken_warhorse_AI : public VehicleAI
+    {
+        /*npc_forsaken_warhorse_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }*/
+        npc_forsaken_warhorse_AI(Creature* creature) : VehicleAI(creature) { }
+
+        void Reset() override
+        {
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+            me->SetReactState(REACT_PASSIVE);
+            _playerGUID = ObjectGuid::Empty;
+            _events.Reset();
+        }
+
+        void IsSummonedBy(Unit* summoner) override
+        {
+            if (Player* player = summoner->ToPlayer())
+                if (player->GetQuestStatus(QUEST_LORDAERON) == QUEST_STATUS_INCOMPLETE)
+                    if (Vehicle* vehicle = me->GetVehicleKit()) {
+                        _playerGUID = player->GetGUID();
+                        _events.ScheduleEvent(EVENT_CAST_CAMERA, 300);
+                    }   
+        }
+
+        void MovementInform(uint32 type, uint32 pointId) override
+        {
+            if (type == EFFECT_MOTION_TYPE && pointId == pathSize)
+                _events.ScheduleEvent(EVENT_WARHORSE_DESPAWN, Seconds(1));
+        }
+
+        void JustDied(Unit* /*killer*/) override
+        {
+            if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                if (player->GetQuestStatus(QUEST_LORDAERON) == QUEST_STATUS_INCOMPLETE)
+                {
+                    player->FailQuest(QUEST_LORDAERON);
+                    player->NearTeleportTo(1382.9f, 1038.3f, 54.31f, 3.7848f);
+                }
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) override
+        {
+            if (apply && passenger->GetTypeId() == TYPEID_PLAYER)
+            {   
+                /*if (Creature* sylvanas = me->FindNearestCreature(NPC_SYLVANAS, 2.0f, true)) {
+                    sylvanas->GetAI()->SetGUID(me->GetGUID(), me->GetEntry());
+                    sylvanas->AI()->SetData(54, 54);
+                }*/
+                _events.ScheduleEvent(EVENT_START_PATH, 300);
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_START_PATH:
+                    me->GetMotionMaster()->MoveSmoothPath(uint32(pathSize), forsakenHorsePath, pathSize, true, false);
+                    break;
+                case EVENT_CAST_CAMERA:
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                    {
+                        player->ExitVehicle();
+                        me->CastSpell(player, SPELL_CAMERA, true); // camera spell
+                    }
+                    _events.ScheduleEvent(EVENT_RIDE_WARHORSE, 1500);
+                    break;
+                case EVENT_RIDE_WARHORSE:
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                    {
+                        me->CastSpell(player, SPELL_RIDE_VEHICLE); // ride vehicle, script_effect
+                        player->EnterVehicle(me);
+                    }
+                    break;
+                case EVENT_WARHORSE_DESPAWN:
+                    me->RemoveAllAuras();
+                    me->GetVehicleKit()->RemoveAllPassengers();
+                    me->DespawnOrUnsummon();
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        player->KilledMonsterCredit(SYLVANAS_ACCOMPANIED_TO_THE_SEPULCHER);
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+    private:
+        EventMap _events;
+        ObjectGuid _playerGUID;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_forsaken_warhorse_AI(creature);
+    }
+};
+
+// npc 45051 Sylvanas Windrunner for the quest 27098 'Lordaeron'
+class npc_sylvanas_windrunner_45051 : public CreatureScript
+{
+public:
+    npc_sylvanas_windrunner_45051() : CreatureScript("npc_sylvanas_windrunner_45051") { }
+
+    enum eNPC
+    {
+        QUEST_LORDAERON = 27098,
+        DATA_LORDAERON_RIDE = 54,
+        EVENT_CHAT_TO_PLAYER = 544,
+        EVENT_CHECK_PLAYER_STATUS = 543,
+        EVENT_START_FOLLOW = 542,
+        NPC_FORSAKEN_WARHORSE = 45057,
+        SYLVANAS_PATH_ID = 4505101,
+    };
+
+    struct npc_sylvanas_windrunner_45051_AI : public ScriptedAI
+    {
+        npc_sylvanas_windrunner_45051_AI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _playerGUID = ObjectGuid::Empty;
+            _horseGUID = ObjectGuid::Empty;
+            _events.Reset();
+        }
+
+        void IsSummonedBy(Unit* who) override
+        {
+            if (Player* player = who->ToPlayer())
+                _playerGUID = player->GetGUID();
+            _events.ScheduleEvent(EVENT_CHAT_TO_PLAYER, 60000);
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_LORDAERON_RIDE:
+                _events.ScheduleEvent(EVENT_START_FOLLOW, 100);
+                break;
+            }
+        }
+
+        void SetGUID(ObjectGuid guid, int32 id) override
+        {
+            switch (id)
+            {
+            case NPC_FORSAKEN_WARHORSE:
+            {
+                _horseGUID = guid;
+                break;
+            }
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_CHAT_TO_PLAYER:
+                {
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        me->AI()->Talk(0);
+                    _events.ScheduleEvent(EVENT_CHAT_TO_PLAYER, 60000);
+                    break;
+                }
+                case EVENT_START_FOLLOW:
+                {
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        me->GetMotionMaster()->MovePoint(1231, 1360.59f, 1028.24f, 52.75f);
+                    _events.ScheduleEvent(EVENT_START_FOLLOW + 1, 1500);
+                    break;
+                }
+                case EVENT_START_FOLLOW + 1:
+                {
+                    me->GetMotionMaster()->MovePath(SYLVANAS_PATH_ID, false);
+                    break;
+                }
+                }
+            }
+            UpdateVictim();
+        }
+    private:
+        EventMap _events;
+        ObjectGuid _playerGUID;
+        ObjectGuid _horseGUID;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_sylvanas_windrunner_45051_AI(creature);
+    }
+};
+
 /*######
 ## AddSC
 ######*/
@@ -3556,4 +3838,6 @@ void AddSC_silverpine_forest()
     new npc_caretaker_smithers_44997();
     new npc_sophia_zwoski_45002();
     new npc_camera_45003();
+    new npc_forsaken_warhorse_45057();
+    new npc_sylvanas_windrunner_45051();
 }

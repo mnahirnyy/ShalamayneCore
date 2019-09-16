@@ -35,6 +35,7 @@
 #include "MotionMaster.h"
 #include "PhasingHandler.h"
 #include "SpellInfo.h"
+#include "Log.h"
 
 class scene_azsuna_runes : public SceneScript
 {
@@ -102,42 +103,165 @@ public:
     }
 };
 
+// 93326
+class npc_archmage_khadgar_93326 : public CreatureScript
+{
+public:
+    npc_archmage_khadgar_93326() : CreatureScript("npc_archmage_khadgar_93326") { }
+
+    enum eNpc
+    {
+        QUEST_INTO_THE_FRAY_DH = 44137,
+        QUEST_INTO_THE_FRAY = 38834,
+        SPELL_TRANSFORM_KHADGAR_RAVEN = 165291,
+        EVENT_SAY_HURRY = 11,
+        EVENT_TRANSFORM = 12,
+        EVENT_MOVE_CAMP = 13,
+        EVENT_DESPAWN = 14,
+        DATA_DO_SOMETHING = 21,
+    };
+
+    bool OnQuestAccept(Player* /*player*/, Creature* creature, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_INTO_THE_FRAY)
+        {
+            creature->GetAI()->SetData(DATA_DO_SOMETHING, DATA_DO_SOMETHING);
+        }
+        return true;
+    }
+
+    struct npc_archmage_khadgar_93326_AI : public ScriptedAI
+    {
+        npc_archmage_khadgar_93326_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Initialize() {}
+
+        void Reset() override
+        {
+            me->SetWalk(false);
+            me->SetSpeed(MOVE_RUN, 1.0f);
+            me->SetHomePosition(me->GetPosition());
+            _events.Reset();            
+            Initialize();
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_DO_SOMETHING:
+                _events.ScheduleEvent(EVENT_SAY_HURRY, 300);
+                break;
+            default:
+                break;
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 id) override
+        {
+            if (type == WAYPOINT_MOTION_TYPE)
+            {
+                switch (id)
+                {
+                case 6:
+                    _events.ScheduleEvent(EVENT_DESPAWN, 1000);
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_SAY_HURRY:
+                    me->AI()->Talk(1);
+                    _events.ScheduleEvent(EVENT_TRANSFORM, 1000);
+                    break;
+                case EVENT_TRANSFORM:
+                    DoCast(me, SPELL_TRANSFORM_KHADGAR_RAVEN, true);
+                    _events.ScheduleEvent(EVENT_MOVE_CAMP, 300);
+                    break;
+                case EVENT_MOVE_CAMP:
+                    me->GetMotionMaster()->MovePath(9332600, false);
+                    break;
+                case EVENT_DESPAWN:
+                    me->RemoveAurasDueToSpell(SPELL_TRANSFORM_KHADGAR_RAVEN);
+                    me->GetMotionMaster()->MoveTargetedHome();
+                    me->DespawnOrUnsummon();
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_archmage_khadgar_93326_AI(creature);
+    }
+};
+
 struct questnpc_soul_gem : public ScriptedAI
 {
     questnpc_soul_gem(Creature* creature) : ScriptedAI(creature) { }
 
+    ObjectGuid _playerGUID;
+
     void Reset() override
-    {
-        CheckForDeadDemons(me);
+    {   
+        _playerGUID = ObjectGuid::Empty;
     }
 
-    void CheckForDeadDemons(Creature* creature)
+    void GetTargets()
     {
-        if (!creature->GetOwner() || !creature->GetOwner()->IsPlayer())
-            return;
+        /*if (!me->GetOwner() || !me->GetOwner()->IsPlayer())
+            return;*/
 
-        std::list<Creature*> targets = creature->FindAllCreaturesInRange(15.0f);
-        Player* owner = creature->GetOwner()->ToPlayer();
+        std::list<Creature*> targets = me->FindAllCreaturesInRange(100.0f);
 
-        for (Creature* target : targets)
+        if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
         {
-            if(!target->IsAlive())
-            { 
-                switch (target->GetEntry())
+            for (auto itr : targets)
+            {
+                if (itr->isDead())
                 {
+                    switch (itr->GetEntry())
+                    {
                     case 90230:
                     case 90241:
-                    case 93556:
                     case 93619:
                     case 101943:
-                    case 103180:
-                        target->DespawnOrUnsummon();
-                        owner->KilledMonsterCredit(90298);
+                        me->CastSpell(itr, 178753, true);
+                        me->CastSpell(itr, 178752, true);
+                        itr->DespawnOrUnsummon();
+                        player->KilledMonsterCredit(90298, ObjectGuid::Empty);
                         break;
                     default:
                         break;
+                    }
                 }
             }
+        }
+    }
+
+    void IsSummonedBy(Unit* summoner) override
+    {
+        if (Player* player = summoner->ToPlayer()) {
+            _playerGUID = player->GetGUID();
+            GetTargets();
         }
     }
 };
@@ -606,4 +730,5 @@ void AddSC_azsuna()
     new spell_word_of_versatility();
     new go_sabotaged_portal_stabilizer();
     new spell_gen_radiant_ley_crystal();
+    new npc_archmage_khadgar_93326();
 }

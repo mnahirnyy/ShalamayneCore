@@ -78,20 +78,6 @@ INSERT INTO `npc_trainer` (`ID`, `SpellID`, `MoneyCost`, `ReqSkillLine`, `ReqSki
 (3549,9198,2000,165,180,0,0),
 (3549,226131,1500,165,180,0,0);
 
-SET @KHADGAR := 90417;
-DELETE FROM `creature_text` WHERE `CreatureID` = @KHADGAR;
-INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
-(@KHADGAR, 0, 0, 'Nobody touch it! Not until our guest arrives.', 12, 0, 100, 1, 0, 67263, 101006, 0, 'Archmage Khadgar to Player'),
-(@KHADGAR, 1, 0, 'Any disturbance should catalyze the sequence. Just, uh, give it a poke or something.', 12, 0, 100, 1, 0, 67264, 100058, 0, 'Archmage Khadgar to Player'),
-(@KHADGAR, 2, 0, 'Be careful, champion. The land of Suramar has been wild for ten thousand years.', 12, 0, 100, 0, 0, 67271, 100062, 0, 'Archmage Khadgar to Player'),
-(@KHADGAR, 3, 0, 'I have just a thing. Follow me.', 12, 0, 100, 0, 0, 64653, 0, 0, 'Archmage Khadgar to Player'),
-(@KHADGAR, 4, 0, 'Hold on just a moment. I fear I\'m a bit of a pack rat.', 12, 0, 100, 0, 0, 64654, 0, 0, 'Archmage Khadgar to Player'),
-(@KHADGAR, 5, 0, 'Now let\'s see... apexis crystals? No, no, those won\'t do at all.', 12, 0, 100, 0, 0, 64655, 0, 0, 'Archmage Khadgar to Player'),
-(@KHADGAR, 6, 0, 'Hmm, I must\'ve put it over here.', 12, 0, 100, 0, 0, 64656, 0, 0, 'Archmage Khadgar to Player'),
-(@KHADGAR, 7, 0, 'Arcane powder... soul shards... that\'s definitely not it...', 12, 0, 100, 0, 0, 64657, 0, 0, 'Archmage Khadgar to Player'),
-(@KHADGAR, 8, 0, 'A-ha! Here we are... a crystallized soul. That ought to do the trick!', 12, 0, 100, 0, 0, 64658, 0, 0, 'Archmage Khadgar to Player'),
-(@KHADGAR, 9, 0, 'Would you mind grabbing it? These crystals tend to have an adverse effect on non-demonic beings.', 12, 0, 100, 0, 0, 64659, 0, 0, 'Archmage Khadgar to Player');
-
 -- zone: Silverpine Forest
 UPDATE `quest_template_addon` SET `PrevQuestID`=26965 WHERE `ID`=26989;
 UPDATE `quest_template_addon` SET `PrevQuestID`=26965 WHERE `ID`=26992;
@@ -426,3 +412,108 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 DELETE FROM `creature_template_addon` WHERE `entry` = 45051;
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `aiAnimKit`, `movementAnimKit`, `meleeAnimKit`, `auras`) VALUES
 (45051, 0, 10718, 0, 0, 0, 0, 0, 0, '');
+-- Lordaeron
+DELETE FROM `creature_text` WHERE `CreatureID`=45051 AND `GroupID` BETWEEN 0 AND 21;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(45051, 0, 0, 'I have not always been the Banshee Queen, $n', 12, 0, 100, 0, 0, 0, 20470, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 1, 0, 'And my peopel have not always been the Forsaken.', 12, 0, 100, 0, 0, 0, 20471, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 2, 0, 'Long ago this land comprised the northern kingdoms of Lordaeron, ruled by King Terenas Menethil.', 12, 0, 100, 0, 0, 0, 20472, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 3, 0, 'Terenas had a son named Arthas.', 12, 0, 100, 0, 0, 0, 20473, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 4, 0, 'Arthas... even saying his name makes my body quiver in rage.', 12, 0, 100, 0, 0, 0, 20474, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 5, 0, 'This man-child, Arthas, took for himself a cursed blade known as Frostmourne.', 12, 0, 100, 0, 0, 0, 20475, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 6, 0, 'Through Frostmourne, Arthas killed his own father and razed this land along with every living creature in it!', 12, 0, 100, 0, 0, 0, 20476, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 7, 0, 'My own death came at the hands of Arthas when he and his armies sacked my homeland, Quel\'Thalas, and murdered my people.', 12, 0, 100, 0, 0, 0, 20477, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 8, 0, 'In his vast cruelty, Arthas severed my spirit from my body and raised me as a banshee to serve in his Scourge army.', 12, 0, 100, 0, 0, 0, 20478, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 9, 0, 'A similar fate befell all that would die to the Scourge war machine.', 12, 0, 100, 0, 0, 0, 20479, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 10, 0, 'In death, they were reborn as mindless undead.', 12, 0, 100, 0, 0, 0, 20480, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 11, 0, 'But Arthas was not invincible! With each passing day his power waned - his grip over the will of the damned loosening.', 12, 0, 100, 0, 0, 0, 20481, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 12, 0, 'It was when Arthas was at his weakest that I struck!', 12, 0, 100, 0, 0, 0, 20482, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 13, 0, 'And though the hour of his atonement had come, the worm managed to escape his fate, returning to the frozen wastes of Northrend.', 12, 0, 100, 0, 0, 0, 20483, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 14, 0, 'With Arthas gone, so too was the control he held over the undead masses of Lordaeron. After recovering my body, I freed the remaining Scourge that were left behind.', 12, 0, 100, 0, 0, 0, 20484, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 15, 0, 'From the cruelty and mercilessness of Arthas, the man who would be the Lich King, the Forsaken were born.', 12, 0, 100, 0, 0, 0, 20485, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 16, 0, 'Our goal... Our sole purpose was to destroy the Lich King. We threw our lot in with the Horde and began our journey towards redemption.', 12, 0, 100, 0, 0, 0, 20486, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 17, 0, 'Now the Lich King is dead and we have returned.', 12, 0, 100, 0, 0, 0, 20487, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 18, 0, 'The people who called this land their home in life, do so in death as well.', 12, 0, 100, 0, 0, 0, 20488, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 19, 0, 'But the Alliance does not recognize our rights. They claim this land is their own while attempting to invalidate the claims of the founders of this kingdom.', 12, 0, 100, 0, 0, 0, 20489, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 20, 0, 'I will never allow it.... Never!', 12, 0, 100, 0, 0, 0, 20490, 0, 'Lady Sylvanas Windrunner To Player'),
+(45051, 21, 0, 'Lordaeron belongs to the Forsaken - always and forever.', 12, 0, 100, 0, 0, 0, 20491, 0, 'Lady Sylvanas Windrunner To Player');
+SET @GUID=4505701;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_type`, `action`, `action_chance`, `wpguid`) VALUES
+(@GUID, 1, 1354.1536, 1021.3851, 52.38039, 3.586764, 0, 1, 0, 100, 0),
+(@GUID, 2, 1341.8688, 1011.3289, 54.59922, 3.586764, 0, 1, 0, 100, 0),
+(@GUID, 3, 1326.9110, 1009.5746, 54.59922, 3.021277, 0, 1, 0, 100, 0),
+(@GUID, 4, 1317.4199, 1013.5382, 54.59922, 2.028532, 0, 1, 0, 100, 0),
+(@GUID, 5, 1283.3730, 1070.9077, 53.37197, 2.362329, 0, 1, 0, 100, 0),
+(@GUID, 6, 1258.4970, 1098.5913, 51.47762, 2.308790, 0, 1, 0, 100, 0),
+(@GUID, 7, 1243.2491, 1110.7161, 51.01573, 2.469797, 0, 1, 0, 100, 0),
+(@GUID, 8, 1193.5955, 1148.6325, 49.49488, 2.489432, 0, 1, 0, 100, 0),
+(@GUID, 9, 1105.2985, 1204.6529, 46.48838, 2.568757, 0, 1, 0, 100, 0),
+(@GUID, 10, 1089.7988, 1217.8898, 46.34733, 2.453304, 0, 1, 0, 100, 0),
+(@GUID, 11, 1070.6142, 1234.5732, 46.24262, 2.425815, 0, 1, 0, 100, 0),
+(@GUID, 12, 1032.4326, 1273.4902, 46.02033, 2.599710, 0, 1, 0, 100, 0),
+(@GUID, 13, 945.0678, 1328.3918, 46.71963, 2.580538, 0, 1, 0, 100, 0),
+(@GUID, 14, 926.3798, 1338.3869, 47.25944, 2.694421, 0, 1, 0, 100, 0),
+(@GUID, 15, 895.2805, 1350.9622, 49.68106, 2.780029, 0, 1, 0, 100, 0),
+(@GUID, 16, 871.0656, 1356.4820, 53.67734, 2.917474, 0, 1, 0, 100, 0),
+(@GUID, 17, 862.8825, 1358.3472, 54.92165, 2.917474, 0, 1, 0, 100, 0),
+(@GUID, 18, 848.6384, 1359.6978, 55.42436, 3.215925, 0, 1, 0, 100, 0),
+(@GUID, 19, 820.0228, 1358.7645, 56.41104, 3.178226, 0, 1, 0, 100, 0),
+(@GUID, 20, 748.6945, 1358.4659, 69.44759, 3.138171, 0, 1, 0, 100, 0),
+(@GUID, 21, 723.1749, 1350.9353, 73.37368, 3.641611, 0, 1, 0, 100, 0),
+(@GUID, 22, 683.4259, 1320.9855, 79.61323, 3.834034, 0, 1, 0, 100, 0),
+(@GUID, 23, 648.3973, 1299.3040, 84.76816, 3.466467, 0, 1, 0, 100, 0),
+(@GUID, 24, 645.0045, 1299.9880, 85.07080, 2.805947, 0, 1, 0, 100, 0),
+(@GUID, 25, 640.4437, 1303.3983, 85.34098, 2.508281, 0, 1, 0, 100, 0),
+(@GUID, 26, 630.6345, 1313.0195, 83.93389, 2.311146, 0, 1, 0, 100, 0),
+(@GUID, 27, 619.7167, 1332.3671, 85.35432, 2.078668, 0, 1, 0, 100, 0),
+(@GUID, 28, 599.6586, 1369.7771, 88.74443, 2.062960, 0, 1, 0, 100, 0),
+(@GUID, 29, 583.6837, 1408.0041, 94.51779, 2.069243, 0, 1, 0, 100, 0),
+(@GUID, 30, 576.2428, 1423.0537, 97.55828, 2.132075, 0, 1, 0, 100, 0),
+(@GUID, 31, 555.8312, 1447.9395, 103.65572, 2.257739, 0, 1, 0, 100, 0),
+(@GUID, 32, 534.9779, 1469.4705, 112.33334, 2.340206, 0, 1, 0, 100, 0),
+(@GUID, 33, 509.6081, 1489.6441, 123.12377, 2.469797, 0, 1, 0, 100, 0),
+(@GUID, 34, 501.7248, 1505.1267, 127.12670, 2.041754, 0, 1, 0, 100, 0),
+(@GUID, 35, 496.9183, 1532.4189, 129.50436, 1.730737, 0, 1, 0, 100, 0),
+(@GUID, 36, 494.8780, 1551.0817, 128.88194, 1.679686, 0, 1, 0, 100, 0);
+SET @GUID=4505101;
+DELETE FROM `waypoint_data` WHERE `id`=@GUID;
+-- INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_type`, `action`, `action_chance`, `wpguid`) VALUES
+-- (@GUID, 1, 1351.3326, 1023.5604, 52.49290, 3.794896, 0, 1, 0, 100, 0),
+-- (@GUID, 2, 1341.0969, 1015.6601, 54.55842, 3.476024, 0, 1, 0, 100, 0),
+-- (@GUID, 3, 1326.8812, 1014.2476, 54.59922, 2.851635, 0, 1, 0, 100, 0),
+-- (@GUID, 4, 1323.0731, 1020.3032, 54.59922, 2.592453, 0, 1, 0, 100, 0),
+-- (@GUID, 5, 1287.9075, 1075.5198, 53.46790, 2.364687, 0, 1, 0, 100, 0),
+-- (@GUID, 6, 1261.2916, 1103.7098, 51.42205, 2.502132, 0, 1, 0, 100, 0),
+-- (@GUID, 7, 1245.8872, 1115.0850, 50.81323, 2.506059, 0, 1, 0, 100, 0),
+-- (@GUID, 8, 1198.5935, 1152.2131, 49.44096, 2.658294, 0, 1, 0, 100, 0),
+-- (@GUID, 9, 1109.2337, 1209.0124, 46.59064, 2.407288, 0, 1, 0, 100, 0),
+-- (@GUID, 10, 1093.3975, 1221.9399, 46.33885, 2.415142, 0, 1, 0, 100, 0),
+-- (@GUID, 11, 1075.2797, 1239.9503, 46.22900, 2.368018, 0, 1, 0, 100, 0),
+-- (@GUID, 12, 1035.4653, 1278.9564, 46.00826, 2.635053, 0, 1, 0, 100, 0),
+-- (@GUID, 13, 947.5699, 1334.1583, 46.36019, 2.714379, 0, 1, 0, 100, 0),
+-- (@GUID, 14, 928.7150, 1344.7327, 47.32204, 2.788991, 0, 1, 0, 100, 0),
+-- (@GUID, 15, 896.6491, 1356.9969, 49.57093, 2.918682, 0, 1, 0, 100, 0),
+-- (@GUID, 16, 870.8812, 1361.7207, 53.70751, 3.122786, 0, 1, 0, 100, 0),
+-- (@GUID, 17, 862.8340, 1362.1898, 54.94648, 3.154202, 0, 1, 0, 100, 0),
+-- (@GUID, 18, 848.4928, 1362.7254, 55.44739, 3.197399, 0, 1, 0, 100, 0),
+-- (@GUID, 19, 819.8353, 1362.2593, 56.44017, 3.154202, 0, 1, 0, 100, 0),
+-- (@GUID, 20, 747.8422, 1362.3352, 69.48340, 3.358405, 0, 1, 0, 100, 0),
+-- (@GUID, 21, 720.9816, 1354.3851, 73.56366, 3.707908, 0, 1, 0, 100, 0),
+-- (@GUID, 22, 681.3668, 1323.4702, 79.91288, 3.790375, 0, 1, 0, 100, 0), -- fix
+-- (@GUID, 23, 644.8774, 1303.9456, 84.95144, 3.790375, 0, 1, 0, 100, 0),
+-- (@GUID, 24, 642.8243, 1303.5966, 85.16318, 3.091370, 0, 1, 0, 100, 0),
+-- (@GUID, 25, 640.1527, 1308.0874, 84.79577, 3.087443, 0, 1, 0, 100, 0),
+-- (@GUID, 26, 634.2171, 1315.6269, 83.82943, 2.199943, 0, 1, 0, 100, 0),
+-- (@GUID, 27, 622.9302, 1334.6844, 84.96324, 2.192089, 0, 1, 0, 100, 0),
+-- (@GUID, 28, 604.1992, 1373.0546, 88.62355, 2.196016, 0, 1, 0, 100, 0),
+-- (@GUID, 29, 587.1557, 1410.5729, 94.52041, 2.207797, 0, 1, 0, 100, 0),
+-- (@GUID, 30, 579.6567, 1426.0507, 97.99942, 2.298117, 0, 1, 0, 100, 0),
+-- (@GUID, 31, 559.6369, 1451.3808, 104.46113, 2.305971, 0, 1, 0, 100, 0),
+-- (@GUID, 32, 538.0384, 1473.1732, 112.81736, 2.482686, 0, 1, 0, 100, 0),
+-- (@GUID, 33, 512.9638, 1493.9776, 123.20586, 2.482686, 0, 1, 0, 100, 0),
+-- (@GUID, 34, 505.3227, 1508.1033, 126.81208, 2.219578, 0, 1, 0, 100, 0),
+-- (@GUID, 35, 500.6704, 1535.3819, 129.32786, 2.239213, 0, 1, 0, 100, 0),
+-- (@GUID, 36, 496.8941, 1552.6738, 128.83305, 2.239213, 0, 1, 0, 100, 0);
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_forsaken_warhorse_45057' WHERE `entry`=45057;
+-- UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_sylvanas_windrunner_45051' WHERE `entry`=45051;

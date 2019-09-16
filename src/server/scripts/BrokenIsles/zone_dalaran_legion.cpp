@@ -25,7 +25,9 @@
 #include "SpellMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
+#include "ScriptedEscortAI.h"
 #include "SpellScript.h"
+#include "Log.h"
 
 /*
  * Dalaran above Karazhan
@@ -831,6 +833,342 @@ public:
     }
 };
 
+// 86563
+class npc_archmage_khadgar_86563 : public CreatureScript
+{
+public:
+    npc_archmage_khadgar_86563() : CreatureScript("npc_archmage_khadgar_86563") { }
+
+    enum eNpc
+    {   
+        QUEST_DOWN_TO_AZSUNA = 41220,
+        SPELL_TAXI_DALARAN_AZSUNA_ALLIANCE = 205098,
+        SPELL_TAXI_DALARAN_AZSUNA_HORDE = 205203,
+    };
+
+    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 /*action*/) override
+    {
+        if (player->HasQuest(QUEST_DOWN_TO_AZSUNA) || player->GetQuestStatus(QUEST_DOWN_TO_AZSUNA) == QUEST_STATUS_INCOMPLETE)
+            player->CastSpell(player, player->IsInAlliance() ? SPELL_TAXI_DALARAN_AZSUNA_ALLIANCE : SPELL_TAXI_DALARAN_AZSUNA_HORDE, true); // KillCredit & SendTaxi
+
+        return true;
+    }
+
+    bool OnQuestAccept(Player* /*player*/, Creature* creature, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_DOWN_TO_AZSUNA)
+        {
+            creature->AI()->Talk(1);
+        }
+        return true;
+    }
+};
+
+// npc 90417 for the quest 41804 'Ask and You Shall Receive'
+class npc_archmage_khadgar_90417 : public CreatureScript {
+public:
+    npc_archmage_khadgar_90417() : CreatureScript("npc_archmage_khadgar_90417") { }
+
+    enum Khadgar {
+        QUEST_ASK_AND_YOU_SHALL_RECEIVE = 41804,
+        QUEST_RETURN_TO_JACE = 41806,
+        SPELL_CRYSTALLIZED_SOUL = 208510,
+        PHASE_NONE = 0,
+        PHASE_CONTINUE = -1,
+        DATA_EVENT_STARTER_GUID = 0,
+        SAY_KHADGAR_1 = 3,
+        SAY_KHADGAR_2 = 4,
+        SAY_KHADGAR_3 = 5,
+        SAY_KHADGAR_4 = 6,
+        SAY_KHADGAR_5 = 7,
+        SAY_KHADGAR_6 = 8,
+        SAY_KHADGAR_7 = 9,
+        SAY_KHADGAR_8 = 10,
+        WP_START = 1,
+        WP_START_WALK = 4,
+        WP_IN_THE_MIDDLE = 10,
+        WP_AT_FIRST_CHEST = 11,
+        WP_AT_SECOND_CHEST = 15,
+        WP_AT_HOME = 21,
+        PHASE_WAIT_IN_MIDDLE = 1,
+        PHASE_SEEK_IN_FIRST_CHEST_1 = 2,
+        PHASE_SEEK_IN_FIRST_CHEST_2 = 3,
+        PHASE_SEEK_IN_FIRST_CHEST_3 = 4,
+        PHASE_SEEK_IN_SECOND_CHEST_1 = 5,
+        PHASE_SEEK_IN_SECOND_CHEST_2 = 6,
+        PHASE_SEEK_IN_SECOND_CHEST_3 = 7,
+        PHASE_SEEK_IN_SECOND_CHEST_4 = 8,
+        PHASE_MOVE_HOME = 9,
+        PHASE_DESPAWN = 10,
+        GO_CRYSTALLIZED_SOUL = 248521,
+    };
+
+    struct npc_archmage_khadgar_90417_AI : public npc_escortAI
+    {
+        npc_archmage_khadgar_90417_AI(Creature* creature) : npc_escortAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _phase = PHASE_NONE;
+            _moveTimer = 0;
+        }
+
+        void sQuestAccept(Player* player, Quest const* quest) override
+        {
+            if (quest->GetQuestId() == QUEST_ASK_AND_YOU_SHALL_RECEIVE)
+            {
+                SetGUID(player->GetGUID(), DATA_EVENT_STARTER_GUID);
+                Talk(SAY_KHADGAR_1);
+                Start(false, true, player->GetGUID(), quest);
+            }
+            if (quest->GetQuestId() == QUEST_RETURN_TO_JACE)
+            {
+                Talk(SAY_KHADGAR_8);
+            }
+        }
+
+        ObjectGuid GetGUID(int32 type) const override
+        {
+            if (type == DATA_EVENT_STARTER_GUID)
+                return _eventStarterGuid;
+
+            return ObjectGuid::Empty;
+        }
+
+        void SetGUID(ObjectGuid guid, int32 type) override
+        {
+            switch (type)
+            {
+            case DATA_EVENT_STARTER_GUID:
+                _eventStarterGuid = guid;
+                break;
+            default:
+                break;
+            }
+        }
+
+        void Reset() override
+        {
+            me->SetWalk(false);
+            Initialize();
+            _events.Reset();
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            if (UpdateVictim())
+            {
+                DoMeleeAttackIfReady();
+            }
+
+            if (HasEscortState(STATE_ESCORT_NONE))
+                return;
+
+            npc_escortAI::UpdateAI(diff);
+
+            if (_phase)
+            {
+                if (_moveTimer <= diff)
+                {
+                    switch (_phase)
+                    {
+                    case PHASE_CONTINUE:
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_WAIT_IN_MIDDLE:
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_CONTINUE;
+                        break;
+                    case PHASE_SEEK_IN_FIRST_CHEST_1:
+                        me->HandleEmoteCommand(EMOTE_STATE_USESTANDING);
+                        Talk(SAY_KHADGAR_3);
+                        _moveTimer = 7 * IN_MILLISECONDS;
+                        _phase = PHASE_SEEK_IN_FIRST_CHEST_2;
+                        break;
+                    case PHASE_SEEK_IN_FIRST_CHEST_2:
+                        me->HandleEmoteCommand(EMOTE_STATE_NONE);
+                        me->SetFacingTo(5.1576f);
+                        Talk(SAY_KHADGAR_4);
+                        _moveTimer = 3 * IN_MILLISECONDS;
+                        _phase = PHASE_SEEK_IN_FIRST_CHEST_3;
+                        break;
+                    case PHASE_SEEK_IN_FIRST_CHEST_3:
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_SEEK_IN_SECOND_CHEST_1:
+                        me->HandleEmoteCommand(EMOTE_STATE_USESTANDING);
+                        Talk(SAY_KHADGAR_5);
+                        _moveTimer = 7 * IN_MILLISECONDS;
+                        _phase = PHASE_SEEK_IN_SECOND_CHEST_2;
+                        break;
+                    case PHASE_SEEK_IN_SECOND_CHEST_2:
+                        me->HandleEmoteCommand(EMOTE_STATE_NONE);
+                        Talk(SAY_KHADGAR_6);
+                        _moveTimer = 6 * IN_MILLISECONDS;
+                        _phase = PHASE_SEEK_IN_SECOND_CHEST_3;
+                        break;
+                    case PHASE_SEEK_IN_SECOND_CHEST_3:
+                        me->CastSpell(me, SPELL_CRYSTALLIZED_SOUL);
+                        me->SummonGameObject(GO_CRYSTALLIZED_SOUL, -829.154f, 4653.472f, 768.774f, 1.46863f, QuaternionData(), 60);
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _eventStarterGuid))
+                        {
+                            player->KilledMonsterCredit(90417, ObjectGuid::Empty);
+                        }
+                        me->SetFacingTo(1.9587f);
+                        Talk(SAY_KHADGAR_7);
+                        _moveTimer = 5 * IN_MILLISECONDS;
+                        _phase = PHASE_SEEK_IN_SECOND_CHEST_4;
+                        break;
+                    case PHASE_SEEK_IN_SECOND_CHEST_4:
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_DESPAWN:
+                        me->DespawnOrUnsummon(5000, Seconds(1));
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                else if (!me->IsInCombat())
+                    _moveTimer -= diff;
+            }
+        }
+
+        void WaypointReached(uint32 waypointId) override
+        {
+            Player* player = GetPlayerForEscort();
+            if (!player)
+                return;
+            
+            switch (waypointId)
+            {
+            case WP_START_WALK:
+                _moveTimer = 0 * IN_MILLISECONDS;
+                _phase = PHASE_NONE;
+                me->SetWalk(true);
+                me->SetUnitMovementFlags(MOVEMENTFLAG_WALKING);
+                break;
+            case WP_IN_THE_MIDDLE:
+                SetEscortPaused(true);
+                me->SetFacingTo(2.3671f);
+                Talk(SAY_KHADGAR_2);
+                _moveTimer = 5 * IN_MILLISECONDS;
+                _phase = PHASE_WAIT_IN_MIDDLE;
+                break;
+            case WP_AT_FIRST_CHEST:
+                SetEscortPaused(true);
+                me->SetFacingTo(3.6316f);
+                _moveTimer = 0.2 * IN_MILLISECONDS;
+                _phase = PHASE_SEEK_IN_FIRST_CHEST_1;
+                break;
+            case WP_AT_SECOND_CHEST:
+                SetEscortPaused(true);
+                _moveTimer = 0.2 * IN_MILLISECONDS;
+                _phase = PHASE_SEEK_IN_SECOND_CHEST_1;
+                break;
+            case WP_AT_HOME:
+                _moveTimer = 0.2 * IN_MILLISECONDS;
+                _phase = PHASE_DESPAWN;
+                break;
+            default:
+                break;
+            }
+        }
+
+    private:
+        int8 _phase;
+        uint32 _moveTimer;
+        ObjectGuid _eventStarterGuid;
+        GuidList _explosivesGuids;
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_archmage_khadgar_90417_AI(creature);
+    }
+};
+
+// npc 99262 for the quest 41807 'Establishing A Connection'
+class npc_jace_darkweaver_99262 : public CreatureScript
+{
+public:
+    npc_jace_darkweaver_99262() : CreatureScript("npc_jace_darkweaver_99262") { }
+
+    enum eJace {
+        QUEST_ESTABLISHING_A_CONNECTION = 41807,
+        KILLCREDIT_ACTIVATE_COMMUNICATOR = 104907,
+        KILLCREDIT_REPORT_RECEIVED = 104908,
+        SPELL_ACTIVATE_LEGION_COMMUNICATOR = 37020,
+        EVENT_START_ANIM = 1,
+        DATA_COMMUNICATOR_ACTIVATED = 21,
+    };
+
+    struct npc_jace_darkweaver_99262_AI : public ScriptedAI
+    {
+        npc_jace_darkweaver_99262_AI(Creature* creature) : ScriptedAI(creature) {
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void MoveInLineOfSight(Unit* who) override {}
+
+        void EnterCombat(Unit* who) override
+        {
+            who->GetAI()->AttackStart(me);
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage) override {}
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override {}
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_COMMUNICATOR_ACTIVATED:
+                break;
+            }
+        }
+
+        void JustReachedHome() override {}
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+             while (uint32 eventId = _events.ExecuteEvent())
+             {
+                 switch (eventId)
+                 {
+                     case EVENT_START_ANIM:
+                         //_events.ScheduleEvent(EVENT_TEMPERED_FURY, urand(2000, 4000));
+                         break;
+                 }
+             }
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_jace_darkweaver_99262_AI(creature);
+    }
+};
+
 void AddSC_dalaran_legion()
 {
     new OnLegionArrival();
@@ -849,4 +1187,7 @@ void AddSC_dalaran_legion()
     new PlayerScript_summon_korvas_bloodthorn();
     new npc_korvas_bloodthorn_summon();
     new npc_altruis_sufferer_artifact();
+    new npc_archmage_khadgar_86563();
+    new npc_archmage_khadgar_90417();
+    new npc_jace_darkweaver_99262();
 }
