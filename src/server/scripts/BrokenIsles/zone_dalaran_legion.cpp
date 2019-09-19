@@ -17,6 +17,7 @@
 
 #include "Conversation.h"
 #include "GameObject.h"
+#include "GameObjectAI.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "PhasingHandler.h"
@@ -1100,6 +1101,17 @@ public:
     }
 };
 
+enum eQuest41807 {
+    QUEST_ESTABLISHING_A_CONNECTION = 41807,
+    KILLCREDIT_ACTIVATE_COMMUNICATOR = 104907,
+    KILLCREDIT_REPORT_RECEIVED = 104908,
+    DATA_COMMUNICATOR_ACTIVATED = 21,
+    DATA_REPORT_RECEIVED = 22,
+    DATA_GARBLED_POSITION = 23,
+    DATA_GARBLED_INCOMING = 24,
+    SPELL_SUMMON_ALLARI = 207795,
+};
+
 // npc 99262 for the quest 41807 'Establishing A Connection'
 class npc_jace_darkweaver_99262 : public CreatureScript
 {
@@ -1107,13 +1119,18 @@ public:
     npc_jace_darkweaver_99262() : CreatureScript("npc_jace_darkweaver_99262") { }
 
     enum eJace {
-        QUEST_ESTABLISHING_A_CONNECTION = 41807,
-        KILLCREDIT_ACTIVATE_COMMUNICATOR = 104907,
-        KILLCREDIT_REPORT_RECEIVED = 104908,
-        SPELL_ACTIVATE_LEGION_COMMUNICATOR = 37020,
-        EVENT_START_ANIM = 1,
-        DATA_COMMUNICATOR_ACTIVATED = 21,
+        SAY_JACE_1 = 0,
+        SAY_JACE_2 = 1,
+        SAY_ALTRUIS_1 = 0,
     };
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) override
+    {
+        if (quest->GetQuestId() == QUEST_ESTABLISHING_A_CONNECTION)
+            if (Creature* altruis = creature->FindNearestCreature(99254, 15.0f))
+                altruis->AI()->Talk(SAY_ALTRUIS_1);
+        return true;
+    }
 
     struct npc_jace_darkweaver_99262_AI : public ScriptedAI
     {
@@ -1121,42 +1138,17 @@ public:
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void MoveInLineOfSight(Unit* who) override {}
-
-        void EnterCombat(Unit* who) override
-        {
-            who->GetAI()->AttackStart(me);
-        }
-
-        void DamageTaken(Unit* /*attacker*/, uint32& damage) override {}
-
-        void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override {}
-
         void SetData(uint32 id, uint32 /*value*/) override
         {
             switch (id)
             {
             case DATA_COMMUNICATOR_ACTIVATED:
+                Talk(SAY_JACE_1);
+                break;
+            case DATA_REPORT_RECEIVED:
+                Talk(SAY_JACE_2);
                 break;
             }
-        }
-
-        void JustReachedHome() override {}
-
-        void UpdateAI(uint32 diff) override
-        {
-            _events.Update(diff);
-
-             while (uint32 eventId = _events.ExecuteEvent())
-             {
-                 switch (eventId)
-                 {
-                     case EVENT_START_ANIM:
-                         //_events.ScheduleEvent(EVENT_TEMPERED_FURY, urand(2000, 4000));
-                         break;
-                 }
-             }
-            DoMeleeAttackIfReady();
         }
 
     private:
@@ -1168,6 +1160,207 @@ public:
         return new npc_jace_darkweaver_99262_AI(creature);
     }
 };
+
+// gameobject 251528 for the quest 41807 'Establishing A Connection'
+class go_legion_communicator : public GameObjectScript
+{
+public:
+    go_legion_communicator() : GameObjectScript("go_legion_communicator") { }
+
+    enum eAllari {
+        EVENT_TALK_JACE_00 = 1,
+        EVENT_TALK_JACE_01 = 2,
+        EVENT_TALK_PART_00 = 3,
+        EVENT_TALK_PART_01 = 4,
+        EVENT_GIVE_CREDIT = 5,
+        NPC_ALLARI_SOULEATER = 104909,
+    };
+
+    bool OnGossipHello(Player* player, GameObject* go) override
+    {
+        if (player->HasQuest(QUEST_ESTABLISHING_A_CONNECTION) &&
+            !player->GetQuestObjectiveData(QUEST_ESTABLISHING_A_CONNECTION, 0))
+        {
+            Position allariPosition = { go->GetPositionX(), go->GetPositionY(), 747.019f, 0.385333f };
+            player->SummonCreature(NPC_ALLARI_SOULEATER, allariPosition, TEMPSUMMON_TIMED_DESPAWN, 30000);
+        }
+
+        return false;
+    }
+
+    struct go_legion_communicator_AI : public GameObjectAI
+    {
+        go_legion_communicator_AI(GameObject* go) : GameObjectAI(go) { }
+
+        EventMap    _events;
+        ObjectGuid  _playerGUID;
+        ObjectGuid  _allariGUID;
+        ObjectGuid  _jaceGUID;
+
+        void Reset() override
+        {
+            _playerGUID = ObjectGuid::Empty;
+            _allariGUID = ObjectGuid::Empty;
+            _jaceGUID = ObjectGuid::Empty;
+        }
+
+        void OnStateChanged(uint32 /*state*/, Unit* unit) override
+        {
+            if (unit)
+                if (unit->ToPlayer()->HasQuest(QUEST_ESTABLISHING_A_CONNECTION) &&
+                    !unit->ToPlayer()->GetQuestObjectiveData(QUEST_ESTABLISHING_A_CONNECTION, 0))
+                    if (Creature* allari = go->FindNearestCreature(104909, 3.0f))
+                        if (Creature* jace = go->FindNearestCreature(99262, 5.0f))
+                            if (Player* player = unit->ToPlayer())
+                            {
+                                _playerGUID = player->GetGUID();
+                                _allariGUID = allari->GetGUID();
+                                _jaceGUID = jace->GetGUID();
+                                _events.ScheduleEvent(EVENT_TALK_JACE_00, 1000);
+                                _events.RescheduleEvent(EVENT_TALK_PART_00, 7000);
+                            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_TALK_JACE_00:
+                {
+                    if (Creature* jace = ObjectAccessor::GetCreature(*go, _jaceGUID))
+                        if (Player* player = ObjectAccessor::GetPlayer(*go, _playerGUID))
+                        {
+                            jace->AI()->SetData(DATA_COMMUNICATOR_ACTIVATED, DATA_COMMUNICATOR_ACTIVATED);
+                            player->KilledMonsterCredit(KILLCREDIT_ACTIVATE_COMMUNICATOR, ObjectGuid::Empty);
+                        }   
+                    break;
+                }
+                case EVENT_TALK_PART_00:
+                {
+                    if (Creature* allari = ObjectAccessor::GetCreature(*go, _allariGUID))
+                        if (Player* player = ObjectAccessor::GetPlayer(*go, _playerGUID))
+                            allari->AI()->SetData(DATA_GARBLED_POSITION, DATA_GARBLED_POSITION);
+                    _events.ScheduleEvent(EVENT_TALK_PART_01, 6000);
+                    break;
+                }
+                case EVENT_TALK_PART_01:
+                {
+                    if (Creature* allari = ObjectAccessor::GetCreature(*go, _allariGUID))
+                        if (Player* player = ObjectAccessor::GetPlayer(*go, _playerGUID))
+                            allari->AI()->SetData(DATA_GARBLED_INCOMING, DATA_GARBLED_INCOMING);
+                    _events.ScheduleEvent(EVENT_GIVE_CREDIT, 2000);
+                    break;
+                }
+                case EVENT_GIVE_CREDIT:
+                {
+                    if (Creature* allari = ObjectAccessor::GetCreature(*go, _allariGUID))
+                        if (Player* player = ObjectAccessor::GetPlayer(*go, _playerGUID))
+                        {
+                            player->KilledMonsterCredit(KILLCREDIT_REPORT_RECEIVED, ObjectGuid::Empty);
+                            allari->DespawnOrUnsummon(Seconds(2));
+                        }
+                    _events.ScheduleEvent(EVENT_TALK_JACE_01, 2000);
+                    break;
+                }
+                case EVENT_TALK_JACE_01:
+                {
+                    if (Creature* jace = ObjectAccessor::GetCreature(*go, _jaceGUID))
+                        if (Player* player = ObjectAccessor::GetPlayer(*go, _playerGUID))
+                            jace->AI()->SetData(DATA_REPORT_RECEIVED, DATA_REPORT_RECEIVED);
+                    break;
+                }
+                default:
+                    break;
+                }                
+            }
+        }
+    };
+
+    GameObjectAI* GetAI(GameObject* go) const override
+    {
+        return new go_legion_communicator_AI(go);
+    }
+};
+
+// npc 104909 for the quest 41807 'Establishing A Connection'
+class npc_allari_souleater_104909 : public CreatureScript
+{
+public:
+    npc_allari_souleater_104909() : CreatureScript("npc_allari_souleater_104909") { }
+
+    enum eAllari {
+        SAY_ALLARI_1 = 0,
+        SAY_ALLARI_2 = 1,
+    };
+
+    struct npc_allari_souleater_104909_AI : public ScriptedAI
+    {
+        npc_allari_souleater_104909_AI(Creature* creature) : ScriptedAI(creature) {
+            me->SetUInt32Value(UNIT_NPC_EMOTESTATE, Emote::EMOTE_STATE_READY2H);
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_GARBLED_POSITION:
+                Talk(SAY_ALLARI_1);
+                break;
+            case DATA_GARBLED_INCOMING:
+                Talk(SAY_ALLARI_2);
+                break;
+            }
+        }
+
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_allari_souleater_104909_AI(creature);
+    }
+};
+
+struct npc_illidari_fel_bat_94324 : public ScriptedAI
+{
+    npc_illidari_fel_bat_94324(Creature* creature) : ScriptedAI(creature)
+    {
+        me->SetAIAnimKitId(0);
+    }
+
+    enum eQuest {
+        QUEST_THE_HUNT_1 = 39247,
+        QUEST_THE_HUNT_2 = 41119,
+        QUEST_VENGEANCE_WILL_BE_OURS_1 = 40249,
+        QUEST_VENGEANCE_WILL_BE_OURS_2 = 41863,
+    };
+
+    void OnSpellClick(Unit* clicker, bool& /*result*/)
+    {
+        if (Player* player = clicker->ToPlayer())
+        {
+            if (player->HasQuest(QUEST_THE_HUNT_1) || player->HasQuest(QUEST_THE_HUNT_2))
+            {
+                me->SetAIAnimKitId(4061);
+                player->KilledMonsterCredit(94321); // 52391
+                player->TeleportTo(1498, Position(1263.69f, 5236.659f, 93.531f, 2.73693f));
+            }
+
+            if (player->HasQuest(QUEST_VENGEANCE_WILL_BE_OURS_1) || player->HasQuest(QUEST_VENGEANCE_WILL_BE_OURS_2))
+            {
+                me->SetAIAnimKitId(4061);
+                player->KilledMonsterCredit(99250);
+                player->TeleportTo(1500, Position(-2379.679f, 174.2f, 3.5625f, 3.733872f));
+            }
+        }
+    }
+};
+
 
 void AddSC_dalaran_legion()
 {
@@ -1190,4 +1383,7 @@ void AddSC_dalaran_legion()
     new npc_archmage_khadgar_86563();
     new npc_archmage_khadgar_90417();
     new npc_jace_darkweaver_99262();
+    new go_legion_communicator();
+    new npc_allari_souleater_104909();
+    RegisterCreatureAI(npc_illidari_fel_bat_94324);
 }

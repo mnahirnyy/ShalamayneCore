@@ -88,19 +88,31 @@ UPDATE `gameobject_template` SET `IconName`='questinteract', `castBarCaption`='G
 UPDATE `creature` SET `spawntimesecs` = '0' WHERE `guid` = '20508639' AND `id` = '90417';
 DELETE FROM `gameobject_template` WHERE `entry`=251528;
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`, `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`, `Data22`, `Data23`, `Data24`, `Data25`, `Data26`, `Data27`, `Data28`, `Data29`, `Data30`, `Data31`, `Data32`, `RequiredLevel`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
-(251528,10,27635,'Legion Communicator','questinteract','','',0.7,93,0,0,30000,0,0,0,0,0,0,37020,0,0,0,27700,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,'','',22423);
+(251528,10,27635,'Legion Communicator','questinteract','','',0.7,93,0,0,30000,0,0,0,0,0,0,0,0,0,0,27700,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,'','go_legion_communicator',22423);
 UPDATE `gameobject` SET `id` = '251528' WHERE `guid` = '20406041';
-DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (99262, 99254);
+DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (99262, 99254, 104909);
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
 (99262,1,128360,0,0,128370,0,0,0,0,0,25549),
-(99254,1,128360,0,0,128370,0,0,0,0,0,25549);
-UPDATE `creature` SET `equipment_id`='1' WHERE `id` IN ('99254', '99262');
+(99254,1,128360,0,0,128370,0,0,0,0,0,25549),
+(104909,1,122430,0,0,0,0,0,0,0,0,25549);
+UPDATE `creature` SET `equipment_id`='1' WHERE `id` IN ('99254', '99262', '104909');
 DELETE FROM `creature_text` WHERE `CreatureID` = 99262;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
-(99262, 0, 0, 'Allari, report in. Have you located the Warblades?', 12, 0, 100, 1, 0, 64662, 101006, 0, 'Jace Darkweaver to Player'),
-(99262, 1, 0, 'We have their position. That will have to do.', 12, 0, 100, 1, 0, 64665, 101006, 0, 'Jace Darkweaver to Player');
+(99262, 0, 0, 'Allari, report in. Have you located the Warblades?', 12, 0, 100, 1, 0, 64662, 0, 0, 'Jace Darkweaver to Player'),
+(99262, 1, 0, 'We have their position. That will have to do.', 12, 0, 100, 1, 0, 64666, 0, 0, 'Jace Darkweaver to Player');
 DELETE FROM `creature_text` WHERE `CreatureID` = 104909;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
-(104909, 0, 0, 'Yes... <garbled> Caria... <garbled> Broken Shore... <garbled> heavy resistance...', 12, 0, 100, 1, 0, 64663, 101006, 0, 'Allari the Souleater to Player'),
-(104909, 1, 0, 'Damn it all! INCOMING!', 12, 0, 100, 1, 0, 64664, 101006, 0, 'Allari the Souleater to Player');
+(104909, 0, 0, 'Yes... <garbled> Caria... <garbled> Broken Shore... <garbled> heavy resistance...', 12, 0, 100, 0, 0, 64663, 0, 0, 'Allari the Souleater to Player'),
+(104909, 1, 0, 'Damn it all! INCOMING!', 12, 0, 100, 33, 0, 64664, 0, 0, 'Allari the Souleater to Player');
 UPDATE `creature_template` SET `scale` = '0.85' WHERE `entry` = '104909';
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_jace_darkweaver_99262' WHERE `entry`='99262';
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_allari_souleater_104909' WHERE `entry`='104909';
+DELETE FROM `creature_text` WHERE `CreatureID` = 99254;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(99254, 0, 0, '$n. I have an idea.', 12, 0, 100, 1, 0, 64661, 0, 0, 'Altruis to Player');
+UPDATE `creature` SET `position_x`=-864.727, `position_y`=4260.450, `position_z`=745.120, `orientation`=2.93473 WHERE `guid`=20556170;
+UPDATE `gameobject` SET `position_x`=-868.421, `position_y`=4261.290 WHERE `guid`=20406041;
+-- The Aldrachi Warblades Artifact Scenario
+UPDATE `instance_template` SET `script`='scenario_artifact_brokenshore', `parent`=0, `insideResurrection`=1 WHERE `map`=1500;
+DELETE FROM `scenarios` WHERE `map` = '1500' AND `scenario_A` = '961';
+INSERT INTO `scenarios` (`map`, `difficulty`, `scenario_A`, `scenario_H`) VALUES ('1500', '12', '961', '961');

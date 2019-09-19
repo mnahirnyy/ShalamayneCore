@@ -205,6 +205,9 @@ void AddSC_boss_new_opera();
 void AddSC_boss_new_vizaduum();
 void AddSC_boss_new_nightbane();
 
+//scenario
+void AddSC_scenario_artifact_brokenshore();
+
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddBrokenIslesScripts()
@@ -388,4 +391,7 @@ void AddBrokenIslesScripts()
     AddSC_boss_new_opera();
     AddSC_boss_new_vizaduum();
     AddSC_boss_new_nightbane();
+	
+	//scenario
+    AddSC_scenario_artifact_brokenshore();
 }
