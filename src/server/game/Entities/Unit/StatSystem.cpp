@@ -1083,7 +1083,7 @@ void Guardian::UpdateArmor()
                 case ENTRY_SUCCUBUS:
                     pctFromOwnerArmor = 300.f;
                     break;
-		// Hunter
+                // Hunter
                 case ENTRY_HATI_1:
                 case ENTRY_HATI_2:
                 case ENTRY_HATI_3:
@@ -1171,7 +1171,7 @@ void Guardian::UpdateMaxHealth()
                 case ENTRY_IMP:
                     pctFromOwnerHealth = 30.f;
                     break;
-		case ENTRY_HATI_1:
+                case ENTRY_HATI_1:
                 case ENTRY_HATI_2:
                 case ENTRY_HATI_3:
                 case ENTRY_HATI_4:
@@ -1262,7 +1262,7 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
                 case ENTRY_ABOMINATION:
                     value = CalculatePct(m_owner->GetTotalAttackPowerValue(BASE_ATTACK), 50.f);
                     break;
-		case ENTRY_HATI_1:
+                case ENTRY_HATI_1:
                 case ENTRY_HATI_2:
                 case ENTRY_HATI_3:
                 case ENTRY_HATI_4:

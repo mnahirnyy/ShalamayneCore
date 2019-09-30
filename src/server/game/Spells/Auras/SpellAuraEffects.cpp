@@ -2014,6 +2014,9 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
                     case 75531:
                         target->SetDisplayId(target->getGender() == GENDER_MALE ? 31654 : 31655);
                         break;
+                    // Suramar Masquerade
+                    case 202477:
+                        break;
                     default:
                         break;
                 }

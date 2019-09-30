@@ -45,9 +45,9 @@
 #include "CinematicMgr.h"
 #include "CombatLogPackets.h"
 #include "CombatPackets.h"
-#include "Config.h"
 #include "Common.h"
 #include "ConditionMgr.h"
+#include "Config.h"
 #include "CreatureAI.h"
 #include "DB2Stores.h"
 #include "DatabaseEnv.h"
@@ -12498,7 +12498,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 
     // hook for player on itemlevel change
     sScriptMgr->OnPlayerItemLevelChange(this);
- 
+
     return pItem;
 }
 
@@ -13806,9 +13806,9 @@ void Player::SwapItem(uint16 src, uint16 dst)
 
     AutoUnequipOffhandIfNeed();
     UpdateAverageItemLevel();
+
     // hook for player on itemlevel change
     sScriptMgr->OnPlayerItemLevelChange(this);
-
 }
 
 void Player::AddItemToBuyBackSlot(Item* pItem)
@@ -15645,6 +15645,7 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
 
     sScriptMgr->OnQuestStatusChange(this, quest_id);
     sScriptMgr->OnQuestStatusChange(this, quest, oldStatus, questStatusData.Status);
+    sScriptMgr->OnQuestAccept(this, quest);  
 }
 
 void Player::ForceCompleteQuest(uint32 quest_id)
@@ -16003,7 +16004,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
         SetMonthlyQuestStatus(quest_id);
     else if (quest->IsSeasonal())
         SetSeasonalQuestStatus(quest_id);
-
+    
     if (quest->CanIncreaseRewardedQuestCounters())
         SetRewardedQuest(quest_id);
 
@@ -27389,7 +27390,7 @@ void Player::ResummonPetTemporaryUnSummonedIfAny()
         NewPet->UpdateAllStats();
     else
         delete NewPet;
-
+ 
     m_temporaryUnsummonedPetNumber = 0;
     sScriptMgr->OnPlayerResummonPetTemporary(this);
 }

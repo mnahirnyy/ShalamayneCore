@@ -107,7 +107,7 @@ public:
     static ScenarioMgr* Instance();
 
     InstanceScenario* CreateInstanceScenario(Map const* map, TeamId team) const;
-
+    
     void LoadDBData();
     void LoadDB2Data();
     void LoadScenarioPOI();

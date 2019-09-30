@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
+ * Copyright (C) 2008-2019 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -45,7 +45,17 @@
 #include "WorldSession.h"
 #include <sstream>
 #include <cstdarg>
+#include "ScenarioMgr.h"
 #include "SpellMgr.h"
+#include "GridNotifiers.h"
+#include "CELLIMPL.h"
+
+
+inline uint32 secsToTimeBitFields(time_t secs)
+{
+    tm* lt = localtime(&secs);
+    return uint32((lt->tm_year - 100) << 24 | lt->tm_mon << 20 | (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 | lt->tm_hour << 6 | lt->tm_min);
+}
 
 BossBoundaryData::~BossBoundaryData()
 {
@@ -67,6 +77,30 @@ _challengeModeStarted(false), _challengeModeLevel(0), _challengeModeStartTime(0)
    // to keep it loaded until this object is destroyed.
     module_reference = sScriptMgr->AcquireModuleReferenceOfScriptName(scriptname);
 #endif // #ifndef TRINITY_API_USE_DYNAMIC_LINKING
+
+//////////////////////////////////////////////////
+
+    m_IsScenarioComplete = false;
+
+    m_ChallengeStarted = false;
+    m_ConditionCompleted = false;
+    m_CreatureKilled = 0;
+    m_StartChallengeTime = 0;
+
+    m_ChallengeDoorGuids.clear();
+
+    m_ChallengeOrbGuid = 0;
+    m_ChallengeTime = 0;
+    //m_MedalType = eChallengeMedals::MedalTypeNone;
+
+    m_InstanceGuid = map->GetId();//  MAKE_NEW_GUID(map->GetId(), 0, HIGHGUID_INSTANCE_SAVE);
+    m_BeginningTime = 0;
+    m_ScenarioID = 0;
+    m_ScenarioStep = 0;
+    m_LastResetTime = 0;
+    m_ChallengeLevel = 0;
+    m_DeathCount = 0;
+////////////////////////////////////////
 }
 
 void InstanceScript::SaveToDB()
@@ -860,6 +894,36 @@ void InstanceScript::DoStartMovie(uint32 movieId)
                 player->SendMovieStart(movieId);
 }
 
+/// Create Conversation for all players in instance
+void InstanceScript::DoConversation(uint32 conversationId)
+{
+    if (!conversationId)
+    {
+        TC_LOG_ERROR("scripts", "DoConversation called for not existing conversationId %u", conversationId);
+        return;
+    }
+
+    Map::PlayerList const& playerList = instance->GetPlayers();
+    if (!playerList.isEmpty())
+        for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+            if (Player* player = i->GetSource())
+                Conversation::CreateConversation(conversationId, player, player->GetPosition(), { player->GetGUID() });
+}
+
+void InstanceScript::DoDelayedConversation(uint32 delay, uint32 conversationId)
+{
+    if (!conversationId)
+    {
+        TC_LOG_ERROR("scripts", "DoDelayedConversation called for not existing conversationId %u", conversationId);
+        return;
+    }
+
+    Map::PlayerList const& playerList = instance->GetPlayers();
+    if (!playerList.isEmpty())
+        for (Map::PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
+            if (Player* player = i->GetSource())
+                player->AddDelayedConversation(delay, conversationId);
+}
 // Update Achievement Criteria for all players in instance
 void InstanceScript::DoUpdateAchievementCriteria(CriteriaTypes type, uint32 miscValue1 /*= 0*/, uint32 miscValue2 /*= 0*/, Unit* unit /*= NULL*/)
 {
@@ -960,6 +1024,120 @@ void InstanceScript::SendBossKillCredit(uint32 encounterId)
     bossKillCreditMessage.DungeonEncounterID = encounterId;
 
     instance->SendToPlayers(bossKillCreditMessage.Write());
+}
+
+///
+
+void InstanceScript::CompleteScenario()
+{
+    if (InstanceScenario* inScenario = instance->GetInstanceScenario())
+        inScenario->CompleteScenario();
+    else
+        TC_LOG_ERROR("scripts", "InstanceScript::CompleteScenario() fail", "");
+}
+
+void InstanceScript::CompleteCurrStep()
+{
+    if (InstanceScenario* inScenario = instance->GetInstanceScenario())
+        inScenario->CompleteCurrStep();
+    else
+        TC_LOG_ERROR("scripts", "InstanceScript::CompleteCurrStep() fail", "");
+}
+
+void InstanceScript::GetScenarioData(Player* p_Player/*= nullptr*/)
+{
+    //m_ScenarioID, m_ScenarioStep
+    TC_LOG_ERROR("scripts", "GetScenarioData  start %s", "");
+    TeamId tid;
+    uint32 zoneid;
+    if (p_Player == nullptr)
+    {
+        tid = TEAM_ALLIANCE;
+        zoneid = 0;
+        TC_LOG_ERROR("scripts", "GetScenarioData  p_Player == nullptr %s", "");
+    }
+    else
+    {
+        tid  = (p_Player == nullptr) ? TEAM_ALLIANCE : p_Player->GetTeamId();
+        zoneid = (p_Player == nullptr) ? 0 : p_Player->GetZoneId();
+        TC_LOG_ERROR("scripts", "GetScenarioData  p_Player != nullptr %s", "");
+    }
+    InstanceMap* map = instance->ToInstanceMap();
+    //map->SetDifficultyID(DIFFICULTY_MYTHIC_KEYSTONE);
+    TC_LOG_ERROR("scripts", "GetScenarioData  map->SetDifficultyID %s", "");
+    if (InstanceScenario* instanceScenario = sScenarioMgr->CreateInstanceScenario(map, tid)) // , zoneid
+    {
+        TC_LOG_ERROR("scripts", "GetScenarioData CreateInstanceScenario %s", "");
+        m_ScenarioID = instanceScenario->GetStep()->ScenarioID;
+        m_ScenarioStep = instanceScenario->GetStep()->ID;
+        map->SetInstanceScenario(instanceScenario);
+     
+    }
+    else
+
+        TC_LOG_DEBUG("scripts", "InstanceScript: GetScenarioData failed");
+
+    TC_LOG_ERROR("scripts", "GetScenarioData  end %s", "");
+         
+}
+
+void InstanceScript::SendScenarioState(ScenarioData p_Data, Player* p_Player /*= nullptr*/)
+{
+    WorldPacket l_Data(SMSG_SCENARIO_STATE);
+
+    l_Data << int32(p_Data.m_ScenarioID);
+    l_Data << int32(p_Data.m_StepID);
+    l_Data << uint32(instance->GetDifficultyID());
+    l_Data << uint32(p_Data.m_WaveCurrent);
+    l_Data << uint32(p_Data.m_WaveMax);
+    l_Data << uint32(p_Data.m_TimerDuration);
+
+    l_Data << uint32(p_Data.m_CriteriaCount);
+    l_Data << uint32(p_Data.m_BonusCount);
+
+    for (CriteriaProgressData l_ProgressData : p_Data.m_CriteriaProgress)
+        BuildCriteriaProgressPacket(&l_Data, l_ProgressData);
+
+    for (BonusObjectiveData l_BonusObjective : p_Data.m_BonusObjectives)
+    {
+        l_Data << int32(l_BonusObjective.m_ObjectiveID);
+        l_Data.WriteBit(l_BonusObjective.m_ObjectiveComplete);
+        l_Data.FlushBits();
+    }
+
+    l_Data.WriteBit(p_Data.m_ScenarioComplete);
+    l_Data.FlushBits();
+
+    if (p_Player == nullptr)
+        instance->SendToPlayers(&l_Data);
+    else
+        p_Player->SendDirectMessage(&l_Data);
+}
+
+void InstanceScript::SendScenarioProgressUpdate(CriteriaProgressData p_Data, Player* p_Player /*= nullptr*/)
+{
+    WorldPacket l_Data(SMSG_SCENARIO_PROGRESS_UPDATE, 39);
+    BuildCriteriaProgressPacket(&l_Data, p_Data);
+
+    if (p_Player == nullptr)
+        instance->SendToPlayers(&l_Data);
+    else
+        p_Player->SendDirectMessage(&l_Data);
+}
+
+void InstanceScript::BuildCriteriaProgressPacket(WorldPacket* p_Data, CriteriaProgressData p_CriteriaProgress)
+{
+    *p_Data << int32(p_CriteriaProgress.m_ID);
+    *p_Data << uint64(p_CriteriaProgress.m_Quantity);
+
+    *p_Data << uint64(p_CriteriaProgress.m_Guid);
+    //p_Data->appendPackGUID(p_CriteriaProgress.m_Guid);
+    *p_Data << uint32(secsToTimeBitFields(p_CriteriaProgress.m_Date));
+    *p_Data << int32(p_CriteriaProgress.m_TimeFromStart);
+    *p_Data << int32(p_CriteriaProgress.m_TimeFromCreate);
+
+    p_Data->WriteBits(p_CriteriaProgress.m_Flags, 4);
+    p_Data->FlushBits();
 }
 
 bool InstanceScript::IsWipe() const

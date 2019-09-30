@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
+ * Copyright (C) 2008-2019 TrinityCore <https://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
  * This program is free software; you can redistribute it and/or modify it
@@ -349,6 +349,15 @@ void MotionMaster::MoveCloserAndStop(uint32 id, Unit* target, float distance)
         init.Launch();
         Mutate(new EffectMovementGenerator(id), MOTION_SLOT_ACTIVE);
     }
+}
+
+void MotionMaster::MoveAwayAndDespawn(float distance, uint32 msTimeToDespawn)
+{
+    if (_owner->ToCreature())
+    {
+        MovePoint(1, _owner->ToCreature()->GetPositionWithDistInFront(distance), true);
+        _owner->ToCreature()->DespawnOrUnsummon(3000);
+    }       
 }
 
 void MotionMaster::MoveLand(uint32 id, Position const& pos)

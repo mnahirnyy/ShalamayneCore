@@ -1379,7 +1379,7 @@ class TC_GAME_API Unit : public WorldObject
         void SetCritterGUID(ObjectGuid guid) { SetGuidValue(UNIT_FIELD_CRITTER, guid); }
         ObjectGuid GetCritterGUID() const { return GetGuidValue(UNIT_FIELD_CRITTER); }
 
-		//m_HatiGUID
+        //m_HatiGUID
         void SetHatiGUID(ObjectGuid guid) { m_HatiGUID = guid; }
         ObjectGuid GetHatiGUID() const { return m_HatiGUID; }
         Creature* GetHati() const;

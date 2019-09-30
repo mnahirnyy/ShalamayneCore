@@ -38,6 +38,8 @@
 #include "SceneMgr.h"
 #include <queue>
 #include "GarrisonMgr.h"
+#include "TaskScheduler.h"
+#include "Conversation.h"
 #include "PlayerStorage.h"
 
 struct AccessRequirement;
@@ -2533,6 +2535,52 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         // Send custom message with system message (addon, custom interfaces ...etc)
         void SendCustomMessage(std::string const& opcode, std::string const& data = "");
         void SendCustomMessage(std::string const& opcode, std::vector<std::string> const& data);
+				
+		/* delay teleport */
+        void AddDelayedTeleport(uint32 delay, uint32 mapID, float x, float y, float z, float o)
+        {
+            WorldLocation loc;
+            loc = WorldLocation(mapID);
+            loc.Relocate(x, y, z, o);
+
+            this->GetScheduler().Schedule(Milliseconds(delay), [loc](TaskContext context)
+            {
+                if (Player* player = GetContextPlayer())
+                {
+                    if (loc.GetMapId() == player->GetMapId())
+                        player->NearTeleportTo(loc, false);
+                    else
+                        player->TeleportTo(loc);
+                }
+            });
+
+        }
+        void AddDelayedTeleport(uint32 delay, uint32 mapID, Position pos)
+        {
+            AddDelayedTeleport(delay, mapID, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
+        }
+
+        /*conversation delay teleport */
+        void AddConversationDelayedTeleport(uint32 delay, uint32 conversationId, uint32 mapID, float x, float y, float z, float o)
+        {
+            Conversation::CreateConversation(conversationId, this, this->GetPosition(), { this->GetGUID() });
+            AddDelayedTeleport(delay, mapID, x, y, z, o);           
+        }
+        void AddConversationDelayedTeleport(uint32 delay, uint32 conversationId, uint32 mapID, Position pos)
+        {
+            AddConversationDelayedTeleport(delay, conversationId, mapID, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
+        }
+
+        void AddDelayedConversation(uint32 delay, uint32 conversationId)
+        {
+            this->GetScheduler().Schedule(Milliseconds(delay), [conversationId](TaskContext context)
+            {
+                if (Player* player = GetContextPlayer())
+                {
+                    Conversation::CreateConversation(conversationId, player, player->GetPosition(), { player->GetGUID() });
+                }
+            });
+        }
 
     protected:
         // Gamemaster whisper whitelist

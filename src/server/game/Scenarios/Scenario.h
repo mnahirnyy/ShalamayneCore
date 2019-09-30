@@ -73,6 +73,8 @@ class TC_GAME_API Scenario : public CriteriaHandler
 
         void SendScenarioEvent(Player* player, uint32 eventId);
 
+        void CompleteCurrStep();
+
     protected:
         GuidUnorderedSet _players;
 

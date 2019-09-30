@@ -403,6 +403,7 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
         uint32 GetId() const;
         bool Instanceable() const;
         bool IsDungeon() const;
+        bool IsScenario()  const;
         bool IsNonRaidDungeon() const;
         bool IsRaid() const;
         bool IsRaidOrHeroicDungeon() const;

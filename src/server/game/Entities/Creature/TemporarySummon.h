@@ -37,8 +37,8 @@ enum PetEntry
 
     // Shaman pet
     PET_SPIRIT_WOLF     = 29264,
-	
-	// Hunter Pet
+
+    // Hunter Pet
     PET_HATI_1          = 100324,
     PET_HATI_2          = 106548,
     PET_HATI_3          = 106549,
@@ -83,7 +83,7 @@ enum PetEntries
     ENTRY_CHI_JI                  = 100868,
     // Druid Pet/Minion
     ENTRY_TREANT                  = 1964,
-   // Hunter Pet/minion
+    // Hunter Pet/minion
     ENTRY_HATI_1                  = 100324,
     ENTRY_HATI_2                  = 106548,
     ENTRY_HATI_3                  = 106549,
