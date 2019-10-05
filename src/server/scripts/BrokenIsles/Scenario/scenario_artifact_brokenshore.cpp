@@ -183,8 +183,10 @@ struct scenario_artifact_brokenshore : public InstanceScript
         else if (type == DATA_STAGE_3 && data == DONE)
         {
             ++demonTwinsKilled;
-            if (demonTwinsKilled == 2)
+            if (demonTwinsKilled == 2) {
                 NextStep();
+                SummonGorgonnash();
+            }
         }
         else if (type == DATA_STAGE_4 && data == DONE)
         {
@@ -205,6 +207,12 @@ struct scenario_artifact_brokenshore : public InstanceScript
         }
     }
 
+    void SummonGorgonnash()
+    {
+        TempSummon* gorgonnash = instance->SummonCreature(NPC_GORGONNASH, Position(-2784.22f, -98.7661f, 47.9949f, 0.511382f));
+        gorgonnash->AI()->SetData(23, 23);
+    }
+
 private:
     EventMap events;
     uint8 StepID;
@@ -222,6 +230,11 @@ public:
 
     enum eAllari {
         DATA_FREED = 11,
+        EVENT_YELL_1 = 1,
+        EVENT_SAY_2 = 2,
+        EVENT_SAY_3 = 3,
+        EVENT_SAY_4 = 4,
+        EVENT_DESPAWN = 5,
     };
 
     struct npc_allari_soulweaver_98882_AI : public ScriptedAI
@@ -232,7 +245,18 @@ public:
 
         void Initialize()
         {
+            sayGreeting = false;
             instance = me->GetInstanceScript();
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (who->IsPlayer())
+                // if (!sayGreeting)
+                {
+                    sayGreeting = true;
+                    _events.ScheduleEvent(EVENT_YELL_1, 500);
+                }
         }
 
         void SetData(uint32 id, uint32 /*value*/) override
@@ -242,15 +266,54 @@ public:
             case DATA_FREED:
                 if (instance->GetData(DATA_STAGE_1) == NOT_STARTED)
                     instance->SetData(DATA_STAGE_1, DONE);
+                _events.ScheduleEvent(EVENT_SAY_2, 1000);
                 break;
             default:
                 break;
             }
         }
 
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            if (!UpdateVictim())
+                return;
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_YELL_1:
+                    Talk(0);
+                    break;
+                case EVENT_SAY_2:
+                    Talk(1);
+                    _events.ScheduleEvent(EVENT_SAY_3, 4000);
+                    me->LoadEquipment(1);
+                    break;
+                case EVENT_SAY_3:
+                    Talk(2);
+                    me->HandleEmoteCommand(EMOTE_STATE_KNEEL);
+                    _events.ScheduleEvent(EVENT_SAY_4, 6000);
+                    break;
+                case EVENT_SAY_4:
+                    Talk(3);
+                    _events.ScheduleEvent(EVENT_DESPAWN, Seconds(60));
+                    break;
+                case EVENT_DESPAWN:
+                    me->DespawnOrUnsummon();
+                default:
+                    break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+
     private:
         EventMap _events;
         InstanceScript * instance;
+        bool sayGreeting;
     };
 
     CreatureAI* GetAI(Creature* creature) const override
@@ -323,6 +386,8 @@ public:
         EVENT_DEMON_LINK = 1,
         EVENT_SHADOW_BOLT = 2,
         EVENT_STALKING_SHADOWS = 3,
+        EVENT_SAY_1 = 4,
+        EVENT_SAY_2 = 5,
         SPELL_DEMON_LINK = 215837,
         SPELL_SHADOW_BOLT = 215885,
         SPELL_STALKING_SHADOWS = 215861,
@@ -337,18 +402,19 @@ public:
         void Initialize()
         {
             instance = me->GetInstanceScript();
+            conversationStarted = false;
+            me->setActive(true);
+            me->SetReactState(REACT_AGGRESSIVE);
         }
 
         void Reset() override
         {
             _events.Reset();
             Initialize();
-            me->setActive(true);
         }
 
         void EnterCombat(Unit* /*who*/) override
         {
-            me->AddAura(SPELL_DEMON_LINK, me);
             _events.ScheduleEvent(EVENT_SHADOW_BOLT, 1000);
             _events.ScheduleEvent(EVENT_STALKING_SHADOWS, urand(8000, 10000));
         }
@@ -357,6 +423,22 @@ public:
         {
             instance->SetData(DATA_STAGE_3, DONE);
             me->DespawnOrUnsummon(20000, Seconds(300));
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (damage >= me->GetHealth())
+                Talk(2);
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (who->IsPlayer())
+                if (!conversationStarted)
+                {   
+                    _events.ScheduleEvent(EVENT_SAY_1, 500);
+                    conversationStarted = true;
+                }
         }
 
         void UpdateAI(uint32 diff) override
@@ -378,6 +460,15 @@ public:
                     DoCastVictim(SPELL_STALKING_SHADOWS);
                     _events.ScheduleEvent(EVENT_STALKING_SHADOWS, 8000);
                     break;
+                case EVENT_SAY_1:
+                    Talk(0);
+                    _events.ScheduleEvent(EVENT_SAY_1, 4000);
+                    break;
+                case EVENT_SAY_2:
+                    Talk(1);
+                    if (Creature* doomherald_taraar = me->FindNearestCreature(105094, 15.0f, true))
+                        doomherald_taraar->AI()->SetData(22, 22);
+                    break;
                 default:
                     break;
                 }
@@ -388,6 +479,7 @@ public:
     private:
         EventMap _events;
         InstanceScript * instance;
+        bool conversationStarted;
     };
 
     CreatureAI* GetAI(Creature* creature) const override
@@ -407,9 +499,15 @@ public:
         EVENT_DEMON_LINK = 1,
         EVENT_FEL_FIREBALL = 2,
         EVENT_SUMMON_FEL_FAMILIARS = 3,
+        EVENT_SAY_1 = 4,
+        EVENT_SAY_2 = 5,
         SPELL_DEMON_LINK = 215837,
         SPELL_FEL_FIREBALL = 215852,
         SPELL_SUMMON_FEL_FAMILIARS = 215842,
+        DATA_START_TALK = 22,
+        NPC_FEL_FAMILIAR = 108686,
+        SPELL_FEL_FAMILIAR = 215844,
+        SPELL_FEL_FAMILIAR_2 = 215847,
     };
 
     struct npc_doomherald_taraar_105094_AI : public ScriptedAI
@@ -432,18 +530,22 @@ public:
 
         void EnterCombat(Unit* /*who*/) override
         {
-            me->AddAura(SPELL_DEMON_LINK, me);
             _events.ScheduleEvent(EVENT_FEL_FIREBALL, 1000);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage) override
         {
-            if (HealthAbovePct(60))
-                _events.ScheduleEvent(EVENT_SUMMON_FEL_FAMILIARS, 1000);
+            /*if (HealthBelowPct(60))
+                _events.ScheduleEvent(EVENT_SUMMON_FEL_FAMILIARS, 500);*/
         }
 
         void JustDied(Unit* /*killer*/) override
         {
+           std::list<Creature*> summonedFelFamiliars;
+            me->GetCreatureListWithEntryInGrid(summonedFelFamiliars, NPC_FEL_FAMILIAR, me->GetVisibilityRange());
+            for (std::list<Creature*>::const_iterator itr = summonedFelFamiliars.begin(); itr != summonedFelFamiliars.end(); ++itr)
+                (*itr)->ToCreature()->DespawnOrUnsummon(0);
+
             instance->SetData(DATA_STAGE_3, DONE);
             me->DespawnOrUnsummon(20000, Seconds(300));
         }
@@ -464,13 +566,49 @@ public:
                     _events.ScheduleEvent(EVENT_FEL_FIREBALL, 4000);
                     break;
                 case EVENT_SUMMON_FEL_FAMILIARS:
-                    DoCastVictim(SPELL_SUMMON_FEL_FAMILIARS);
+                    // DoCastVictim(SPELL_SUMMON_FEL_FAMILIARS);
+                    //if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true))
+                    //    SummomNearTarget(2, NPC_FEL_FAMILIAR, target->GetPosition(), 20000); // 2 Fel Familiars
+                    break;
+                case EVENT_SAY_1:
+                    Talk(0);
+                    _events.ScheduleEvent(EVENT_SAY_2, 3000);
+                    break;
+                case EVENT_SAY_2:
+                    Talk(1);
                     break;
                 default:
                     break;
                 }
             }
             DoMeleeAttackIfReady();
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_START_TALK:
+                _events.ScheduleEvent(EVENT_SAY_1, 2000);
+                break;
+            default:
+                break;
+            }
+        }
+
+        void SummomNearTarget(uint8 count, uint32 entry, Position targetPos, uint32 duration)
+        {
+            for (uint8 i = 0; i < count; i++)
+            {
+                uint8 rand = urand(1, 2);
+                float angle = frand(0.0f, 2.0f * float(M_PI));
+                float x = targetPos.GetPositionX() + (5.0f * std::cos(angle));
+                float y = targetPos.GetPositionY() + (5.0f * std::sin(angle));
+                Position randomPosition = {
+                    x, y, targetPos.GetPositionZ(), targetPos.GetOrientation()
+                };
+                me->SummonCreature(entry, randomPosition, TEMPSUMMON_CORPSE_DESPAWN, duration);
+            }
         }
 
     private:
@@ -497,6 +635,8 @@ public:
         EVENT_SUMMON_FEL_CRUSHER = 3,
         SPELL_CREEPING_DOOM = 215978,
         SPELL_FEL_CLEAVE = 215925,
+        DATA_START_ANIM = 23,
+        NPC_BURNING_CRUSHER = 105103,
     };
 
     struct npc_gorgonnash_99046_AI : public ScriptedAI
@@ -519,19 +659,28 @@ public:
 
         void EnterCombat(Unit* /*who*/) override
         {
+            Talk(1);
             _events.ScheduleEvent(EVENT_CREEPING_DOOM, 5000);
             _events.ScheduleEvent(EVENT_FEL_CLEAVE, 500);
+            _events.ScheduleEvent(EVENT_SUMMON_FEL_CRUSHER, 8000);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage) override
         {
-            // TO DO
-            // if (HealthBelowPct(60))
-                // _events.ScheduleEvent(EVENT_SUMMON_FEL_CRUSHER, 1000);
+            if (HealthBelowPct(60))
+                _events.ScheduleEvent(EVENT_SUMMON_FEL_CRUSHER, 1000);
+
+            if (damage >= me->GetHealth())
+                Talk(3);
         }
 
         void JustDied(Unit* /*killer*/) override
         {
+            std::list<Creature*> summonedCrushers;
+            me->GetCreatureListWithEntryInGrid(summonedCrushers, NPC_BURNING_CRUSHER, me->GetVisibilityRange());
+            for (std::list<Creature*>::const_iterator itr = summonedCrushers.begin(); itr != summonedCrushers.end(); ++itr)
+                (*itr)->ToCreature()->DespawnOrUnsummon(0);
+
             if (instance->GetData(DATA_STAGE_4) == NOT_STARTED)
                 instance->SetData(DATA_STAGE_4, DONE);
 
@@ -557,11 +706,46 @@ public:
                     DoCastVictim(SPELL_FEL_CLEAVE);
                     _events.ScheduleEvent(EVENT_FEL_CLEAVE, urand(8000, 10000));
                     break;
+                case EVENT_SUMMON_FEL_CRUSHER:
+                    _events.CancelEvent(EVENT_SUMMON_FEL_CRUSHER);
+                    Talk(2);
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true))
+                        SummomNearTarget(2, NPC_BURNING_CRUSHER, target->GetPosition(), 20000); // 2 Burning Crushers
+                    break;
                 default:
                     break;
                 }
             }
             DoMeleeAttackIfReady();
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_START_ANIM:
+                Talk(0);
+                me->SetAIAnimKitId(0);
+                me->PlayOneShotAnimKitId(6961);
+                break;
+            default:
+                break;
+            }
+        }
+
+        void SummomNearTarget(uint8 count, uint32 entry, Position targetPos, uint32 duration)
+        {
+            for (uint8 i = 0; i < count; i++)
+            {
+                uint8 rand = urand(1, 2);
+                float angle = frand(0.0f, 2.0f * float(M_PI));
+                float x = targetPos.GetPositionX() + (5.0f * std::cos(angle));
+                float y = targetPos.GetPositionY() + (5.0f * std::sin(angle));
+                Position randomPosition = {
+                    x, y, targetPos.GetPositionZ(), targetPos.GetOrientation()
+                };
+                me->SummonCreature(entry, randomPosition, TEMPSUMMON_CORPSE_DESPAWN, duration);
+            }
         }
 
     private:
@@ -701,7 +885,8 @@ public:
                     player->KilledMonsterCredit(114514);
 
             if (InstanceScript * instance = go->GetInstanceScript())
-                instance->SetData(DATA_STAGE_7, DONE);
+                if (instance->GetData(DATA_STAGE_7) == NOT_STARTED)
+                    instance->SetData(DATA_STAGE_7, DONE);
         }
     }
     bool isLooted;
@@ -716,11 +901,13 @@ public:
     {
         if (InstanceScript * instance = go->GetInstanceScript())
         {
-            if (!isUsed && player->HasAura(188501))
+            if (!isUsed)
             {
                 isUsed = true;
                 go->DestroyForPlayer(player);
-                instance->SetData(DATA_STAGE_5, DONE);
+
+                if (instance->GetData(DATA_STAGE_5) == NOT_STARTED)
+                    instance->SetData(DATA_STAGE_5, DONE);
             }
         }
         return false;

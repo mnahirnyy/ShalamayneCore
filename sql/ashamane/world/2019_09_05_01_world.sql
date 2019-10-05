@@ -116,9 +116,19 @@ UPDATE `gameobject` SET `position_x`=-868.421, `position_y`=4261.290 WHERE `guid
 UPDATE `instance_template` SET `script`='scenario_artifact_brokenshore', `parent`=0, `insideResurrection`=1 WHERE `map`=1500;
 DELETE FROM `scenarios` WHERE `map` = '1500' AND `scenario_A` = '961';
 INSERT INTO `scenarios` (`map`, `difficulty`, `scenario_A`, `scenario_H`) VALUES ('1500', '12', '961', '961');
+-- Allari Souleater 98882
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_allari_soulweaver_98882' WHERE `entry`='98882';
+DELETE FROM `creature_text` WHERE `CreatureID` = 98882;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(98882, 0, 0, '$n, is that you? Finally some good news.', 14, 0, 100, 0, 0, 58226, 0, 0, 'Allari Souleater to Player'),
+(98882, 0, 1, 'Caria left me for dead... the fool!', 12, 0, 100, 0, 0, 58227, 0, 0, 'Allari Souleater to Player'),
+(98882, 0, 2, 'My wounds are severe. You\'ll have to push ahead alone.', 12, 0, 100, 0, 0, 58228, 0, 0, 'Allari Souleater to Player'),
+(98882, 0, 3, 'I\'ll join you as soon as I\'m able.', 12, 0, 100, 0, 0, 58229, 0, 0, 'Allari Souleater to Player');
+DELETE FROM `creature_equip_template` WHERE `CreatureID`=98882;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(98882,1,122430,0,0,0,0,0,0,0,0,25549);
 SET @GUID := 280000405;
-DELETE FROM `creature` WHERE `guid` BETWEEN @GUID+1 AND @GUID+53;
+DELETE FROM `creature` WHERE `guid` BETWEEN @GUID+1 AND @GUID+47;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
 (@GUID+1,105125,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2776.7,-198.007,42.7372,0.412475,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+2,105138,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2779.4,-201.615,42.2245,0.479234,900,0,0,0,0,0,0,0,0,0,0,'',26972),
@@ -126,115 +136,181 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@GUID+4,98975,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2622.2,48.7097,40.186,1.08621,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+5,105125,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2741.7,-159.902,48.5941,1.51518,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+6,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2624.29,35.2339,42.6158,1.15375,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+7,108646,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2713.47,-65.2707,46.8933,2.97757,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+8,108646,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2777.82,-39.0945,47.3001,5.68798,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+9,108646,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2778.13,-57.7502,46.4468,5.83642,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+10,108646,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2734.82,-99.2475,46.6737,2.16547,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+11,98891,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2819.03,-211.928,39.2151,0.544413,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+12,105138,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2818.72,-215.646,39.175,0.544413,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+13,98891,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2799.04,-204.15,39.8648,0.322936,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+14,98891,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2798.18,-201.348,39.8876,0.210625,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+15,105125,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2774.94,-202.043,42.4006,0.412475,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+16,105125,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2752.38,-182.139,46.1015,1.03687,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+17,105125,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2754.3,-179.766,46.3346,1.11148,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+18,105125,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2742.02,-165.608,47.9461,1.51518,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+19,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2632.57,40.4857,43.4871,0.941693,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+20,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2609.77,73.9158,35.7398,0.190852,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+21,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2609.57,81.7673,35.7878,6.22271,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+22,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2607.37,79.7441,35.2339,6.23449,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+23,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2607.18,75.669,35.1404,0.0887503,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+24,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2600.5,83.9686,33.7518,5.34856,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+25,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2627.05,48.9812,41.2774,1.12862,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+26,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2616.88,49.1165,39.0248,1.19538,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+27,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2619.78,44.6529,40.2464,1.15611,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+28,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2627.64,35.4816,43.1705,0.937766,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+29,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2597.53,74.1462,32.9812,0.819961,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+30,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2604.85,68.95,34.4744,0.658948,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+31,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2624.87,53.5853,40.0687,1.12469,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+32,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2594.34,82.9146,32.5172,5.84572,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+33,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2593.16,76.8109,32.1264,0.39192,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+34,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2577.3,77.858,26.7235,0.475957,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+35,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2579.34,85.7889,27.3312,5.9117,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+36,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2577.32,89.2888,26.8618,5.2504,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+37,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2574.07,75.537,25.8615,0.374648,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+38,98995,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2572.93,74.152,25.5651,2.45595,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+39,98995,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2574.5,74.1077,25.9783,2.24154,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+40,98995,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2578.97,89.7792,27.2976,5.70594,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+41,98995,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2577.09,91.1646,26.8336,6.05387,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+42,99184,1500,7796,7796,'1,2,8,12',0,0,0,-1,0,0,-2749.17,-330.338,38.7842,1.88583,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+43,105151,1500,7796,7799,'1,2,8,12',0,0,0,-1,0,0,-2810.06,-243.924,38.6361,1.92589,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+44,99046,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2784.22,-98.7661,47.9949,0.511382,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+45,105094,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2746.54,-84.4343,46.6362,1.93767,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+46,105095,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2751.16,-69.521,46.6362,4.99993,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+47,98995,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2680.71,-33.3051,49.843,4.0983,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+48,98995,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2682.25,-35.4171,49.796,0.698307,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+49,98995,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2690.99,-21.124,49.6984,6.02095,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+50,98882,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2507.72,117.919,8.19956,0.0794148,900,0,0,0,0,0,3,0,0,0,0,'',26972),
-(@GUID+51,98995,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2689.22,-20.6522,48.3898,1.48999,900,0,0,0,0,0,0,0,0,0,0,'',26972);
+(@GUID+7,98891,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2819.03,-211.928,39.2151,0.544413,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+8,105138,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2818.72,-215.646,39.175,0.544413,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+9,98891,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2799.04,-204.15,39.8648,0.322936,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+10,98891,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2798.18,-201.348,39.8876,0.210625,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+11,105125,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2774.94,-202.043,42.4006,0.412475,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+12,105125,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2752.38,-182.139,46.1015,1.03687,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+13,105125,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2754.3,-179.766,46.3346,1.11148,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+14,105125,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2742.02,-165.608,47.9461,1.51518,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+15,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2632.57,40.4857,43.4871,0.941693,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+16,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2609.77,73.9158,35.7398,0.190852,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+17,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2609.57,81.7673,35.7878,6.22271,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+18,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2607.37,79.7441,35.2339,6.23449,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+19,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2607.18,75.669,35.1404,0.0887503,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+20,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2600.5,83.9686,33.7518,5.34856,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+21,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2627.05,48.9812,41.2774,1.12862,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+22,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2616.88,49.1165,39.0248,1.19538,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+23,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2619.78,44.6529,40.2464,1.15611,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+24,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2627.64,35.4816,43.1705,0.937766,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+25,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2597.53,74.1462,32.9812,0.819961,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+26,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2604.85,68.95,34.4744,0.658948,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+27,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2624.87,53.5853,40.0687,1.12469,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+28,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2594.34,82.9146,32.5172,5.84572,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+29,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2593.16,76.8109,32.1264,0.39192,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+30,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2577.3,77.858,26.7235,0.475957,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+31,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2579.34,85.7889,27.3312,5.9117,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+32,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2577.32,89.2888,26.8618,5.2504,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+33,105000,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2574.07,75.537,25.8615,0.374648,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+34,98995,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2572.93,74.152,25.5651,2.45595,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+35,98995,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2574.5,74.1077,25.9783,2.24154,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+36,98995,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2578.97,89.7792,27.2976,5.70594,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+37,98995,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2577.09,91.1646,26.8336,6.05387,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+38,99184,1500,7796,7796,'1,2,8,12',0,0,0,-1,0,0,-2749.17,-330.338,38.7842,1.88583,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+39,105151,1500,7796,7799,'1,2,8,12',0,0,0,-1,0,0,-2810.06,-243.924,38.6361,1.92589,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+-- (@GUID+40,99046,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2784.22,-98.7661,47.9949,0.511382,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+40,105094,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2746.54,-84.4343,46.6362,1.93767,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+41,105095,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2751.16,-69.521,46.6362,4.99993,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+42,98995,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2680.71,-33.3051,49.843,4.0983,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+43,98995,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2682.25,-35.4171,49.796,0.698307,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+44,98995,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2690.99,-21.124,49.6984,6.02095,900,0,0,0,0,0,0,0,0,0,0,'',26972),
+(@GUID+45,98882,1500,7796,7797,'1,2,8,12',0,0,0,-1,0,0,-2507.72,117.919,8.19956,0.0794148,900,0,0,0,0,0,3,0,0,0,0,'',26972),
+(@GUID+46,98995,1500,7796,7798,'1,2,8,12',0,0,0,-1,0,0,-2689.22,-20.6522,48.3898,1.48999,900,0,0,0,0,0,0,0,0,0,0,'',26972);
 -- Aldrachi Soulwrath SAI
 UPDATE `creature_template` SET `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=1 WHERE `entry`=105000;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=105000 AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (105000,0,0,0,0,0,100,0,5000,8000,12000,15000,11,216265,0,0,0,0,0,2,0,0,0,0,0,0,0,"Aldrachi Soulwraith - In Combat - Cast 'Dark Presence'");
--- Doomherald Akvesh
+-- Doomherald Akvesh 98975
 UPDATE `creature_template` SET `lootid`=98975, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=98975;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=98975 AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (98975,0,0,0,0,0,100,0,5000,8000,12000,15000,11,215709,0,0,0,0,0,2,0,0,0,0,0,0,0,"Doomherald Akvesh - In Combat - Cast 'Shadowflame'"),
 (98975,0,1,0,0,0,100,0,10000,10000,10000,25000,11,215701,0,0,0,0,0,2,0,0,0,0,0,0,0,"Doomherald Akvesh - In Combat - Cast 'Impending Doom'");
+DELETE FROM `creature_equip_template` WHERE `CreatureID`=98975;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(98975,1,134069,0,0,0,0,0,0,0,0,25549);
+UPDATE `creature` SET `equipment_id`=1 WHERE `id`=98975;
 -- Doomherald Saera 105095
 DELETE FROM `creature_template_addon` WHERE `entry`=105095;
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `aiAnimKit`, `movementAnimKit`, `meleeAnimKit`, `auras`) VALUES 
 (105095,0,0,0,1,0,0,0,0,'215837');
 UPDATE `creature_template` SET `lootid`=105095, `AIName`='', `ScriptName`='npc_doomherald_saera_105095', `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=105095;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=105095 AND `source_type`=0;
+DELETE FROM `creature_equip_template` WHERE `CreatureID`=105095;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(105095,1,126760,0,0,125648,0,0,0,0,0,25549);
+UPDATE `creature` SET `equipment_id`=1 WHERE `id`=105095;
+DELETE FROM `creature_text` WHERE `CreatureID` = 105095;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(105095, 0, 0, 'Put your back into it, Taraar. Quickly!', 12, 0, 100, 0, 0, 0, 0, 0, 'Doomherald Saera to Player'),
+(105095, 0, 1, 'Keep its soul in tact - Caria has plans for this one.', 12, 0, 100, 0, 0, 0, 0, 0, 'Doomherald Saera to Player'),
+(105095, 0, 2, 'You are too late... he comes...', 12, 0, 100, 0, 0, 0, 0, 0, 'Doomherald Saera to Player');
 -- Doomherald Taraar 105094
 DELETE FROM `creature_template_addon` WHERE `entry`=105094;
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `aiAnimKit`, `movementAnimKit`, `meleeAnimKit`, `auras`) VALUES 
 (105094,0,0,0,1,0,0,0,0,'215837');
 UPDATE `creature_template` SET `lootid`=105094, `AIName`='', `ScriptName`='npc_doomherald_taraar_105094', `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=105094;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=105094 AND `source_type`=0;
+DELETE FROM `creature_equip_template` WHERE `CreatureID`=105094;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(105094,1,126760,0,0,125648,0,0,0,0,0,25549);
+UPDATE `creature` SET `equipment_id`=1 WHERE `id`=105094;
+DELETE FROM `creature_text` WHERE `CreatureID` = 105094;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(105094, 0, 0, 'Me?! If you\'d focus we would be done by now!', 12, 0, 100, 0, 0, 0, 0, 0, 'Doomherald Taraar to Player'),
+(105094, 0, 1, 'At last something reasonable escapes your lips.', 12, 0, 100, 0, 0, 0, 0, 0, 'Doomherald Taraar to Player');
 -- Gorgonnash 99046
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_gorgonnash_99046', `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=99046;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=99046 AND `source_type`=0;
--- Felsoul Legionnaire 105125
-UPDATE `creature_template` SET `lootid`=105125, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=105125;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=105125 AND `source_type`=0;
+DELETE FROM `creature_text` WHERE `CreatureID` = 99046;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(99046, 0, 0, 'What\'s that smell? Is that... Illidari?', 12, 0, 100, 0, 0, 58230, 0, 0, 'Gorgonnash to Player'),
+(99046, 0, 1, 'Caria must complete her work. You will not intefere.', 12, 0, 100, 0, 0, 58231, 0, 0, 'Gorgonnash to Player'),
+(99046, 0, 2, 'Reesh Archim, galar.', 12, 0, 100, 0, 0, 58232, 0, 0, 'Gorgonnash to Player'),
+(99046, 0, 3, 'DEATH IS ALL THAT AWAITS YOU!', 12, 0, 100, 0, 0, 58234, 0, 0, 'Gorgonnash to Player');
+DELETE FROM `creature_equip_template` WHERE `CreatureID`=99046;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(99046,1,127648,0,0,0,0,0,0,0,0,25549);
+UPDATE `creature` SET `equipment_id`=1 WHERE `id`=99046;
+-- Felsoul Legionnaire SAI 105125
+SET @FELSOUL_LEGIONAIRE := 105125;
+UPDATE `creature_template` SET `lootid`=105125, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=@FELSOUL_LEGIONAIRE;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@FELSOUL_LEGIONAIRE AND `source_type`=0;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@FELSOUL_LEGIONAIRE*100+01,@FELSOUL_LEGIONAIRE*100+02) AND `source_type`=9;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(105125,0,0,0,0,0,100,0,5000,8000,12000,15000,11,204092,0,0,0,0,0,2,0,0,0,0,0,0,0,"Felsoul Legionnaire - In Combat - Cast 'Fel Strike'");
+(@FELSOUL_LEGIONAIRE,0,1,0,10,0,100,1,1,10,0,0,87,@FELSOUL_LEGIONAIRE*100+01,@FELSOUL_LEGIONAIRE*100+02,0,0,0,0,1,0,0,0,0,0,0,0,"Felsoul Legionnaire - Within 1-10 Range Out of Combat LoS - Run Random Script (No Repeat)"),
+(@FELSOUL_LEGIONAIRE,0,2,0,0,0,100,0,5000,8000,12000,15000,11,204092,0,0,0,0,0,1,0,0,0,0,0,0,0,"Felsoul Legionnaire - In Combat - Cast 'Fel Strike'"),
+(@FELSOUL_LEGIONAIRE*100+01,9,0,0,0,0,100,0,100,100,0,0,1,0,5000,0,0,0,0,1,0,0,0,0,0,0,0,"Felsoul Legionnaire - On Script - Say Line 0"),
+(@FELSOUL_LEGIONAIRE*100+02,9,0,0,0,0,100,0,100,100,0,0,1,1,5000,0,0,0,0,1,0,0,0,0,0,0,0,"Felsoul Legionnaire - On Script - Say Line 1");
+DELETE FROM `creature_text` WHERE `CreatureID` = 105125;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `BroadcastTextId`, `comment`) VALUES
+(105125, 0, 0, 'You will meet your end!', 12, 0, 100, 0, 0, 53417, 0, 'Felsoul Legionnaire to Player'),
+(105125, 1, 0, 'Reinforcements - now!', 12, 0, 100, 0, 0, 53418, 0, 'Felsoul Legionnaire to Player');
+DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (105125);
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(105125,1,138754,0,0,0,0,0,0,0,0,25549);
+UPDATE `creature` SET `equipment_id`=1 WHERE `id`=105125;
 -- Felsoul Chaosweaver 105138
 UPDATE `creature_template` SET `lootid`=105138, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=105138;
 DELETE FROM `smart_scripts` WHERE `entryorguid`= 105138 AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (105138,0,0,0,0,0,100,0,5000,8000,12000,15000,11,216009,0,0,0,0,0,2,0,0,0,0,0,0,0,"Felsoul Chaosweaver - In Combat - Cast 'Corrupting Chaos'"),
 (105138,0,1,0,0,0,100,0,0,0,3400,4700,11,183345,64,0,0,0,0,2,0,0,0,0,0,0,0,"Felsoul Chaosweaver - In Combat - Cast 'Shadow Bolt'");
+DELETE FROM `creature_equip_template` WHERE `CreatureID`=105138;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(105138,1,128199,0,0,0,0,0,0,0,0,25549);
+UPDATE `creature` SET `equipment_id`=1 WHERE `id`=105138;
 -- Felsoul Bloodseeker 98891
 UPDATE `creature_template` SET `lootid`=98891, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=98891;
 DELETE FROM `smart_scripts` WHERE `entryorguid`= 98891 AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (98891,0,0,0,0,0,100,0,5000,8000,12000,15000,11,204885,0,0,0,0,0,2,0,0,0,0,0,0,0,"Felsoul Bloodseeker - In Combat - Cast 'Devour Magic'"),
 (98891,0,1,0,0,0,100,0,0,0,9400,14700,11,204896,64,0,0,0,0,2,0,0,0,0,0,0,0,"Felsoul Bloodseeker - In Combat - Cast 'Drain Life'");
--- Aldrachi Revenant 105151
-UPDATE `creature_template` SET `lootid`=105151, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=105151;
-DELETE FROM `smart_scripts` WHERE `entryorguid`= 105151 AND `source_type`=0;
+-- Aldrachi Revenant SAI
+SET @ALDRACHI_REVENANT := 105151;
+UPDATE `creature_template` SET `lootid`=105151, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=@ALDRACHI_REVENANT;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ALDRACHI_REVENANT AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(105151,0,0,0,0,0,100,0,5000,8000,12000,15000,11,208196,0,0,0,0,0,2,0,0,0,0,0,0,0,"Aldrachi Revenant - In Combat - Cast 'Dark Presence'"),
-(105151,0,1,0,0,0,100,0,10000,10000,10000,25000,11,216020,0,0,0,0,0,2,0,0,0,0,0,0,0,"Aldrachi Revenant - In Combat - Cast 'Despair'");
--- Eredar SHadow trapper 108646
-UPDATE `creature_template` SET `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=2 WHERE `entry`=108646;
+(@ALDRACHI_REVENANT,0,0,0,0,0,100,1,0,0,0,0,1,0,5000,0,0,0,0,1,0,0,0,0,0,0,0,"Aldrachi Revenant- In Combat - Say Line 0 (No Repeat)"),
+(@ALDRACHI_REVENANT,0,1,0,0,0,100,0,5000,8000,12000,15000,11,208196,0,0,0,0,0,1,0,0,0,0,0,0,0,"Aldrachi Revenant - In Combat - Cast 'Dark Presence'"),
+(@ALDRACHI_REVENANT,0,2,0,0,0,100,0,10000,10000,10000,25000,11,216020,0,0,0,0,0,1,0,0,0,0,0,0,0,"Aldrachi Revenant - In Combat - Cast 'Despair'");
+DELETE FROM `creature_text` WHERE `CreatureID` = 105151;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(105151, 0, 0, 'Your soul will be ours...', 12, 0, 100, 0, 0, 0, 0, 0, 'Aldrachi Revenant to Player');
+-- Eredar Shadow trapper 108646
+UPDATE `creature_template` SET `AIName`='', `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=2 WHERE `entry`=108646;
+DELETE FROM `creature_equip_template` WHERE `CreatureID`=108646;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(108646,1,126793,0,0,0,0,0,0,0,0,25549);
+UPDATE `creature` SET `equipment_id`=1 WHERE `id`=108646;
 -- Caria Felsoul 99184
 UPDATE `creature_template` SET `lootid`=99184, `AIName`='', `ScriptName`='npc_caria_felsoul_99184', `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=99184;
+DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (99184);
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(99184,1,128832,0,0,0,0,0,0,0,0,25549);
+UPDATE `creature` SET `equipment_id`=1 WHERE `id`=9184;
 -- Lesser imp (98995)
 UPDATE `creature_template` SET `AIName`='', `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=0 WHERE `entry`=98995;
+-- Burning Crusher (105103)
+UPDATE `creature_template` SET `AIName`='', `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=0 WHERE `entry`=105103;
+-- Burning Crusher (105103)
+UPDATE `creature_template` SET `AIName`='', `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=0 WHERE `entry`=105103;
 -- Felsoul Portals
-UPDATE `gameobject_template` SET `type`=10, `displayId`=30007, `castBarCaption`='Destroying', `size`=0.66, `Data0`=99, `Data14`=24585, `Data20`=1, `Data26`=1, `AIName`='', `VerifiedBuild`=26822 WHERE `entry` IN ('248517', '248573');
+UPDATE `gameobject_template` SET `type`=10, `displayId`=30007, `IconName`='questinteract', `castBarCaption`='Destroying', `size`=0.66, `Data0`=99, `Data10`=190610, `Data13`=1, `Data14`=24585, `Data20`=1, `Data23`=1, `Data25`=1, `Data26`=0, `AIName`='', `VerifiedBuild`=26822 WHERE `entry` IN ('248517', '248573');
 DELETE FROM `gameobject` WHERE `guid` in (51014375, 51014376, 51014377, 51014378);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) VALUES
-(51014375,248573,1500,7796,7797,'1,2,8,12',0,0,0,-1,-2648.52,19.5848,48.6442,0.85781,-0,-0,-0.415875,-0.909422,3000,255,1,0,'go_brokenshore_felsoul_portal',26822),
-(51014376,248517,1500,7796,7797,'1,2,8,12',0,0,0,-1,-2618.59,78.8602,38.1285,6.15595,-0,-0,-0.0635752,0.997977,3000,255,1,0,'go_brokenshore_felsoul_portal',26822),
-(51014377,266029,1500,7796,7797,'1,2,8,12',0,0,0,-1,-2507.57,117.86,8.20133,0.254625,-0,-0,-0.126969,-0.991907,3000,255,1,0,'go_temporary_allari_cage',26822),
-(51014378,245045,1500,7796,7797,'1,2,8,12',0,0,0,-1,-2740.67,-149.12,48.4044,1.50511,-0,-0,0.236534,-0.971623,3000,255,1,0,'go_cavern_stones_7796',26822);
--- Loot
+(51014375,248573,1500,7796,7797,'1,2,8,12',0,0,0,-1,-2648.52,19.5848,48.6442,0.85781,-0,-0,-0.415875,-0.909422,7200,255,0,1,'go_brokenshore_felsoul_portal',26822),
+(51014376,248517,1500,7796,7797,'1,2,8,12',0,0,0,-1,-2618.59,78.8602,38.1285,6.15595,-0,-0,-0.0635752,0.997977,7200,255,0,1,'go_brokenshore_felsoul_portal',26822),
+(51014377,266029,1500,7796,7797,'1,2,8,12',0,0,0,-1,-2507.57,117.86,8.20133,0.254625,-0,-0,-0.126969,-0.991907,7200,255,1,0,'go_temporary_allari_cage',26822),
+(51014378,252400,1500,7796,7797,'1,2,8,12',0,0,0,-1,-2740.67,-149.12,48.4044,1.50511,0,0,0.559193,-0.829037,7200,255,1,0,'go_cavern_stones_7796',26822);
+DELETE FROM `gameobject_addon` WHERE `guid` in (51014375, 51014376);
+INSERT INTO `gameobject_addon` (`guid`, `parent_rotation0`, `parent_rotation1`, `parent_rotation2`, `parent_rotation3`, `invisibilityType`, `invisibilityValue`, `WorldEffectID`) VALUES
+(51014375,0.0664606,0.00581074,0.156891,0.98536,0,0,0),
+(51014376,0.0664606,0.00581074,0.156891,0.98536,0,0,0);
+DELETE FROM `gameobject_template_addon` WHERE `entry` in (248573, 248517);
+INSERT INTO `gameobject_template_addon` (`entry`, `faction`, `flags`, `mingold`, `maxgold`, `WorldEffectID`) VALUES
+(248573,0,262176,0,0,0),
+(248517,0,262176,0,0,0);
+-- Creature Loot
 DELETE FROM `creature_loot_template` WHERE `Entry` IN (98975, 105095, 105094, 105125, 105138, 98891, 105151, 99184);
 INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES
 (98975,132204,0,98,0,1,0,1,1,'Doomherald Akvesh: Sticky Volatile Substance'),
@@ -270,12 +346,7 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (105151,138781,0,0.01,0,1,0,1,1,'Aldrachi Revenant: Brief History of the Aeons'),
 (105151,137677,0,23,1,1,0,1,1,'Aldrachi Revenant: Fel Blood'),
 (99184,132231,0,70,0,1,0,1,1,'Caira Felsoul: Worn Hooked Claw'),
-(99184,138782,0,20,0,1,0,1,1,'Caira Felsoul: Brief History of the Ages');
--- creature equip
-DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (99184);
-INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
-(99184,1,128832,0,0,128831,0,0,0,0,0,25549);
-UPDATE `creature` SET `equipment_id`='1' WHERE `id` IN ('99184');
+(99184,138782,0,20,0,1,0,1,1,'Caria Felsoul: Brief History of the Ages');
 -- Graveyards
 DELETE FROM `graveyard_zone` WHERE `GhostZone` IN (7871, 7866, 7864, 7819, 7873);
 INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
