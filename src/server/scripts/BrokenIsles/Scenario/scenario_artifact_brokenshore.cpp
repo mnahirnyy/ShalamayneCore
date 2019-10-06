@@ -47,7 +47,10 @@ enum DataTypes
     PHASE_PALADIN = 5171,
     NPC_ALLARI_SOULEATER = 98882,
     NPC_GORGONNASH = 99046,
-    GO_ALDRACHI_WARBLADES = 99999,
+    NPC_DOOMHERALD_SAERA = 105095,
+    NPC_DOOMHERALD_TARAAR = 105094,
+    NPC_ALDRACHI_WARBLADES = 105155,
+    GO_ALDRACHI_WARBLADES = 248785,
     GO_FELSOUL_PORTAL_1 = 248573,
     GO_FELSOUL_PORTAL_2 = 248517,
     GO_FELSOUL_CAGE = 266029,
@@ -177,8 +180,10 @@ struct scenario_artifact_brokenshore : public InstanceScript
         else if (type == DATA_STAGE_2 && data == DONE)
         {
             ++demonPortalsDestroyed;
-            if (demonPortalsDestroyed == 2)
+            if (demonPortalsDestroyed == 2) {
                 NextStep();
+                SummonDemonTwins();
+            }
         }
         else if (type == DATA_STAGE_3 && data == DONE)
         {
@@ -199,6 +204,8 @@ struct scenario_artifact_brokenshore : public InstanceScript
         else if (type == DATA_STAGE_6 && data == DONE)
         {
             NextStep();
+            //summon Aldrachi Warblades GO + NPC
+            SummonAldrachiWarblades();
         }
         else if (type == DATA_STAGE_7 && data == DONE)
         {
@@ -210,7 +217,20 @@ struct scenario_artifact_brokenshore : public InstanceScript
     void SummonGorgonnash()
     {
         TempSummon* gorgonnash = instance->SummonCreature(NPC_GORGONNASH, Position(-2784.22f, -98.7661f, 47.9949f, 0.511382f));
-        gorgonnash->AI()->SetData(23, 23);
+        gorgonnash->AI()->SetData(51, 51);
+    }
+    
+    void SummonDemonTwins()
+    {
+        TempSummon* doomheralSaera = instance->SummonCreature(NPC_DOOMHERALD_SAERA, Position(-2751.16f, -69.521f, 46.6362f, 4.99993f));
+        TempSummon* doomheralTaraar = instance->SummonCreature(NPC_DOOMHERALD_TARAAR, Position(-2746.54f, -84.4343f, 46.6362f, 1.93767f));
+        doomheralSaera->AI()->SetData(52, 52);
+    }
+
+    void SummonAldrachiWarblades()
+    {
+        TempSummon* aldrachiWb = instance->SummonCreature(NPC_ALDRACHI_WARBLADES, Position(-2746.991f, -328.47f, 38.4056f, 2.2876f));
+        GameObject* aldrachiWbLoot = instance->SummonGameObject(GO_ALDRACHI_WARBLADES, Position(-2747.71f, -328.3544f, 38.4344f, 2.28768f), QuaternionData(), WEEK);
     }
 
 private:
@@ -252,7 +272,7 @@ public:
         void MoveInLineOfSight(Unit* who) override
         {
             if (who->IsPlayer())
-                // if (!sayGreeting)
+                if (!sayGreeting)
                 {
                     sayGreeting = true;
                     _events.ScheduleEvent(EVENT_YELL_1, 500);
@@ -277,9 +297,6 @@ public:
         {
             _events.Update(diff);
 
-            if (!UpdateVictim())
-                return;
-
             while (uint32 eventId = _events.ExecuteEvent())
             {
                 switch (eventId)
@@ -303,11 +320,16 @@ public:
                     break;
                 case EVENT_DESPAWN:
                     me->DespawnOrUnsummon();
+                    break;
                 default:
                     break;
                 }
             }
-            DoMeleeAttackIfReady();
+
+            if (!UpdateVictim())
+                return;
+            else
+                DoMeleeAttackIfReady();
         }
 
     private:
@@ -362,7 +384,7 @@ public:
         {
             if (instance->GetData(DATA_STAGE_1) == NOT_STARTED)
             {
-                if (Creature* chained_allari = go->FindNearestCreature(NPC_CHAINED_ALLARI, 5.0f, true))
+                if (Creature* chained_allari = go->FindNearestCreature(NPC_CHAINED_ALLARI, 10.0f, true))
                 {
                     go->ResetDoorOrButton();
                     go->DestroyForPlayer(player);
@@ -391,6 +413,8 @@ public:
         SPELL_DEMON_LINK = 215837,
         SPELL_SHADOW_BOLT = 215885,
         SPELL_STALKING_SHADOWS = 215861,
+        DATA_START_CONVERSATION = 52,
+        DATA_START_TARAAR_CONVERSATION = 53,
     };
 
     struct npc_doomherald_saera_105095_AI : public ScriptedAI
@@ -422,7 +446,7 @@ public:
         void JustDied(Unit* /*killer*/) override
         {
             instance->SetData(DATA_STAGE_3, DONE);
-            me->DespawnOrUnsummon(20000, Seconds(300));
+            // me->DespawnOrUnsummon(20000, Seconds(300));
         }
 
         void DamageTaken(Unit* attacker, uint32& damage) override
@@ -441,12 +465,24 @@ public:
                 }
         }
 
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_START_CONVERSATION:
+                _events.ScheduleEvent(EVENT_SAY_1, 4000);
+                break;
+            default:
+                break;
+            }
+        }
+
         void UpdateAI(uint32 diff) override
         {
             _events.Update(diff);
 
-            if (!UpdateVictim())
-                return;
+           /* if (!UpdateVictim())
+                return;*/
 
             while (uint32 eventId = _events.ExecuteEvent())
             {
@@ -462,18 +498,21 @@ public:
                     break;
                 case EVENT_SAY_1:
                     Talk(0);
-                    _events.ScheduleEvent(EVENT_SAY_1, 4000);
+                    _events.ScheduleEvent(EVENT_SAY_2, 4000);
                     break;
                 case EVENT_SAY_2:
                     Talk(1);
                     if (Creature* doomherald_taraar = me->FindNearestCreature(105094, 15.0f, true))
-                        doomherald_taraar->AI()->SetData(22, 22);
+                        doomherald_taraar->AI()->SetData(DATA_START_TARAAR_CONVERSATION, DATA_START_TARAAR_CONVERSATION);
                     break;
                 default:
                     break;
                 }
             }
-            DoMeleeAttackIfReady();
+            if (!UpdateVictim())
+                return;
+            else
+                DoMeleeAttackIfReady();
         }
 
     private:
@@ -504,7 +543,7 @@ public:
         SPELL_DEMON_LINK = 215837,
         SPELL_FEL_FIREBALL = 215852,
         SPELL_SUMMON_FEL_FAMILIARS = 215842,
-        DATA_START_TALK = 22,
+        DATA_START_TALK = 53,
         NPC_FEL_FAMILIAR = 108686,
         SPELL_FEL_FAMILIAR = 215844,
         SPELL_FEL_FAMILIAR_2 = 215847,
@@ -547,15 +586,15 @@ public:
                 (*itr)->ToCreature()->DespawnOrUnsummon(0);
 
             instance->SetData(DATA_STAGE_3, DONE);
-            me->DespawnOrUnsummon(20000, Seconds(300));
+            // me->DespawnOrUnsummon(20000, Seconds(300));
         }
 
         void UpdateAI(uint32 diff) override
         {
             _events.Update(diff);
 
-            if (!UpdateVictim())
-                return;
+            /*if (!UpdateVictim())
+                return;*/
 
             while (uint32 eventId = _events.ExecuteEvent())
             {
@@ -581,7 +620,10 @@ public:
                     break;
                 }
             }
-            DoMeleeAttackIfReady();
+            if (!UpdateVictim())
+                return;
+            else
+                DoMeleeAttackIfReady();
         }
 
         void SetData(uint32 id, uint32 /*value*/) override
@@ -635,7 +677,7 @@ public:
         EVENT_SUMMON_FEL_CRUSHER = 3,
         SPELL_CREEPING_DOOM = 215978,
         SPELL_FEL_CLEAVE = 215925,
-        DATA_START_ANIM = 23,
+        DATA_START_ANIM = 51,
         NPC_BURNING_CRUSHER = 105103,
     };
 
@@ -662,16 +704,19 @@ public:
             Talk(1);
             _events.ScheduleEvent(EVENT_CREEPING_DOOM, 5000);
             _events.ScheduleEvent(EVENT_FEL_CLEAVE, 500);
-            _events.ScheduleEvent(EVENT_SUMMON_FEL_CRUSHER, 8000);
+            // _events.ScheduleEvent(EVENT_SUMMON_FEL_CRUSHER, 10000);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage) override
         {
-            if (HealthBelowPct(60))
-                _events.ScheduleEvent(EVENT_SUMMON_FEL_CRUSHER, 1000);
-
             if (damage >= me->GetHealth())
                 Talk(3);
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (me->CanStartAttack(who, false) && me->IsWithinDistInMap(who, me->GetAttackDistance(who) + me->m_CombatDistance))
+                EnterCombat(who);
         }
 
         void JustDied(Unit* /*killer*/) override
@@ -683,16 +728,11 @@ public:
 
             if (instance->GetData(DATA_STAGE_4) == NOT_STARTED)
                 instance->SetData(DATA_STAGE_4, DONE);
-
-            me->DespawnOrUnsummon(20000, Seconds(300));
         }
 
         void UpdateAI(uint32 diff) override
         {
             _events.Update(diff);
-
-            if (!UpdateVictim())
-                return;
 
             while (uint32 eventId = _events.ExecuteEvent())
             {
@@ -716,7 +756,10 @@ public:
                     break;
                 }
             }
-            DoMeleeAttackIfReady();
+            if (!UpdateVictim())
+                return;
+            else
+                DoMeleeAttackIfReady();
         }
 
         void SetData(uint32 id, uint32 /*value*/) override
@@ -726,7 +769,7 @@ public:
             case DATA_START_ANIM:
                 Talk(0);
                 me->SetAIAnimKitId(0);
-                me->PlayOneShotAnimKitId(6961);
+                me->PlayOneShotAnimKitId(15);
                 break;
             default:
                 break;
@@ -809,8 +852,6 @@ public:
         {
             if (instance->GetData(DATA_STAGE_6) == NOT_STARTED)
                 instance->SetData(DATA_STAGE_6, DONE);
-
-            me->DespawnOrUnsummon(20000, Seconds(1));
         }
 
         void DamageTaken(Unit* attacker, uint32& damage) override
@@ -870,10 +911,10 @@ public:
     }
 };
 
-class go_aldrachi_warblades : public GameObjectScript
+class go_aldrachi_warblades_248785 : public GameObjectScript
 {
 public:
-    go_aldrachi_warblades() : GameObjectScript("go_aldrachi_warblades") { isLooted = false; }
+    go_aldrachi_warblades_248785() : GameObjectScript("go_aldrachi_warblades_248785") { isLooted = false; }
 
     void OnLootStateChanged(GameObject* go, uint32 state, Unit* unit)
     {
@@ -926,6 +967,6 @@ void AddSC_scenario_artifact_brokenshore()
     new npc_doomherald_taraar_105094();
     new npc_gorgonnash_99046();
     new npc_caria_felsoul_99184();
-    new go_aldrachi_warblades();
+    new go_aldrachi_warblades_248785();
     new go_cavern_stones_7796();
 }
