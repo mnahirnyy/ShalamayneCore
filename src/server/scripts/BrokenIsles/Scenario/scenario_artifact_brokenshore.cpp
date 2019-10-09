@@ -49,6 +49,8 @@ enum DataTypes
     NPC_GORGONNASH = 99046,
     NPC_DOOMHERALD_SAERA = 105095,
     NPC_DOOMHERALD_TARAAR = 105094,
+    NPC_ALDRACHI_REVENANT = 105151,
+    NPC_CARIA_FELSOUL = 99184,
     NPC_ALDRACHI_WARBLADES = 105155,
     GO_ALDRACHI_WARBLADES = 248785,
     GO_FELSOUL_PORTAL_1 = 248573,
@@ -69,20 +71,6 @@ enum DataTypes
     QUEST_VENGEANCE_WILL_BE_OURS_2 = 41863,
 };
 
-struct ScenarioSpawnData
-{
-    uint32 event, npcId;
-    float X;
-    float Y;
-    float Z;
-    float orientation;
-};
-
-ScenarioSpawnData const spawnData[] =
-{
-    { DATA_STAGE_1, NPC_GORGONNASH, -2784.22f, -98.766f, 47.994f, 0.51138f },
-};
-
 struct scenario_artifact_brokenshore : public InstanceScript
 {
     scenario_artifact_brokenshore(InstanceMap* map) : InstanceScript(map) { }
@@ -99,17 +87,23 @@ struct scenario_artifact_brokenshore : public InstanceScript
         demonTwinsKilled = 0;
         _playerGUID = ObjectGuid::Empty;
         _gorgonnashGUID = ObjectGuid::Empty;
+        _allariGUID = ObjectGuid::Empty;
+        _doomheraldSaeraGUID = ObjectGuid::Empty;
+        _doomheraldTaraarGUID = ObjectGuid::Empty;
+        _cariaFelsoulGUID = ObjectGuid::Empty;
+        _aldrachiRevenantGUID = ObjectGuid::Empty;
     }
 
     void OnPlayerEnter(Player* player) override
     {
         InstanceScript::OnPlayerEnter(player);
-        TC_LOG_ERROR("server.worldserver", " === scenario_artifact_brokenshore  === ");
+        TC_LOG_ERROR("server.worldserver", " === scenario_artifact_brokenshore: Player Entered  === ");
         if (player->GetMapId() == 1500)
         {
             _playerGUID = player->GetGUID();
             PhasingHandler::AddPhase(player, NORMAL_PHASE, true);
         }
+        SummonAllariSouleater();
     }
 
     void OnCreatureCreate(Creature* creature) override
@@ -120,6 +114,21 @@ struct scenario_artifact_brokenshore : public InstanceScript
         {
         case NPC_GORGONNASH:
             _gorgonnashGUID = creature->GetGUID();
+            break;
+        case NPC_ALLARI_SOULEATER:
+            _allariGUID = creature->GetGUID();
+            break;
+        case NPC_DOOMHERALD_SAERA:
+            _doomheraldSaeraGUID = creature->GetGUID();
+            break;
+        case NPC_DOOMHERALD_TARAAR:
+            _doomheraldTaraarGUID = creature->GetGUID();
+            break;
+        case NPC_CARIA_FELSOUL:
+            _cariaFelsoulGUID = creature->GetGUID();
+            break;
+        case NPC_ALDRACHI_REVENANT:
+            _aldrachiRevenantGUID = creature->GetGUID();
             break;
         default:
             break;
@@ -132,12 +141,6 @@ struct scenario_artifact_brokenshore : public InstanceScript
 
         switch (go->GetEntry())
         {
-        /*case GO_FELSOUL_PORTAL_1:
-            go->SetGoState(GO_STATE_ACTIVE);
-            break;
-        case GO_FELSOUL_PORTAL_2:
-            go->SetGoState(GO_STATE_ACTIVE);
-            break;*/
         case GO_STONE_WALL:
             go->SetLootState(GO_READY);
         default:
@@ -200,6 +203,8 @@ struct scenario_artifact_brokenshore : public InstanceScript
         else if (type == DATA_STAGE_5 && data == DONE)
         {
             NextStep();
+            SummonAldrachiRevenant();
+            SummonCariaFelsoul();
         }
         else if (type == DATA_STAGE_6 && data == DONE)
         {
@@ -210,8 +215,14 @@ struct scenario_artifact_brokenshore : public InstanceScript
         else if (type == DATA_STAGE_7 && data == DONE)
         {
             NextStep();
+            // CompleteScenario();
             DoPlayScenePackageIdOnPlayers(DH_VENGEANCE_ARTIFACT_ACQUISTION_LOOTED_SCENE);
         }
+    }
+
+    void SummonAllariSouleater()
+    {
+        TempSummon* allari = instance->SummonCreature(NPC_ALLARI_SOULEATER, Position(-2507.72f, 117.919f, 8.1995f, 0.079414f));
     }
 
     void SummonGorgonnash()
@@ -227,10 +238,20 @@ struct scenario_artifact_brokenshore : public InstanceScript
         doomheralSaera->AI()->SetData(52, 52);
     }
 
+    void SummonAldrachiRevenant()
+    {   
+        TempSummon* revenant = instance->SummonCreature(NPC_ALDRACHI_REVENANT, Position(-2810.06f, -243.924f, 38.6361f, 1.92589f));
+    }
+
+    void SummonCariaFelsoul()
+    {
+        TempSummon* caria = instance->SummonCreature(NPC_CARIA_FELSOUL, Position(-2749.17f, -330.338f, 38.7842f, 1.88583f));
+    }
+
     void SummonAldrachiWarblades()
     {
         TempSummon* aldrachiWb = instance->SummonCreature(NPC_ALDRACHI_WARBLADES, Position(-2746.991f, -328.47f, 38.4056f, 2.2876f));
-        GameObject* aldrachiWbLoot = instance->SummonGameObject(GO_ALDRACHI_WARBLADES, Position(-2747.71f, -328.3544f, 38.4344f, 2.28768f), QuaternionData(), WEEK);
+        GameObject* aldrachiWbLoot = instance->SummonGameObject(GO_ALDRACHI_WARBLADES, Position(-2747.71f, -328.3544f, 38.4344f, 2.28768f), QuaternionData(), 300);
     }
 
 private:
@@ -239,17 +260,23 @@ private:
     bool isComplete;
     ObjectGuid _playerGUID;
     ObjectGuid _gorgonnashGUID;
+    ObjectGuid _allariGUID;
+    ObjectGuid _doomheraldSaeraGUID;
+    ObjectGuid _doomheraldTaraarGUID;
+    ObjectGuid _cariaFelsoulGUID;
+    ObjectGuid _aldrachiRevenantGUID;
     uint8 demonPortalsDestroyed;
     uint8 demonTwinsKilled;
 };
 
-class npc_allari_soulweaver_98882 : public CreatureScript
+class npc_allari_souleater_98882 : public CreatureScript
 {
 public:
-    npc_allari_soulweaver_98882() : CreatureScript("npc_allari_soulweaver_98882") { }
+    npc_allari_souleater_98882() : CreatureScript("npc_allari_souleater_98882") { }
 
     enum eAllari {
-        DATA_FREED = 11,
+        DATA_FREED = 56,
+        DATA_START_TALK = 55,
         EVENT_YELL_1 = 1,
         EVENT_SAY_2 = 2,
         EVENT_SAY_3 = 3,
@@ -257,9 +284,9 @@ public:
         EVENT_DESPAWN = 5,
     };
 
-    struct npc_allari_soulweaver_98882_AI : public ScriptedAI
+    struct npc_allari_souleater_98882_AI : public ScriptedAI
     {
-        npc_allari_soulweaver_98882_AI(Creature* creature) : ScriptedAI(creature) {
+        npc_allari_souleater_98882_AI(Creature* creature) : ScriptedAI(creature) {
             Initialize();
         }
 
@@ -271,22 +298,33 @@ public:
 
         void MoveInLineOfSight(Unit* who) override
         {
-            if (who->IsPlayer())
-                if (!sayGreeting)
-                {
-                    sayGreeting = true;
-                    _events.ScheduleEvent(EVENT_YELL_1, 500);
-                }
+            if (!who || !who->IsInWorld() || !me->IsWithinDist(who, 70.0f, false))
+                return;
+
+            Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (!player)
+                return;
+            if (instance->GetData(DATA_STAGE_1) == NOT_STARTED && !sayGreeting)
+            {
+                sayGreeting = true;
+                Talk(0);
+            }
         }
 
         void SetData(uint32 id, uint32 /*value*/) override
         {
             switch (id)
             {
+            case DATA_START_TALK:
+                _events.ScheduleEvent(EVENT_YELL_1, 4000);
+                break;
             case DATA_FREED:
+                sayGreeting = false;
+                Talk(1);
+                _events.ScheduleEvent(EVENT_SAY_3, 3000);
+
                 if (instance->GetData(DATA_STAGE_1) == NOT_STARTED)
                     instance->SetData(DATA_STAGE_1, DONE);
-                _events.ScheduleEvent(EVENT_SAY_2, 1000);
                 break;
             default:
                 break;
@@ -305,31 +343,25 @@ public:
                     Talk(0);
                     break;
                 case EVENT_SAY_2:
-                    Talk(1);
-                    _events.ScheduleEvent(EVENT_SAY_3, 4000);
                     me->LoadEquipment(1);
                     break;
                 case EVENT_SAY_3:
+                    me->HandleEmoteCommand(EMOTE_STATE_SIT_GROUND);
                     Talk(2);
-                    me->HandleEmoteCommand(EMOTE_STATE_KNEEL);
-                    _events.ScheduleEvent(EVENT_SAY_4, 6000);
+                    _events.ScheduleEvent(EVENT_SAY_4, 3000);
                     break;
                 case EVENT_SAY_4:
                     Talk(3);
-                    _events.ScheduleEvent(EVENT_DESPAWN, Seconds(60));
+                    _events.ScheduleEvent(EVENT_DESPAWN, 30000);
                     break;
                 case EVENT_DESPAWN:
+                    me->HandleEmoteCommand(EMOTE_STATE_NONE);
                     me->DespawnOrUnsummon();
                     break;
                 default:
                     break;
                 }
             }
-
-            if (!UpdateVictim())
-                return;
-            else
-                DoMeleeAttackIfReady();
         }
 
     private:
@@ -340,7 +372,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const override
     {
-        return new npc_allari_soulweaver_98882_AI(creature);
+        return new npc_allari_souleater_98882_AI(creature);
     }
 };
 
@@ -374,7 +406,7 @@ public:
 
     enum eCage {
         NPC_CHAINED_ALLARI = 98882,
-        DATA_FREED = 11,
+        DATA_ALLARI_FREED = 56,
     };
 
     bool OnGossipHello(Player* player, GameObject* go) override
@@ -386,9 +418,11 @@ public:
             {
                 if (Creature* chained_allari = go->FindNearestCreature(NPC_CHAINED_ALLARI, 10.0f, true))
                 {
+                    chained_allari->AI()->SetData(DATA_ALLARI_FREED, DATA_ALLARI_FREED);
+
                     go->ResetDoorOrButton();
                     go->DestroyForPlayer(player);
-                    chained_allari->AI()->SetData(DATA_FREED, DATA_FREED);
+
                     return false;
                 }
             }
@@ -427,14 +461,27 @@ public:
         {
             instance = me->GetInstanceScript();
             conversationStarted = false;
-            me->setActive(true);
-            me->SetReactState(REACT_AGGRESSIVE);
         }
 
         void Reset() override
         {
             _events.Reset();
             Initialize();
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (!who || !who->IsInWorld() || !me->IsWithinDist(who, 60.0f, false))
+                return;
+
+            Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (!player)
+                return;
+            if (instance->GetData(DATA_STAGE_3) == NOT_STARTED && !conversationStarted)
+            {
+                conversationStarted = true;
+                _events.ScheduleEvent(EVENT_SAY_1, 500);
+            }
         }
 
         void EnterCombat(Unit* /*who*/) override
@@ -445,24 +492,9 @@ public:
 
         void JustDied(Unit* /*killer*/) override
         {
+            Talk(2);
+            conversationStarted = false;
             instance->SetData(DATA_STAGE_3, DONE);
-            // me->DespawnOrUnsummon(20000, Seconds(300));
-        }
-
-        void DamageTaken(Unit* attacker, uint32& damage) override
-        {
-            if (damage >= me->GetHealth())
-                Talk(2);
-        }
-
-        void MoveInLineOfSight(Unit* who) override
-        {
-            if (who->IsPlayer())
-                if (!conversationStarted)
-                {   
-                    _events.ScheduleEvent(EVENT_SAY_1, 500);
-                    conversationStarted = true;
-                }
         }
 
         void SetData(uint32 id, uint32 /*value*/) override
@@ -470,7 +502,8 @@ public:
             switch (id)
             {
             case DATA_START_CONVERSATION:
-                _events.ScheduleEvent(EVENT_SAY_1, 4000);
+                Talk(0);
+                _events.ScheduleEvent(EVENT_SAY_2, 3000);
                 break;
             default:
                 break;
@@ -480,9 +513,6 @@ public:
         void UpdateAI(uint32 diff) override
         {
             _events.Update(diff);
-
-           /* if (!UpdateVictim())
-                return;*/
 
             while (uint32 eventId = _events.ExecuteEvent())
             {
@@ -498,11 +528,11 @@ public:
                     break;
                 case EVENT_SAY_1:
                     Talk(0);
-                    _events.ScheduleEvent(EVENT_SAY_2, 4000);
+                    _events.ScheduleEvent(EVENT_SAY_2, 3000);
                     break;
                 case EVENT_SAY_2:
                     Talk(1);
-                    if (Creature* doomherald_taraar = me->FindNearestCreature(105094, 15.0f, true))
+                    if (Creature* doomherald_taraar = me->FindNearestCreature(105094, 20.0f, true))
                         doomherald_taraar->AI()->SetData(DATA_START_TARAAR_CONVERSATION, DATA_START_TARAAR_CONVERSATION);
                     break;
                 default:
@@ -586,15 +616,11 @@ public:
                 (*itr)->ToCreature()->DespawnOrUnsummon(0);
 
             instance->SetData(DATA_STAGE_3, DONE);
-            // me->DespawnOrUnsummon(20000, Seconds(300));
         }
 
         void UpdateAI(uint32 diff) override
         {
             _events.Update(diff);
-
-            /*if (!UpdateVictim())
-                return;*/
 
             while (uint32 eventId = _events.ExecuteEvent())
             {
@@ -638,21 +664,6 @@ public:
             }
         }
 
-        void SummomNearTarget(uint8 count, uint32 entry, Position targetPos, uint32 duration)
-        {
-            for (uint8 i = 0; i < count; i++)
-            {
-                uint8 rand = urand(1, 2);
-                float angle = frand(0.0f, 2.0f * float(M_PI));
-                float x = targetPos.GetPositionX() + (5.0f * std::cos(angle));
-                float y = targetPos.GetPositionY() + (5.0f * std::sin(angle));
-                Position randomPosition = {
-                    x, y, targetPos.GetPositionZ(), targetPos.GetOrientation()
-                };
-                me->SummonCreature(entry, randomPosition, TEMPSUMMON_CORPSE_DESPAWN, duration);
-            }
-        }
-
     private:
         EventMap _events;
         InstanceScript * instance;
@@ -690,6 +701,7 @@ public:
         void Initialize()
         {
             instance = me->GetInstanceScript();
+            infernalsSummoned = false;
         }
 
         void Reset() override
@@ -704,23 +716,25 @@ public:
             Talk(1);
             _events.ScheduleEvent(EVENT_CREEPING_DOOM, 5000);
             _events.ScheduleEvent(EVENT_FEL_CLEAVE, 500);
-            // _events.ScheduleEvent(EVENT_SUMMON_FEL_CRUSHER, 10000);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage) override
         {
             if (damage >= me->GetHealth())
                 Talk(3);
-        }
 
-        void MoveInLineOfSight(Unit* who) override
-        {
-            if (me->CanStartAttack(who, false) && me->IsWithinDistInMap(who, me->GetAttackDistance(who) + me->m_CombatDistance))
-                EnterCombat(who);
+            if (HealthBelowPct(40) && !infernalsSummoned)
+            {
+                infernalsSummoned = true;
+                _events.ScheduleEvent(EVENT_SUMMON_FEL_CRUSHER, 500);
+            }
+                
         }
 
         void JustDied(Unit* /*killer*/) override
         {
+            infernalsSummoned = false;
+
             std::list<Creature*> summonedCrushers;
             me->GetCreatureListWithEntryInGrid(summonedCrushers, NPC_BURNING_CRUSHER, me->GetVisibilityRange());
             for (std::list<Creature*>::const_iterator itr = summonedCrushers.begin(); itr != summonedCrushers.end(); ++itr)
@@ -740,11 +754,11 @@ public:
                 {
                 case EVENT_CREEPING_DOOM:
                     DoCastVictim(SPELL_CREEPING_DOOM);
-                    _events.ScheduleEvent(EVENT_FEL_CLEAVE, urand(6000, 9000));
+                    _events.ScheduleEvent(EVENT_CREEPING_DOOM, urand(6000, 9000));
                     break;
                 case EVENT_FEL_CLEAVE:
                     DoCastVictim(SPELL_FEL_CLEAVE);
-                    _events.ScheduleEvent(EVENT_FEL_CLEAVE, urand(8000, 10000));
+                    _events.ScheduleEvent(EVENT_FEL_CLEAVE, urand(15000, 18000));
                     break;
                 case EVENT_SUMMON_FEL_CRUSHER:
                     _events.CancelEvent(EVENT_SUMMON_FEL_CRUSHER);
@@ -768,8 +782,7 @@ public:
             {
             case DATA_START_ANIM:
                 Talk(0);
-                me->SetAIAnimKitId(0);
-                me->PlayOneShotAnimKitId(15);
+                me->SetAIAnimKitId(6870);
                 break;
             default:
                 break;
@@ -781,9 +794,9 @@ public:
             for (uint8 i = 0; i < count; i++)
             {
                 uint8 rand = urand(1, 2);
-                float angle = frand(0.0f, 2.0f * float(M_PI));
-                float x = targetPos.GetPositionX() + (5.0f * std::cos(angle));
-                float y = targetPos.GetPositionY() + (5.0f * std::sin(angle));
+                float angle = frand(0.0f, 5.0f * float(M_PI));
+                float x = targetPos.GetPositionX() + (10.0f * std::cos(angle));
+                float y = targetPos.GetPositionY() + (10.0f * std::sin(angle));
                 Position randomPosition = {
                     x, y, targetPos.GetPositionZ(), targetPos.GetOrientation()
                 };
@@ -794,6 +807,7 @@ public:
     private:
         EventMap _events;
         InstanceScript * instance;
+        bool infernalsSummoned;
     };
 
     CreatureAI* GetAI(Creature* creature) const override
@@ -815,11 +829,23 @@ public:
         SPELL_SIGIL_OF_POWER = 216229,
         SPELL_SIGIL_OF_POWER_2 = 216228,
         SPELL_SOUL_CARVER = 216188,
+        SPELL_CALL_WARBLADES_VISUAL_1 = 195154,
+        SPELL_CALL_WARBLADES_VISUAL_2 = 195151,
         EVENT_CALL_OF_THE_WARBLADES = 1,
         EVENT_FELSOUL_SLAM = 2,
         EVENT_SIGIL_OF_POWER = 3,
         EVENT_SIGIL_OF_POWER_2 = 4,
         EVENT_SOUL_CARVER = 5,
+        EVENT_TALK_3 = 6,
+        EVENT_TALK_4 = 7,
+        EVENT_CALL_WARBLADES_VISUAL_1 = 8,
+        EVENT_CALL_WARBLADES_VISUAL_2 = 9,
+        TEXT_SAY_1 = 0, // 'For every soul I claim, my power grows. I will rule this world... ALL worlds!'
+        TEXT_SAY_2 = 1, // 'WITNESS THE MIGHT OF THE ALDRACHI!'
+        TEXT_SAY_3 = 2, // 'Your destiny awaits!'
+        TEXT_SAY_4 = 3, // 'Do you not see? Kil\'jaeden offers power Illidan never could!'
+        TEXT_SAY_5 = 4, // 'I WILL claim your soul, even if I have to tear it from your lifeless corpse!'
+        TEXT_SAY_6 = 5, // 'I will... be... reborn...'
     };
 
     struct npc_caria_felsoul_99184_AI : public ScriptedAI
@@ -831,46 +857,81 @@ public:
         void Initialize()
         {
             instance = me->GetInstanceScript();
+            _playerGUID = ObjectGuid::Empty;
+            startTalk = false;
+            jumpPosition = false;
         }
 
         void Reset() override
         {
             _events.Reset();
             Initialize();
-            me->setActive(true);
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (!who || !who->IsInWorld() || !me->IsWithinDist(who, 60.0f, false))
+                return;
+
+            Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (!player)
+                return;
+            _playerGUID = player->GetGUID();
+            if (instance->GetData(DATA_STAGE_6) == NOT_STARTED && !startTalk)
+            {
+                startTalk = true;
+                Talk(TEXT_SAY_1);
+                _events.ScheduleEvent(EVENT_CALL_WARBLADES_VISUAL_1, 2000);
+            }
         }
 
         void EnterCombat(Unit* /*who*/) override
         {
+            Talk(TEXT_SAY_3);
             _events.ScheduleEvent(EVENT_FELSOUL_SLAM, 1500);
             _events.ScheduleEvent(EVENT_SIGIL_OF_POWER, 8000);
             _events.ScheduleEvent(EVENT_SIGIL_OF_POWER_2, 4000);
             _events.ScheduleEvent(EVENT_SOUL_CARVER, 5000);
+            _events.ScheduleEvent(EVENT_TALK_3, 5000);
         }
 
         void JustDied(Unit* /*killer*/) override
         {
+            startTalk = false;
+            jumpPosition = false;
+            Talk(TEXT_SAY_6);
             if (instance->GetData(DATA_STAGE_6) == NOT_STARTED)
                 instance->SetData(DATA_STAGE_6, DONE);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage) override
         {
-            if (HealthBelowPct(20))
+            if (HealthBelowPct(25) && !jumpPosition)
+            {
+                jumpPosition = true;
                 _events.ScheduleEvent(EVENT_CALL_OF_THE_WARBLADES, 500);
+            }  
         }
 
         void UpdateAI(uint32 diff) override
         {
             _events.Update(diff);
 
-            if (!UpdateVictim())
-                return;
-
             while (uint32 eventId = _events.ExecuteEvent())
             {
                 switch (eventId)
                 {
+                case EVENT_CALL_WARBLADES_VISUAL_1:
+                    DoCastSelf(SPELL_CALL_WARBLADES_VISUAL_1, true);
+                    _events.ScheduleEvent(EVENT_CALL_WARBLADES_VISUAL_2, 6000);
+                    break;
+                case EVENT_CALL_WARBLADES_VISUAL_2:
+                    DoCastSelf(SPELL_CALL_WARBLADES_VISUAL_2, true);
+                    Talk(TEXT_SAY_2);
+                    break;
+                case EVENT_TALK_3:
+                    Talk(TEXT_SAY_4);
+                    break;
                 case EVENT_FELSOUL_SLAM:
                     DoCastVictim(SPELL_FELSOUL_SLAM);
                     _events.ScheduleEvent(EVENT_FELSOUL_SLAM, urand(6000, 8000));
@@ -888,16 +949,103 @@ public:
                     _events.ScheduleEvent(EVENT_SOUL_CARVER, 5000);
                     break;
                 case EVENT_CALL_OF_THE_WARBLADES:
+                    Talk(TEXT_SAY_5);
                     _events.CancelEvent(EVENT_FELSOUL_SLAM);
                     _events.CancelEvent(EVENT_SOUL_CARVER);
                     _events.CancelEvent(SPELL_SIGIL_OF_POWER);
                     _events.CancelEvent(EVENT_SIGIL_OF_POWER_2);
+                    me->SetReactState(REACT_PASSIVE);
+                    me->GetMotionMaster()->MoveJump(-2726.95f, -313.85f, 30.8943f, 2.2876f, 15.0f, 10.0f);
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        me->CastSpell(player, SPELL_CALL_OF_THE_WARBLADES, true);
                     break;
                 default:
                     break;
                 }
             }
-            DoMeleeAttackIfReady();
+            if (!UpdateVictim())
+                return;
+            else
+                DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap _events;
+        InstanceScript * instance;
+        ObjectGuid _playerGUID;
+        bool startTalk;
+        bool jumpPosition;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_caria_felsoul_99184_AI(creature);
+    }
+};
+
+// Aldrachi Revenant 105151
+class npc_aldrachi_revenant_105151 : public CreatureScript
+{
+public:
+    npc_aldrachi_revenant_105151() : CreatureScript("npc_aldrachi_revenant_105151") { }
+
+    enum eRevenant
+    {
+        SPELL_DARK_PRESENCE = 208196,
+        SPELL_DESPAIR = 216020,
+        EVENT_DARK_PRESENCE = 1,
+        EVENT_DESPAIR = 2,
+        TEXT_SAY_1 = 0, // 'Your soul will be ours...'
+    };
+
+    struct npc_aldrachi_revenant_105151_AI : public ScriptedAI
+    {
+        npc_aldrachi_revenant_105151_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            instance = me->GetInstanceScript();
+        }
+
+        void Reset() override
+        {
+            _events.Reset();
+            Initialize();
+        }
+
+        void EnterCombat(Unit* /*who*/) override
+        {
+            Talk(TEXT_SAY_1);
+            _events.ScheduleEvent(EVENT_DARK_PRESENCE, 1500);
+            _events.ScheduleEvent(EVENT_DESPAIR, 8000);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_DARK_PRESENCE:
+                    DoCastVictim(SPELL_DARK_PRESENCE);
+                    _events.ScheduleEvent(EVENT_DARK_PRESENCE, urand(6000, 8000));
+                    break;
+                case EVENT_DESPAIR:
+                    DoCastVictim(SPELL_DESPAIR);
+                    _events.ScheduleEvent(EVENT_DESPAIR, 5000);
+                    break;
+                default:
+                    break;
+                }
+            }
+            if (!UpdateVictim())
+                return;
+            else
+                DoMeleeAttackIfReady();
         }
 
     private:
@@ -907,7 +1055,7 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const override
     {
-        return new npc_caria_felsoul_99184_AI(creature);
+        return new npc_aldrachi_revenant_105151_AI(creature);
     }
 };
 
@@ -918,7 +1066,7 @@ public:
 
     void OnLootStateChanged(GameObject* go, uint32 state, Unit* unit)
     {
-        if (state == GO_ACTIVATED && unit && !isLooted)
+        /*if (!isLooted)
         {
             isLooted = true;
             if (Player* player = unit->ToPlayer())
@@ -928,7 +1076,10 @@ public:
             if (InstanceScript * instance = go->GetInstanceScript())
                 if (instance->GetData(DATA_STAGE_7) == NOT_STARTED)
                     instance->SetData(DATA_STAGE_7, DONE);
-        }
+        }*/
+        if (state == GO_ACTIVATED && unit)
+            if (Player* player = unit->ToPlayer())
+                TC_LOG_ERROR("server.worldserver", " === go_aldrachi_warblades_248785  STATE  %u === ", state);
     }
     bool isLooted;
 };
@@ -960,12 +1111,13 @@ public:
 void AddSC_scenario_artifact_brokenshore()
 {
     RegisterInstanceScript(scenario_artifact_brokenshore, 1500);
-    new npc_allari_soulweaver_98882();
+    new npc_allari_souleater_98882();
     new go_temporary_allari_cage();
     new go_brokenshore_felsoul_portal();
     new npc_doomherald_saera_105095();
     new npc_doomherald_taraar_105094();
     new npc_gorgonnash_99046();
+    new npc_aldrachi_revenant_105151();
     new npc_caria_felsoul_99184();
     new go_aldrachi_warblades_248785();
     new go_cavern_stones_7796();
