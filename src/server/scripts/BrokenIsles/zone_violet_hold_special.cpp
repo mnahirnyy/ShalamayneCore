@@ -219,6 +219,9 @@ public:
     }
 };
 
+/*********/
+/* AddSC */
+/*********/
 void AddSC_zone_violet_hold_special()
 {
     new zone_special_violet_hold();

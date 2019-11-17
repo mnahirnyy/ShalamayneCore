@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AchievementMgr.h"
 #include "Conversation.h"
 #include "GameObject.h"
 #include "GameObjectAI.h"
@@ -28,6 +29,8 @@
 #include "ScriptedGossip.h"
 #include "ScriptedEscortAI.h"
 #include "SpellScript.h"
+#include "Vehicle.h"
+#include "CombatAI.h"
 #include "Log.h"
 
 /*
@@ -1035,7 +1038,7 @@ public:
                         _phase = PHASE_NONE;
                         break;
                     case PHASE_DESPAWN:
-                        me->DespawnOrUnsummon(5000, Seconds(1));
+                        me->Respawn(false);
                         break;
                     default:
                         break;
@@ -1326,54 +1329,339 @@ public:
     }
 };
 
-struct npc_illidari_fel_bat_94324 : public ScriptedAI
+// npc 94324 for the DH Artifact Acquisition Scenarios
+Position const brokenShorePath[] =
 {
-    npc_illidari_fel_bat_94324(Creature* creature) : ScriptedAI(creature)
-    {
-        me->SetAIAnimKitId(0);
-    }
+    { -845.682f, 4253.238f, 754.557f },
+    { -845.679f, 4253.229f, 756.223f },
+    { -845.679f, 4253.229f, 759.037f },
+    { -845.046f, 4249.666f, 759.037f },
+    { -840.329f, 4223.146f, 759.037f },
+    { -831.249f, 4173.871f, 723.158f }
+};
+size_t const pathSize = std::extent<decltype(brokenShorePath)>::value;
 
-    enum eQuest {
+class npc_illidari_felbat_94324 : public CreatureScript
+{
+public:
+    npc_illidari_felbat_94324() : CreatureScript("npc_illidari_felbat_94324") { }
+
+    enum eFelBal {
+        EVENT_START_BROKENSHORE_PATH = 1,
+        EVENT_START_SURAMAR_PATH = 2,
+        EVENT_TELEPORT_BROKENSHORE = 3,
+        EVENT_TELEPORT_SURAMAR = 4,
+        SPELL_RIDE_VEHICLE_HARD_CODED = 46598,
         QUEST_THE_HUNT_1 = 39247,
         QUEST_THE_HUNT_2 = 41119,
         QUEST_VENGEANCE_WILL_BE_OURS_1 = 40249,
         QUEST_VENGEANCE_WILL_BE_OURS_2 = 41863,
     };
 
-    void OnSpellClick(Unit* clicker, bool& /*result*/)
+    struct npc_illidari_felbat_94324_AI : public VehicleAI
     {
-        if (Player* player = clicker->ToPlayer())
-        {
-            if (player->HasQuest(QUEST_THE_HUNT_1) || player->HasQuest(QUEST_THE_HUNT_2))
-            {
-                me->SetAIAnimKitId(4061);
-                player->KilledMonsterCredit(94321); // 52391
-                player->TeleportTo(1498, Position(1263.69f, 5236.659f, 93.531f, 2.73693f));
-            }
+        npc_illidari_felbat_94324_AI(Creature* creature) : VehicleAI(creature) { }
 
-            if (player->HasQuest(QUEST_VENGEANCE_WILL_BE_OURS_1) || player->HasQuest(QUEST_VENGEANCE_WILL_BE_OURS_2))
-            {
-                me->SetAIAnimKitId(4061);
-                player->KilledMonsterCredit(99250);
-                player->TeleportTo(1500, Position(-2379.679f, 174.2f, 3.5625f, 3.733872f));
+        void Reset() override
+        {
+            _events.Reset();
+            _playerGUID = ObjectGuid::Empty;
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) override
+        {
+            if (apply && passenger->GetTypeId() == TYPEID_PLAYER) {
+                _playerGUID = passenger->ToPlayer()->GetGUID();
+
+                if (passenger->ToPlayer()->HasQuest(QUEST_THE_HUNT_1) || passenger->ToPlayer()->HasQuest(QUEST_THE_HUNT_2)) {
+                    _events.ScheduleEvent(EVENT_TELEPORT_SURAMAR, Seconds(1));
+                }
+
+                if (passenger->ToPlayer()->HasQuest(QUEST_VENGEANCE_WILL_BE_OURS_1) || passenger->ToPlayer()->HasQuest(QUEST_VENGEANCE_WILL_BE_OURS_2)) {
+                    _events.ScheduleEvent(EVENT_START_BROKENSHORE_PATH, Seconds(1));
+                }
             }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId) override
+        {
+            if (type == EFFECT_MOTION_TYPE && pointId == pathSize)
+                _events.ScheduleEvent(EVENT_TELEPORT_BROKENSHORE, 200);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_START_BROKENSHORE_PATH:
+                    me->GetMotionMaster()->MoveSmoothPath(uint32(pathSize), brokenShorePath, pathSize, false, true);
+                    break;
+                case EVENT_TELEPORT_BROKENSHORE:
+                    me->RemoveAllAuras();
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID)) {
+                        player->KilledMonsterCredit(99250);
+                        player->TeleportTo(1500, Position(-2379.679f, 174.2f, 3.5625f, 3.733872f));
+                    }
+                    me->GetMotionMaster()->MoveTargetedHome();
+                    break;
+                case EVENT_TELEPORT_SURAMAR:
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID)) {
+                        player->KilledMonsterCredit(94321); // 52391
+                        player->TeleportTo(1498, Position(1263.69f, 5236.659f, 93.531f, 2.73693f));
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    private:
+        EventMap _events;
+        ObjectGuid _playerGUID;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_illidari_felbat_94324_AI(creature);
+    }
+};
+
+// npc 109196 (Jace Darkweaver) for the quest 42869 ('Eternal Vigil') and 42872 ('Securing The Way')
+class npc_jace_darkweaver_109196 : public CreatureScript
+{
+public:
+    npc_jace_darkweaver_109196() : CreatureScript("npc_jace_darkweaver_109196") { }
+
+    enum eJace {
+        QUEST_ETERNAL_VIGIL = 42869,
+        QUEST_SECURING_THE_WAY = 42872,
+        SPELL_SENTENCE_TO_DEATH = 217376,
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_SECURING_THE_WAY) {
+            player->CastSpell(player, SPELL_SENTENCE_TO_DEATH, true);
+        }
+
+        return true;
+    }
+
+    struct npc_jace_darkweaver_109196_AI : public ScriptedAI
+    {
+        npc_jace_darkweaver_109196_AI(Creature* creature) : ScriptedAI(creature) {}
+
+        void MoveInLineOfSight(Unit* unit) override
+        {
+            if (Player* player = unit->ToPlayer())
+                if (player->GetDistance(me) < 25.0f)
+                    if (player->GetQuestStatus(QUEST_ETERNAL_VIGIL) == QUEST_STATUS_INCOMPLETE) {
+                        player->CompleteQuest(QUEST_ETERNAL_VIGIL);
+                    }
+        }
+
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_jace_darkweaver_109196_AI(creature);
+    }
+};
+
+// Remove Action Button when player abandoned the quest
+class q_securing_the_way : public QuestScript
+{
+public:
+    q_securing_the_way() : QuestScript("q_securing_the_way") { }
+
+    void OnQuestStatusChange(Player* player, Quest const* /*quest*/, QuestStatus /*oldStatus*/, QuestStatus newStatus) override
+    {
+        if (newStatus == QUEST_STATUS_NONE)
+        {
+            player->RemoveAurasDueToSpell(217376);
         }
     }
 };
 
+// 217377 Sentence To Death
+class spell_redoubt_sentence_to_death : public SpellScript
+{
+    PrepareSpellScript(spell_redoubt_sentence_to_death);
 
+    void HandleOnCast()
+    {
+        if (Player* player = GetCaster()->ToPlayer())
+        {
+            if (Creature* Asha = player->FindNearestCreature(102798, 50.0f))
+                Asha->AI()->SetData(63, 63);
+            if (Creature* Belath = player->FindNearestCreature(102797, 50.0f))
+                Belath->AI()->SetData(64, 64);
+        }   
+    }
+
+    void Register() override
+    {
+        OnCast += SpellCastFn(spell_redoubt_sentence_to_death::HandleOnCast);
+    }
+};
+
+struct npc_redoubt_asha : public ScriptedAI
+{
+    npc_redoubt_asha(Creature* creature) : ScriptedAI(creature) { }
+
+    enum eAsha {
+        DATA_ACTION_START = 63,
+        EVENT_RELEASE_SOULS = 1,
+        SPELL_ANQUISHED_SOUL = 203699,
+        SPELL_EYE_BEAM_01 = 194326,
+    };
+
+    void SetData(uint32 id, uint32 /*value*/) override
+    {
+        switch (id)
+        {
+        case DATA_ACTION_START:
+            me->CastSpell(me, 194326, true);
+            break;
+        default:
+            break;
+        }
+    }
+
+    void KillCapturedWrathguard() {
+        if (Creature* capturedDemon = me->FindNearestCreature(109247, me->GetVisibilityRange(), true)) {
+            for (uint8 i = 0; i < 3; i++) {
+                capturedDemon->CastSpell(-964.113f, 4066.09f, 648.118f, SPELL_ANQUISHED_SOUL, true);
+            }   
+            capturedDemon->DisappearAndDie();
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+            case EVENT_RELEASE_SOULS:
+                KillCapturedWrathguard();
+                break;
+            default:
+                break;
+            }
+        }
+    }
+private:
+    EventMap _events;
+};
+
+struct npc_redoubt_belath : public ScriptedAI
+{
+    npc_redoubt_belath(Creature* creature) : ScriptedAI(creature) { }
+
+    enum eBelath {
+        DATA_ACTION_START = 64,
+        EVENT_RELEASE_SOULS = 1,
+        SPELL_ANQUISHED_SOUL = 203789,
+        SPELL_EYE_BEAM_01 = 194326,
+    };
+
+    void SetData(uint32 id, uint32 /*value*/) override
+    {
+        switch (id)
+        {
+        case DATA_ACTION_START:
+            me->CastSpell(me, SPELL_EYE_BEAM_01, true);
+            _events.ScheduleEvent(EVENT_RELEASE_SOULS, 1000);
+            break;
+        default:
+            break;
+        }
+    }
+
+    void KillImprisonedImps() {
+        std::list<Creature*> imprisonedImps;
+        me->GetCreatureListWithEntryInGrid(imprisonedImps, 109252, me->GetVisibilityRange());
+        for (std::list<Creature*>::const_iterator itr = imprisonedImps.begin(); itr != imprisonedImps.end(); ++itr)
+        {
+            (*itr)->ToCreature()->CastSpell(-964.113f, 4066.09f, 648.118f, SPELL_ANQUISHED_SOUL, true);
+            (*itr)->ToCreature()->DisappearAndDie();
+        }
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+            case EVENT_RELEASE_SOULS:
+                KillImprisonedImps();
+                break;
+            default:
+                break;
+            }
+        }
+    }
+    private:
+        EventMap _events;
+};
+
+// 215782 back to black temple
+class spell_redoubt_teleport_to_dh_ch : public SpellScript
+{
+    PrepareSpellScript(spell_redoubt_teleport_to_dh_ch);
+
+    enum eQuest {
+        QUEST_RETURN_TO_MARDUM_41221 = 41221,
+        QUEST_RETURN_TO_MARDUM_41033 = 41033,
+    };
+
+    void HandleOnCast()
+    {
+        if (Player* player = GetCaster()->ToPlayer()) {
+            if (player->GetQuestStatus(QUEST_RETURN_TO_MARDUM_41221) == QUEST_STATUS_INCOMPLETE)
+                player->CompleteQuest(QUEST_RETURN_TO_MARDUM_41221);
+
+            if (player->GetQuestStatus(QUEST_RETURN_TO_MARDUM_41033) == QUEST_STATUS_INCOMPLETE)
+                player->CompleteQuest(QUEST_RETURN_TO_MARDUM_41033);
+
+            player->GetAchievementMgr()->UpdateCriteria(CRITERIA_TYPE_BE_SPELL_TARGET, 215782, 0, 0, player);
+        }
+    }
+
+    void Register() override
+    {
+        OnCast += SpellCastFn(spell_redoubt_teleport_to_dh_ch::HandleOnCast);
+    }
+};
+
+/*********/
+/* AddSC */
+/*********/
 void AddSC_dalaran_legion()
 {
     new OnLegionArrival();
     new On110Arrival();
-
     RegisterSpellScript(spell_dalaran_teleportation);
     new npc_dalaran_karazhan_khadgar();
     new scene_dalaran_kharazan_teleportion();
     new zone_legion_dalaran_underbelly();
     new npc_hunter_talua();
     new npc_great_eagle();
-    // new player_artifact_choice();
     new npc_warden_alturas();
     new go_violethold_entrance_portal();
     new PlayerScript_DH_artifact_choice();
@@ -1385,5 +1673,11 @@ void AddSC_dalaran_legion()
     new npc_jace_darkweaver_99262();
     new go_legion_communicator();
     new npc_allari_souleater_104909();
-    RegisterCreatureAI(npc_illidari_fel_bat_94324);
+    new npc_illidari_felbat_94324();
+    new npc_jace_darkweaver_109196();
+    new q_securing_the_way();
+    RegisterSpellScript(spell_redoubt_sentence_to_death);
+    RegisterCreatureAI(npc_redoubt_asha);
+    RegisterCreatureAI(npc_redoubt_belath);
+    RegisterSpellScript(spell_redoubt_teleport_to_dh_ch);
 }

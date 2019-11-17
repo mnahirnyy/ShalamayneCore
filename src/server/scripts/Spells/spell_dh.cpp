@@ -158,6 +158,27 @@ enum DHSpells
     SPELL_DH_VENGEFUL_RETREAT_TRIGGER       = 198813,
 };
 
+enum ShatteredSoulsSpells
+{
+    // SPELL_DH_SHATTERED_SOULS = 204255,
+    SPELL_DH_SHATTERED_SOULS_DEMON = 204256,
+    SPELL_DH_LESSER_SOUL_SHARD = 203795,
+    // SPELL_DH_SHATTERED_SOULS_MISSILE = 209651,
+    SPELL_DH_SOUL_FRAGMENT_HEAL_25_HAVOC = 178963,
+    SPELL_DH_SOUL_FRAGMENT_DEMON_BONUS = 163073,
+    SPELL_DH_SOUL_FRAGMENT_HEAL_VENGEANCE = 210042,
+    SPELL_DH_LESSER_SOUL_SHARD_HEAL = 203794,
+    // SPELL_DH_CONSUME_SOUL_MISSILE = 210047,
+    SPELL_DH_LESSER_SOUL_FRAGMENT_HAVOC = 228532,
+    SPELL_DH_PAINBRINGER = 207387,
+    SPELL_DH_PAINBRINGER_BUFF = 212988,
+    SPELL_DH_DEVOUR_SOULS = 212821,
+    SPELL_DH_CHARRED_WARBLADES_HEAL = 213011,
+    SPELL_DH_SHATTER_THE_SOULS = 212827,
+    SPELL_DH_FIERY_DEMISE_DEBUFF = 212818,
+    SPELL_DH_COVER_OF_DARKNESS = 227635,
+};
+
 enum NemesisTargets
 {
     NEMESIS_ABERRATION                          = 208607,
@@ -229,9 +250,11 @@ public:
             if (!caster)
                 return;
 
+            // Try to get the bonded Unit
             if (!m_BondUnit)
                 m_BondUnit = GetBondUnit();
 
+            // If still not found, return
             if (!m_BondUnit)
                 return;
 
@@ -476,33 +499,33 @@ class spell_dh_spirit_bomb_damage : public SpellScript
     }
 };
 
-// Blade Turning - 203753
+// 203753 - Blade Turning
 class spell_dh_blade_turning : public SpellScriptLoader
 {
-public:
-    spell_dh_blade_turning() : SpellScriptLoader("spell_dh_blade_turning") {}
+    public:
+        spell_dh_blade_turning() : SpellScriptLoader("spell_dh_blade_turning") { }
 
-    class spell_dh_blade_turning_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_dh_blade_turning_AuraScript);
-
-        bool CheckProc(ProcEventInfo& eventInfo)
+        class spell_dh_blade_turning_AuraScript : public AuraScript
         {
-            if (eventInfo.GetHitMask() & PROC_HIT_PARRY)
-                return true;
-            return false;
-        }
+            PrepareAuraScript(spell_dh_blade_turning_AuraScript);
 
-        void Register() override
+            bool CheckProc(ProcEventInfo& eventInfo)
+            {
+                if (eventInfo.GetHitMask() & PROC_HIT_PARRY)
+                    return true;
+                return false;
+            }
+
+            void Register()
+            {
+                DoCheckProc += AuraCheckProcFn(spell_dh_blade_turning_AuraScript::CheckProc);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
         {
-            DoCheckProc += AuraCheckProcFn(spell_dh_blade_turning_AuraScript::CheckProc);
+            return new spell_dh_blade_turning_AuraScript();
         }
-    };
-
-    AuraScript* GetAuraScript() const override
-    {
-        return new spell_dh_blade_turning_AuraScript();
-    }
 };
 
 // Fel Devastation - 212084
@@ -3267,6 +3290,174 @@ public:
     }
 };
 
+/* Vengeance Demon Hunter Artifact Spells */
+// 207407 - Soul Carver
+class spell_dh_artifact_soul_carver : public SpellScriptLoader
+{
+public:
+    spell_dh_artifact_soul_carver() : SpellScriptLoader("spell_dh_artifact_soul_carver") { }
+
+    class spell_dh_artifact_soul_carver_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dh_artifact_soul_carver_SpellScript);
+
+        void HandleHit(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+
+            uint32 soulsToShatter = GetEffectInfo(EFFECT_3)->BasePoints;
+            for (uint32 i = 0; i < soulsToShatter; ++i)
+                caster->CastCustomSpell(SPELL_DH_SHATTERED_SOULS_MISSILE, SPELLVALUE_BASE_POINT0, SPELL_DH_SHATTERED_SOULS_AT_DEMON, caster, true);
+        }
+
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dh_artifact_soul_carver_SpellScript::HandleHit, EFFECT_2, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+        }
+    };
+
+    class spell_dh_artifact_soul_carver_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dh_artifact_soul_carver_AuraScript);
+
+        void PeriodicTick(AuraEffect const* /*aurEff*/)
+        {
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+
+            caster->CastCustomSpell(SPELL_DH_SHATTERED_SOULS_MISSILE, SPELLVALUE_BASE_POINT0, SPELL_DH_SHATTERED_SOULS_AT_DEMON, caster, true);
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_dh_artifact_soul_carver_AuraScript::PeriodicTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dh_artifact_soul_carver_AuraScript();
+    }
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_dh_artifact_soul_carver_SpellScript();
+    }
+};
+
+// 213010 - Charred Warblades
+class spell_dh_artifact_charred_warblades : public SpellScriptLoader
+{
+public:
+    spell_dh_artifact_charred_warblades() : SpellScriptLoader("spell_dh_artifact_charred_warblades") { }
+
+    class spell_dh_artifact_charred_warblades_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dh_artifact_charred_warblades_AuraScript);
+
+        void OnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            Unit* caster = GetCaster();
+            if (!caster || !eventInfo.GetDamageInfo())
+                return;
+
+            if (!eventInfo.GetDamageInfo()->GetDamage() || !(eventInfo.GetDamageInfo()->GetSchoolMask() & SPELL_SCHOOL_MASK_FIRE))
+                return;
+
+            int32 heal = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount());
+            caster->CastCustomSpell(SPELL_DH_CHARRED_WARBLADES_HEAL, SPELLVALUE_BASE_POINT0, heal, caster, true);
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(spell_dh_artifact_charred_warblades_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dh_artifact_charred_warblades_AuraScript();
+    }
+};
+
+// 213017 - Fueled by Pain
+class spell_dh_artifact_fueled_by_pain : public SpellScriptLoader
+{
+public:
+    spell_dh_artifact_fueled_by_pain() : SpellScriptLoader("spell_dh_artifact_fueled_by_pain") { }
+
+    class spell_dh_artifact_fueled_by_pain_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dh_artifact_fueled_by_pain_AuraScript);
+
+        void OnProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+        {
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+
+            int32 duration = aurEff->GetAmount() * IN_MILLISECONDS;
+            if (Aura* aur = caster->AddAura(SPELL_DH_METAMORPHOSIS_VENGEANCE, caster))
+            {
+                aur->SetMaxDuration(duration);
+                aur->RefreshDuration();
+            }
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            return eventInfo.GetSpellInfo() && (eventInfo.GetSpellInfo()->Id == SPELL_DH_SOUL_FRAGMENT_HEAL_VENGEANCE || eventInfo.GetSpellInfo()->Id == SPELL_DH_LESSER_SOUL_SHARD_HEAL);
+        }
+
+        void Register()
+        {
+            DoCheckProc += AuraCheckProcFn(spell_dh_artifact_fueled_by_pain_AuraScript::CheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_dh_artifact_fueled_by_pain_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dh_artifact_fueled_by_pain_AuraScript();
+    }
+};
+
+// 212817 - Fiery Demise
+class spell_dh_artifact_fiery_demise : public SpellScriptLoader
+{
+public:
+    spell_dh_artifact_fiery_demise() : SpellScriptLoader("spell_dh_artifact_fiery_demise") { }
+
+    class spell_dh_artifact_fiery_demise_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dh_artifact_fiery_demise_AuraScript);
+
+        void OnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = eventInfo.GetActionTarget();
+            if (!caster || !target || !caster->IsValidAttackTarget(target))
+                return;
+
+            caster->CastCustomSpell(SPELL_DH_FIERY_DEMISE_DEBUFF, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), target, true);
+        }
+
+        void Register()
+        {
+            OnEffectProc += AuraEffectProcFn(spell_dh_artifact_fiery_demise_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_dh_artifact_fiery_demise_AuraScript();
+    }
+};
+/* Vengeance Demon Hunter Artifact Spells */
+
 void AddSC_demon_hunter_spell_scripts()
 {
     new spell_dh_annihilation();
@@ -3347,4 +3538,9 @@ void AddSC_demon_hunter_spell_scripts()
     new spell_dh_burning_alive();
     new spell_dh_desperate_instincts();
     new spell_dh_demonic_infusion();
+
+    new spell_dh_artifact_soul_carver();
+    new spell_dh_artifact_charred_warblades();
+    new spell_dh_artifact_fueled_by_pain();
+    new spell_dh_artifact_fiery_demise();
 }

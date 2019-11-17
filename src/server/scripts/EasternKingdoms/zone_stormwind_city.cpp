@@ -752,37 +752,39 @@ public:
     }
 };
 
-class PlayerScript_summon_khadgar_servant : public PlayerScript
+// Elerion Bladedancer <Illidari>
+class npc_elerion_bladedancer_101004 : public CreatureScript
 {
 public:
-    PlayerScript_summon_khadgar_servant() : PlayerScript("PlayerScript_summon_khadgar_servant") {}
+    npc_elerion_bladedancer_101004() : CreatureScript("npc_elerion_bladedancer_101004") { }
 
-    uint32 checkTimer = 1000;
-    bool _khadgarServantSummoned = false;
-
-    void OnUpdate(Player* player, uint32 diff) override
+    bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*item*/) override
     {
-        if (checkTimer <= diff)
+        if (quest->GetQuestId() == QUEST_WEAPON_OF_THE_ALLIANCE)
         {
-            if (player->getClass() == CLASS_DEMON_HUNTER &&
-                player->GetQuestStatus(QUEST_WEAPON_OF_THE_ALLIANCE) == QUEST_STATUS_REWARDED &&
-                player->GetQuestStatus(QUEST_BLINK_OF_AN_EYE) == QUEST_STATUS_NONE && !_khadgarServantSummoned)
-            {
-                /*www.wowhead.com/npc=114562/khadgars-upgraded-servant*/
-                if (Creature* creature = player->FindNearestCreature(114562, 10.0f)) {
-                    creature->DestroyForPlayer(player);
-                    _khadgarServantSummoned = false;
-                }
-
-                /*www.wowhead.com/spell=228002/summon-khadgars-upgraded-servant-3*/
-                player->CastSpell(228002, true);
-                _khadgarServantSummoned = true;
-            }
-            checkTimer = 1000;
+            player->CastSpell(player, 228002, true);
         }
-        else checkTimer -= diff;
+
+        return true;
     }
 };
+
+// Khadgar's Upgraded Servant
+class npc_khadgars_upgraded_servant_114562 : public CreatureScript
+{
+public:
+    npc_khadgars_upgraded_servant_114562() : CreatureScript("npc_khadgars_upgraded_servant_114562") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_BLINK_OF_AN_EYE)
+        {
+            creature->DestroyForPlayer(player);
+        }
+        return true;
+    }
+};
+
 
 class PlayerScript_phase_correction : public PlayerScript
 {
@@ -835,7 +837,8 @@ void AddSC_stormwind_city()
     new npc_anduin_wrynn();
     new scene_demons_among_them_alliance();
     new quest_demons_among_them();
-    new PlayerScript_summon_khadgar_servant();
+    new npc_elerion_bladedancer_101004();
+    new npc_khadgars_upgraded_servant_114562();
     new PlayerScript_phase_correction();
 }
 

@@ -84,7 +84,7 @@ INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `
 DELETE FROM `gameobject_loot_template` WHERE `Entry`=246561;
 INSERT INTO `gameobject_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES
 (246561, 136385, 0, 100, 1, 1, 0, 1, 1, 'Crystallized Soul');
-UPDATE `gameobject_template` SET `IconName`='questinteract', `castBarCaption`='Grabbing', `Data0`=43, `Data1`=246561, `Data14`=37379, `Data30`=53993, `Data31`=1 WHERE `entry`=248521;
+UPDATE `gameobject_template` SET `displayId`=32954, `IconName`='questinteract', `castBarCaption`='Grabbing', `Data0`=43, `Data1`=246561, `Data14`=37379, `Data30`=53993, `Data31`=1 WHERE `entry`=248521;
 UPDATE `creature` SET `spawntimesecs` = '0' WHERE `guid` = '20508639' AND `id` = '90417';
 DELETE FROM `gameobject_template` WHERE `entry`=251528;
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`, `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`, `Data22`, `Data23`, `Data24`, `Data25`, `Data26`, `Data27`, `Data28`, `Data29`, `Data30`, `Data31`, `Data32`, `RequiredLevel`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
@@ -126,20 +126,18 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 (98882, 3, 0, 'I\'ll join you as soon as I\'m able.', 12, 0, 100, 0, 0, 58229, 0, 0, 'Allari Souleater to Player');
 DELETE FROM `creature_equip_template` WHERE `CreatureID`=98882;
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
-(98882,1,122430,0,0,0,0,0,0,0,0,25549);
+(98882,1,122430,0,0,0,0,0,0,0,0,25549),
+(98882,2,0,0,0,0,0,0,0,0,0,25549);
 SET @GUID := 280000405;
 DELETE FROM `creature` WHERE `guid` BETWEEN @GUID+1 AND @GUID+47;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
 (@GUID+1,105125,1500,7796,7797,12,0,0,0,-1,0,0,-2776.7,-198.007,42.7372,0.412475,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+2,105138,1500,7796,7797,12,0,0,0,-1,0,0,-2779.4,-201.615,42.2245,0.479234,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+3,105000,1500,7796,7797,12,0,0,0,-1,0,0,-2633.39,42.9172,43.3673,0.588264,900,0,0,0,0,0,0,0,0,0,0,'',26972),
-(@GUID+4,98975,1500,7796,7797,12,0,0,0,-1,0,0,-2622.2,48.7097,40.186,1.08621,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+5,105125,1500,7796,7797,12,0,0,0,-1,0,0,-2741.7,-159.902,48.5941,1.51518,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+6,105000,1500,7796,7797,12,0,0,0,-1,0,0,-2624.29,35.2339,42.6158,1.15375,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+7,98891,1500,7796,7797,12,0,0,0,-1,0,0,-2819.03,-211.928,39.2151,0.544413,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+8,105138,1500,7796,7797,12,0,0,0,-1,0,0,-2818.72,-215.646,39.175,0.544413,900,0,0,0,0,0,0,0,0,0,0,'',26972),
--- (@GUID+9,98891,1500,7796,7797,12,0,0,0,-1,0,0,-2799.04,-204.15,39.8648,0.322936,900,0,0,0,0,0,0,0,0,0,0,'',26972),
--- (@GUID+10,98891,1500,7796,7797,12,0,0,0,-1,0,0,-2798.18,-201.348,39.8876,0.210625,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+11,105125,1500,7796,7797,12,0,0,0,-1,0,0,-2774.94,-202.043,42.4006,0.412475,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+12,105125,1500,7796,7797,12,0,0,0,-1,0,0,-2752.38,-182.139,46.1015,1.03687,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+13,105125,1500,7796,7797,12,0,0,0,-1,0,0,-2754.3,-179.766,46.3346,1.11148,900,0,0,0,0,0,0,0,0,0,0,'',26972),
@@ -167,15 +165,9 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@GUID+35,98995,1500,7796,7797,12,0,0,0,-1,0,0,-2574.5,74.1077,25.9783,2.24154,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+36,98995,1500,7796,7797,12,0,0,0,-1,0,0,-2578.97,89.7792,27.2976,5.70594,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+37,98995,1500,7796,7797,12,0,0,0,-1,0,0,-2577.09,91.1646,26.8336,6.05387,900,0,0,0,0,0,0,0,0,0,0,'',26972),
--- (@GUID+38,99184,1500,7796,7796,12,0,0,0,-1,0,0,-2749.17,-330.338,38.7842,1.88583,900,0,0,0,0,0,0,0,0,0,0,'',26972),
--- (@GUID+39,105151,1500,7796,7799,12,0,0,0,-1,0,0,-2810.06,-243.924,38.6361,1.92589,900,0,0,0,0,0,0,0,0,0,0,'',26972),
--- (@GUID+40,99046,1500,7796,7798,12,0,0,0,-1,0,0,-2784.22,-98.7661,47.9949,0.511382,900,0,0,0,0,0,0,0,0,0,0,'',26972),
--- (@GUID+40,105094,1500,7796,7798,12,0,0,0,-1,0,0,-2746.54,-84.4343,46.6362,1.93767,900,0,0,0,0,0,0,0,0,0,0,'',26972),
--- (@GUID+41,105095,1500,7796,7798,12,0,0,0,-1,0,0,-2751.16,-69.521,46.6362,4.99993,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+40,98995,1500,7796,7798,12,0,0,0,-1,0,0,-2680.71,-33.3051,49.843,4.0983,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+41,98995,1500,7796,7798,12,0,0,0,-1,0,0,-2682.25,-35.4171,49.796,0.698307,900,0,0,0,0,0,0,0,0,0,0,'',26972),
 (@GUID+42,98995,1500,7796,7798,12,0,0,0,-1,0,0,-2690.99,-21.124,49.6984,6.02095,900,0,0,0,0,0,0,0,0,0,0,'',26972),
--- (@GUID+43,98882,1500,7796,7797,12,0,0,0,-1,0,0,-2507.72,117.919,8.19956,0.0794148,900,0,0,0,0,0,3,0,0,0,0,'',26972),
 (@GUID+44,98995,1500,7796,7798,12,0,0,0,-1,0,0,-2689.22,-20.6522,48.3898,1.48999,900,0,0,0,0,0,0,0,0,0,0,'',26972);
 -- Aldrachi Soulwrath SAI
 UPDATE `creature_template` SET `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=1 WHERE `entry`=105000;
@@ -183,7 +175,7 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`=105000 AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (105000,0,0,0,0,0,100,0,5000,8000,12000,15000,11,216265,0,0,0,0,0,2,0,0,0,0,0,0,0,"Aldrachi Soulwraith - In Combat - Cast 'Dark Presence'");
 -- Doomherald Akvesh 98975
-UPDATE `creature_template` SET `lootid`=98975, `AIName`="SmartAI", `minlevel`=101, `maxlevel`=101, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=98975;
+UPDATE `creature_template` SET `lootid`=98975, `AIName`="SmartAI", `minlevel`=101, `maxlevel`=101, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=98975;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=98975 AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (98975,0,0,0,0,0,100,0,5000,8000,12000,15000,11,215709,0,0,0,0,0,2,0,0,0,0,0,0,0,"Doomherald Akvesh - In Combat - Cast 'Shadowflame'"),
@@ -196,7 +188,7 @@ UPDATE `creature` SET `equipment_id`=1 WHERE `id`=98975;
 DELETE FROM `creature_template_addon` WHERE `entry`=105095;
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `aiAnimKit`, `movementAnimKit`, `meleeAnimKit`, `auras`) VALUES 
 (105095,0,0,0,1,0,0,0,0,'188560 215837');
-UPDATE `creature_template` SET `lootid`=105095, `AIName`='', `ScriptName`='npc_doomherald_saera_105095', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=105095;
+UPDATE `creature_template` SET `lootid`=105095, `AIName`='', `ScriptName`='npc_doomherald_saera_105095', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=105095;
 DELETE FROM `creature_equip_template` WHERE `CreatureID`=105095;
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
 (105095,1,126760,0,0,125648,0,0,0,0,0,25549);
@@ -210,7 +202,7 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 DELETE FROM `creature_template_addon` WHERE `entry`=105094;
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `aiAnimKit`, `movementAnimKit`, `meleeAnimKit`, `auras`) VALUES 
 (105094,0,0,0,1,0,0,0,0,'188560 215837');
-UPDATE `creature_template` SET `lootid`=105094, `AIName`='', `ScriptName`='npc_doomherald_taraar_105094', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=105094;
+UPDATE `creature_template` SET `lootid`=105094, `AIName`='', `ScriptName`='npc_doomherald_taraar_105094', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=105094;
 DELETE FROM `creature_equip_template` WHERE `CreatureID`=105094;
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
 (105094,1,126760,0,0,125648,0,0,0,0,0,25549);
@@ -220,7 +212,7 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 (105094, 0, 0, 'Me?! If you\'d focus we would be done by now!', 12, 0, 100, 0, 0, 0, 0, 0, 'Doomherald Taraar to Player'),
 (105094, 1, 0, 'At last something reasonable escapes your lips.', 12, 0, 100, 0, 0, 0, 0, 0, 'Doomherald Taraar to Player');
 -- Gorgonnash 99046
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_gorgonnash_99046', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=99046;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_gorgonnash_99046', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=99046;
 DELETE FROM `creature_text` WHERE `CreatureID` = 99046;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
 (99046, 0, 0, 'What\'s that smell? Is that... Illidari?', 12, 0, 100, 0, 0, 58230, 0, 0, 'Gorgonnash to Player'),
@@ -233,7 +225,7 @@ INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `Appearanc
 UPDATE `creature` SET `equipment_id`=1 WHERE `id`=99046;
 -- Felsoul Legionnaire SAI 105125
 SET @FELSOUL_LEGIONAIRE := 105125;
-UPDATE `creature_template` SET `lootid`=105125, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=@FELSOUL_LEGIONAIRE;
+UPDATE `creature_template` SET `lootid`=105125, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=2 WHERE `entry`=@FELSOUL_LEGIONAIRE;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@FELSOUL_LEGIONAIRE AND `source_type`=0;
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@FELSOUL_LEGIONAIRE*100+01,@FELSOUL_LEGIONAIRE*100+02) AND `source_type`=9;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
@@ -250,7 +242,7 @@ INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `Appearanc
 (105125,1,124360,0,0,0,0,0,0,0,0,25549);
 UPDATE `creature` SET `equipment_id`=1 WHERE `id`=105125;
 -- Felsoul Chaosweaver 105138
-UPDATE `creature_template` SET `lootid`=105138, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=105138;
+UPDATE `creature_template` SET `lootid`=105138, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=2 WHERE `entry`=105138;
 DELETE FROM `smart_scripts` WHERE `entryorguid`= 105138 AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (105138,0,0,0,0,0,100,0,5000,8000,12000,15000,11,216009,0,0,0,0,0,2,0,0,0,0,0,0,0,"Felsoul Chaosweaver - In Combat - Cast 'Corrupting Chaos'"),
@@ -260,13 +252,13 @@ INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `Appearanc
 (105138,1,128199,0,0,0,0,0,0,0,0,25549);
 UPDATE `creature` SET `equipment_id`=1 WHERE `id`=105138;
 -- Felsoul Bloodseeker 98891
-UPDATE `creature_template` SET `lootid`=98891, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=98891;
+UPDATE `creature_template` SET `lootid`=98891, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=2 WHERE `entry`=98891;
 DELETE FROM `smart_scripts` WHERE `entryorguid`= 98891 AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (98891,0,0,0,0,0,100,0,5000,8000,12000,15000,11,204885,0,0,0,0,0,2,0,0,0,0,0,0,0,"Felsoul Bloodseeker - In Combat - Cast 'Devour Magic'"),
 (98891,0,1,0,0,0,100,0,0,0,9400,14700,11,204896,64,0,0,0,0,2,0,0,0,0,0,0,0,"Felsoul Bloodseeker - In Combat - Cast 'Drain Life'");
 -- Aldrachi Revenant 105151
-UPDATE `creature_template` SET `lootid`=105151, `AIName`='', `ScriptName`='npc_aldrachi_revenant_105151', `minlevel`=101, `maxlevel`=101, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=105151;
+UPDATE `creature_template` SET `lootid`=105151, `AIName`='', `ScriptName`='npc_aldrachi_revenant_105151', `minlevel`=101, `maxlevel`=101, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=105151;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=105151 AND `source_type`=0;
 DELETE FROM `creature_text` WHERE `CreatureID` = 105151;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
@@ -278,10 +270,10 @@ INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `Appearanc
 (108646,1,126793,0,0,0,0,0,0,0,0,25549);
 UPDATE `creature` SET `equipment_id`=1 WHERE `id`=108646;
 -- Caria Felsoul 99184
-UPDATE `creature_template` SET `unit_class`=12, `lootid`=99184, `AIName`='', `ScriptName`='npc_caria_felsoul_99184', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=5 WHERE `entry`=99184;
+UPDATE `creature_template` SET `unit_class`=12, `lootid`=99184, `AIName`='', `ScriptName`='npc_caria_felsoul_99184', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=99184;
 DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (99184);
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
-(99184,1,128831,0,0,128832,0,0,0,0,0,25549);
+(99184,1,128832,0,0,0,0,0,0,0,0,25549);
 UPDATE `creature` SET `equipment_id`=1 WHERE `id`=99184;
 DELETE FROM `creature_text` WHERE `CreatureID` = 99184;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
@@ -295,20 +287,25 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 -- Lesser imp (98995)
 UPDATE `creature_template` SET `AIName`='', `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=0 WHERE `entry`=98995;
 -- Lesser Minion (100286)
-UPDATE `creature_template` SET `AIName`='', `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=0 WHERE `entry`=100286;
+UPDATE `creature_template` SET `AIName`='', `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=0, `HealthModifier`=1 WHERE `entry`=100286;
 -- Burning Crusher (105103)
 UPDATE `creature_template` SET `AIName`='', `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=1 WHERE `entry`=105103;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=105103;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=105103 AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(105103,0,0,0,0,0,100,0,5000,8000,12000,15000,11,206881,0,0,0,0,0,2,0,0,0,0,0,0,0,"Burning Crusher - In Combat - Cast 'Blazing Hellfire'"); 
 -- Felsoul Portals
 DELETE FROM `gameobject_template` WHERE `entry`=245119;
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`, `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`, `Data22`, `Data23`, `Data24`, `Data25`, `Data26`, `Data27`, `Data28`, `Data29`, `Data30`, `Data31`, `Data32`, `RequiredLevel`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
-(245119,0,30796,'Collapsed Rocks','questinteract','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','',23222);
+(245119,0,30796,'Collapsed Rocks','questinteract','','',1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','go_cavern_stones_7796',23222);
 UPDATE `gameobject_template` SET `type`=10, `displayId`=30007, `IconName`='questinteract', `castBarCaption`='Destroying', `size`=0.66, `Data0`=99, `Data10`=190610, `Data13`=1, `Data14`=24585, `Data20`=1, `Data23`=1, `Data25`=1, `Data26`=0, `AIName`='', `VerifiedBuild`=26822 WHERE `entry` IN ('248517', '248573');
 DELETE FROM `gameobject` WHERE `guid` in (51014375, 51014376, 51014377, 51014378);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) VALUES
-(51014375,248573,1500,7796,7797,12,0,0,0,-1,-2648.52,19.5848,48.6442,0.85781,-0,-0,-0.415875,-0.909422,7200,255,0,1,'go_brokenshore_felsoul_portal',26822),
-(51014376,248517,1500,7796,7797,12,0,0,0,-1,-2618.59,78.8602,38.1285,6.15595,-0,-0,-0.0635752,0.997977,7200,255,0,1,'go_brokenshore_felsoul_portal',26822),
-(51014377,266029,1500,7796,7797,12,0,0,0,-1,-2507.57,117.86,8.20133,0.254625,-0,-0,-0.126969,-0.991907,7200,255,1,0,'go_temporary_allari_cage',26822),
-(51014378,245119,1500,7796,7797,12,0,0,0,-1,-2740.67,-149.12,48.4044,1.50511,0,0,0.559193,-0.829037,7200,255,1,0,'go_cavern_stones_7796',26822);
+-- (51014375,248573,1500,7796,7797,12,0,0,0,-1,-2648.52,19.5848,48.6442,0.85781,-0,-0,-0.415875,-0.909422,7200,255,0,1,'go_brokenshore_felsoul_portal',26822),
+-- (51014376,248517,1500,7796,7797,12,0,0,0,-1,-2618.59,78.8602,38.1285,6.15595,-0,-0,-0.0635752,0.997977,7200,255,0,1,'go_brokenshore_felsoul_portal',26822),
+(51014377,266029,1500,7796,7797,12,0,0,0,-1,-2507.57,117.86,8.20133,0.254625,-0,-0,-0.126969,-0.991907,7200,255,1,0,'go_temporary_allari_cage',26822);
+-- (51014378,245119,1500,7796,7797,12,0,0,0,-1,-2740.67,-149.12,48.4044,1.50511,0,0,0.559193,-0.829037,7200,255,1,0,'go_cavern_stones_7796',26822);
+UPDATE `gameobject_template` SET `ScriptName`='go_brokenshore_felsoul_portal' WHERE `entry` IN (248573, 248517);
 DELETE FROM `gameobject_addon` WHERE `guid` in (51014375, 51014376);
 INSERT INTO `gameobject_addon` (`guid`, `parent_rotation0`, `parent_rotation1`, `parent_rotation2`, `parent_rotation3`, `invisibilityType`, `invisibilityValue`, `WorldEffectID`) VALUES
 (51014375,0.0664606,0.00581074,0.156891,0.98536,0,0,0),
@@ -360,7 +357,7 @@ INSERT INTO `gameobject_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, 
 (65644, 128832, 0, 100, 0, 1, 0, 1, 1, 'aldrachi-warblades');
 DELETE FROM `gameobject_template` WHERE `Entry`= 248785;
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`, `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`, `Data22`, `Data23`, `Data24`, `Data25`, `Data26`, `Data27`, `Data28`, `Data29`, `Data30`, `Data31`, `Data32`, `RequiredLevel`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
-(248785, 3, 9806, 'Aldrachi Warblades', 'questinteract', 'Wielding', '', 2, 1691, 65644, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 107711, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', 'go_aldrachi_warblades_248785', 26822);
+(248785, 3, 9806, 'Aldrachi Warblades', 'questinteract', 'Wielding', '', 2, 1691, 65644, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 107711, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, '', 'go_aldrachi_warblades_248785', 26822);
 DELETE FROM `gameobject_template_addon` WHERE `entry`=248785;
 INSERT INTO `gameobject_template_addon` (`entry`, `faction`, `flags`) VALUES
 (248785, 0, 2097152); -- Aldrachi Warblades
@@ -368,3 +365,289 @@ INSERT INTO `gameobject_template_addon` (`entry`, `faction`, `flags`) VALUES
 DELETE FROM `creature_template_addon` WHERE `entry`=108686;
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `aiAnimKit`, `movementAnimKit`, `meleeAnimKit`, `auras`) VALUES 
 (108686,0,0,0,1,0,0,0,0,'215847');
+-- TEST
+UPDATE `creature_template` SET `ScriptName`='npc_portal_bunny' WHERE `entry`='105204'; -- npc_portal_bunny
+-- General DH fixes (Should be moved to the appropriate file)
+DELETE FROM `creature` WHERE `guid` IN (20542659, 20542665);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+(20542659,103655,1468,0,0,1,0,0,0,-1,0,0,4312.78,-590.177,-281.187,6.08924,7200,0,0,0,0,0,0,0,0,0,0,'',22423),
+(20542665,103658,1468,0,0,1,0,0,0,-1,0,0,4339.06,-590.076,-281.158,3.3436,7200,0,0,0,0,0,0,0,0,0,0,'',22423);
+UPDATE `creature` SET `PhaseId`=171 WHERE `guid` IN (20542616, 20542615);
+DELETE FROM `script_waypoint` WHERE `entry`=99632;
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `waittime`, `point_comment`) VALUES
+(99632,1,4315.13,-590.317,-281.665,0,'Altruis the Sufferer for Breaking Out'),
+(99632,2,4316.88,-590.817,-281.665,0,'Altruis the Sufferer for Breaking Out'),
+(99632,3,4317.88,-590.817,-281.665,0,'Altruis the Sufferer for Breaking Out'),
+(99632,4,4318.88,-590.816,-281.665,0,'Altruis the Sufferer for Breaking Out'),
+(99632,5,4319.63,-590.067,-281.665,0,'Altruis the Sufferer for Breaking Out'),
+(99632,6,4320.13,-589.317,-281.665,0,'Altruis the Sufferer for Breaking Out'),
+(99632,7,4319.88,-588.817,-281.665,0,'Altruis the Sufferer for Breaking Out'),
+(99632,8,4319.15,-586.838,-281.673,0,'Altruis the Sufferer at Weapons Crate'),
+(99632,9,4320.9,-586.338,-281.673,0,'Altruis the Sufferer for Breaking Out'),
+(99632,10,4321.9,-585.088,-281.673,0,'Altruis the Sufferer for Breaking Out'),
+(99632,11,4323.64,-583.668,-281.753,0,'Altruis the Sufferer for Breaking Out');
+DELETE FROM `script_waypoint` WHERE `entry`=99631;
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `waittime`, `point_comment`) VALUES
+(99631, 1, 4337.47, -590.45, -281.415, 0, 'Kayn Sunfury for Breaking Out'),
+(99631, 2, 4336.72, -590.7, -281.665, 0, 'Kayn Sunfury for Breaking Out'),
+(99631, 3, 4334.97, -590.95, -281.665, 0, 'Kayn Sunfury for Breaking Out'),
+(99631, 4, 4333.97, -590.95, -281.665, 0, 'Kayn Sunfury for Breaking Out'),
+(99631, 5, 4332.72, -590.7, -281.665, 0, 'Kayn Sunfury for Breaking Out'),
+(99631, 6, 4331.97, -590.2, -281.665, 0, 'Kayn Sunfury for Breaking Out'),
+(99631, 7, 4331.97, -589.45, -281.665, 0, 'Kayn Sunfury for Breaking Out'),
+(99631, 8, 4332.22, -588.95, -281.665, 0, 'Kayn Sunfury at Weapon Crate'),
+(99631, 9, 4331.29, -587.508, -281.862, 0, 'Kayn Sunfury for Breaking Out'),
+(99631, 10, 4331.29, -586.508, -281.862, 0, 'Kayn Sunfury for Breaking Out'),
+(99631, 11, 4331.29, -585.758, -281.862, 0, 'Kayn Sunfury for Breaking Out'),
+(99631, 12, 4331.04, -584.758, -281.862, 0, 'Kayn Sunfury for Breaking Out'),
+(99631, 13, 4330.54, -584.258, -281.862, 0, 'Kayn Sunfury for Breaking Out'),
+(99631, 14, 4328.46, -583.66, -281.729, 0, 'Kayn Sunfury for Breaking Out');
+DELETE FROM `creature_equip_template` WHERE `CreatureID`=99632;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(99632,1,128360,0,0,128370,0,0,0,0,0,25549),
+(99632,2,0,0,0,0,0,0,0,0,0,25549),
+(99632,3,0,0,0,128370,0,0,0,0,0,25549);
+DELETE FROM `creature_equip_template` WHERE `CreatureID`=99631;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(99631,1,128359,0,0,128371,0,0,0,0,0,25549),
+(99631,2,0,0,0,0,0,0,0,0,0,25549),
+(99631,3,0,0,0,128371,0,0,0,0,0,25549);
+UPDATE `creature_template` SET `ScriptName`='npc_altruis_sufferer_freed_99632' WHERE `entry`=99632;
+UPDATE `creature_template` SET `ScriptName`='npc_kayn_sunfury_freed_99631' WHERE `entry`=99631;
+DELETE FROM `gameobject` WHERE `guid` BETWEEN 51014379 AND 51014389;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) VALUES
+(51014379,244596,1468,7814,7873,0,0,171,0,-1,4312.67,-605.875,-281.41,0.161516,0,0,0.0806702,0.996741,7200,255,1,0,'',26822),
+(51014380,244943,1468,7814,7873,0,0,171,0,-1,4333.72,-587.326,-281.146,0.598127,0,0,0.294625,0.955613,7200,255,1,0,'',26822),
+(51014381,244944,1468,7814,7873,0,0,171,0,-1,4318.35,-587.293,-281.11,6.07018,0,0,0.106301,-0.994334,7200,255,1,0,'',26822),
+(51014382,244582,1468,7814,7873,0,0,171,0,-1,4330.88,-605.516,-281.922,3.21962,0,0,0.999239,-0.0390038,7200,255,1,0,'',26822),
+(51014383,244943,1468,7814,7873,0,0,171,0,-1,4334.09,-587.684,-281.203,0.598127,0,0,0.294625,0.955613,7200,255,1,0,'',26822),
+(51014384,244944,1468,7814,7873,0,0,171,0,-1,4318.39,-586.839,-281.127,6.07018,0,0,0.106301,-0.994334,7200,255,1,0,'',26822),
+(51014385,244582,1468,7814,7873,0,0,171,0,-1,4317.79,-587.068,-281.922,6.05931,0,0,0.111704,-0.993742,7200,255,1,0,'',26822),
+(51014386,244582,1468,7814,7873,0,0,171,0,-1,4334.39,-587.222,-281.922,3.73722,0,0,0.95598,-0.293431,7200,255,1,0,'',26822),
+(51014387,253189,1468,7814,7873,0,0,171,0,-1,4330.34,-605.172,-281.156,0.0324739,0,0,0.0162362,0.999868,7200,255,1,0,'',26822),
+(51014388,253189,1468,7814,7873,0,0,171,0,-1,4330.37,-605.495,-281.14,0.0324739,0,0,0.0162362,0.999868,7200,255,1,0,'',26822),
+(51014389,244596,1468,7814,7873,0,0,171,0,-1,4339.11,-605.908,-281.326,2.96785,0,0,0.996229,0.0867621,7200,255,1,0,'',26822);
+DELETE FROM `creature` WHERE `guid` IN (280000453, 280000454);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+(280000453,103655,1468,7814,7873,0,0,0,0,-1,0,0,4312.78,-590.177,-281.187,6.08924,30,0,0,0,0,0,0,0,0,0,0,'',22423),
+(280000454,103658,1468,7814,7873,0,0,0,0,-1,0,0,4339.06,-590.076,-281.158,3.3436,30,0,0,0,0,0,0,0,0,0,0,'',22423);
+DELETE FROM `spell_area` WHERE `area` = 7873 AND `spell` = 59074;
+-- INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `quest_start_status`, `quest_end_status`) VALUES
+-- (59074, 7873, 38672, 38672, 8 | 32, 2);
+UPDATE `creature` SET `ScriptName` = 'npc_maiev_shadowsong' WHERE `guid`= 20542899 AND `id` = 92718;
+UPDATE `creature_template` SET `ScriptName` = 'npc_illidari_felbat_94324' WHERE `entry` = 94324;
+UPDATE `creature_template` SET `ScriptName` = 'npc_illidari_felbat_99227' WHERE `entry` = 99227;
+DELETE FROM `creature` WHERE `guid` = 280000453;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+(280000453,94324,1220,8445,8445,0,0,0,0,-1,0,0,-845.698,4252.15,746.286,1.05337,300,0,0,87,0,0,0,0,0,0,0,'',26972);
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (99227, 94324);
+INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES
+(99227, 46598, 1, 0),
+(94324, 46598, 1, 0);
+-- (20542615,103655,1468,0,0,1,0,0,0,-1,0,0,4312.78,-590.177,-281.27,6.08924,7200,0,0,0,0,0,0,0,0,0,0,'',22423)
+UPDATE `creature` SET `PhaseId`=0 WHERE `guid`='20542615';
+UPDATE `creature_template` SET `ScriptName`='npc_jace_darkweaver_109196' WHERE `entry`=109196;
+UPDATE `quest_template_addon` SET `PrevQuestID`=42869 WHERE `ID`=42872;
+-- Delete NPCs Altruis and Kayn in the cells, they will be spawned as tempsummon cretures via script
+DELETE FROM `creature` WHERE `guid` IN (20542660, 20542664);
+-- Vampiric Illidari Felbat
+UPDATE `creature_template` SET `unit_flags`=0, `VehicleId`=1051, `MovementId`=0, `AIName`='', `ScriptName`='npc_vault_of_the_wardens_vampiric_felbat' WHERE `entry`=99443;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=99443 AND `source_type`=0;
+UPDATE `quest_template_addon` SET `ScriptName`='q_securing_the_way' WHERE `ID`=42872;
+-- make creatures dead
+UPDATE `creature` SET `spawndist`=0, `MovementType`=0, `unit_flags`=537133824 WHERE `guid` IN (20543315, 20543317,
+20543325, 20543314, 20543320, 20543332, 20543327, 20543309, 20543329, 20543310, 20543318, 20543311, 20543341,
+20543340, 20543348, 20543362, 20543351, 20543355, 20543363, 20543365, 20543370, 20543372, 20543373, 20543378,
+20543383, 20543376, 20543377, 20543401, 20543397, 20543386, 20543388, 20543398, 20543395, 20543381, 20543380,
+20543407, 20543404, 20543408, 20543409, 20543412, 20543410);
+
+DELETE FROM `creature_addon` WHERE `guid` IN (20543315, 20543317, 20543325, 20543314, 20543320, 20543332, 20543327,
+20543309, 20543329, 20543310, 20543318, 20543311, 20543341, 20543340, 20543348, 20543362, 20543351, 20543355,
+20543363, 20543365, 20543370, 20543372, 20543373, 20543378, 20543383, 20543376, 20543377, 20543401, 20543397,
+20543386, 20543388, 20543398, 20543395, 20543381, 20543380, 20543407, 20543404, 20543408, 20543409, 20543412,
+20543410);
+INSERT INTO `creature_addon` (`guid`, `mount`, `bytes1`, `bytes2`, `auras`) VALUES
+(20543315, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543317, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543325, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543314, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543320, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543332, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543327, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543309, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543329, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543310, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543318, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543311, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543341, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543340, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543348, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543362, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543351, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543355, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543363, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543365, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543370, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543372, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543373, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543378, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543383, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543376, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543377, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543401, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543397, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543386, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543388, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543398, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543395, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543381, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543380, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543407, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543404, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543408, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543409, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543412, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
+(20543410, 0, 0x0, 0x1, '29266'); -- 25680 - 29266 - 29266
+DELETE FROM `creature_template_addon` WHERE `entry` IN (97225, 92782);
+-- TEST
+UPDATE `creature_template` SET `ScriptName`='npc_elerion_bladedancer_101004' WHERE `entry`=101004;
+UPDATE `creature_template` SET `ScriptName`='npc_khadgars_upgraded_servant_114562' WHERE `entry`=114562;
+-- Illidari Redoupt Spawns
+DELETE FROM `creature` WHERE `guid` BETWEEN 280000455 AND 280000467;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+(280000455,109196,1220,8445,8445,0,0,0,0,-1,0,1,-947.054,4090.14,648.258,5.9197,30,0,0,870,0,0,0,0,0,0,0,'',22423),
+(280000456,109247,1220,7502,8284,0,0,0,0,-1,0,1,-948.914,4066.53,648.208,1.2770,30,0,0,87,0,0,0,0,0,0,0,'',22423),
+(280000457,109252,1220,8445,8445,0,0,0,0,-1,0,0,-962.38,4080.87,648.141,6.20936,30,0,0,87,0,0,0,0,0,0,0,'',22423),
+(280000458,109252,1220,7502,8284,0,0,0,0,-1,0,0,-961.318,4081.57,648.144,6.1426,30,0,0,87,0,0,0,0,0,0,0,'',22423),
+(280000459,109340,1220,7502,8284,0,0,0,0,-1,0,1,-940.248,4073.51,648.268,2.44179,30,0,0,870,0,0,0,0,0,0,0,'',22423),
+(280000460,102798,1220,7502,8284,0,0,0,0,-1,0,1,-948.018,4070.11,648.221,4.53723,30,0,0,870,0,0,0,0,0,0,0,'',22423),
+(280000461,102797,1220,7502,8284,0,0,0,0,-1,0,1,-958.567,4080.89,648.161,3.03712,30,0,0,870,0,0,0,0,0,0,0,'',22423),
+(280000462,109295,1220,8445,8445,0,0,0,0,-1,0,0,-949.179,4090.21,650.038,5.625,300,0,0,522,0,0,0,0,0,0,0,'',22423),
+(280000463,109252,1220,7502,8284,0,0,0,0,-1,0,0,-962.345,4079.65,648.139,0.0675981,30,0,0,87,0,0,0,0,0,0,0,'',22423),
+(280000464,95237,1519,0,0,0,0,0,0,-1,0,1,1524.24,1417.57,243.791,0.0834095,30,0,0,1203351,0,0,0,0,0,0,0,'',22423),
+(280000465,95240,1519,0,0,0,0,0,0,-1,0,1,1524.21,1406.65,243.764,6.12075,30,0,0,113100,0,0,0,0,0,0,0,'',22423),
+(280000466,95237,1519,8022,8023,0,0,0,0,-1,0,1,1551.41,1414.73,237.108,6.225207,30,0,0,1203351,0,0,0,0,0,0,0,'',22423),
+(280000467,103025,1519,8022,8023,0,0,0,0,-1,0,1,1584.68,1409.38,218.026,2.990351,30,0,0,1203351,0,0,0,0,0,0,0,'',22423);
+DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (109196, 109247, 109340, 102798, 102797, 95237);
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(109196,1,128360,0,0,128370,0,0,0,0,0,25549),
+(109247,1,127651,0,0,0,0,0,0,0,0,25549),
+(109340,1,128359,0,0,128371,0,0,0,0,0,25549),
+(102798,1,128361,0,0,128369,0,0,0,0,0,25549),
+(102797,1,128361,0,0,128369,0,0,0,0,0,25549),
+(95237,1,128358,0,0,128372,0,0,0,0,0,25549);
+DELETE FROM `gameobject` WHERE `guid` IN (51014378, 51014379);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) VALUES
+(51014378,251528,1220,7502,8284,0,0,0,0,-1,-949.313,4090.18,648.245,05.66822,-0,-0,-0.302659,0.953099,300,255,1,0,'',26822),
+(51014379,251579,1220,7502,8284,0,0,0,0,-1,-964.162,4066.11,648.119,0.634656,-0,-0,-0.312029,-0.950073,300,255,1,0,'',26822);
+DELETE FROM `spell_script_names` WHERE `spell_id` = 217377;
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(217377, 'spell_redoubt_sentence_to_death');
+UPDATE `creature_template` SET `ScriptName`='npc_redoubt_asha' WHERE `entry` = 102798;
+UPDATE `creature_template` SET `ScriptName`='npc_redoubt_belath' WHERE `entry` = 102797;
+DELETE FROM `creature_template_addon` WHERE `entry` IN (102798, 102797);
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `aiAnimKit`, `movementAnimKit`, `meleeAnimKit`, `auras`) VALUES 
+(102798,0,0,0,1,0,0,0,0,'18950'),
+(102797,0,0,0,1,0,0,0,0,'18950');
+UPDATE `quest_template_addon` SET `PrevQuestID`=42872 WHERE `ID`=41033;
+UPDATE `quest_template_addon` SET `PrevQuestID`=42872 WHERE `ID`=41221;
+-- BreadCrumb Quest "Return To Mardum"
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=19 AND `SourceEntry` IN (41033, 41221);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(19,0,41033,0,0,14,0,40374,0,0,0,0,0,"","Quest 'Return To Mardum' can only be taken if quest 'Obtained Kayn' is not taken"),
+(19,0,41221,0,0,14,0,40375,0,0,0,0,0,"","Quest 'Return To Mardum' can only be taken if quest 'Obtained Altruis' is not taken");
+DELETE FROM `spell_script_names` WHERE `spell_id` = 215782;
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(215782, 'spell_redoubt_teleport_to_dh_ch');
+UPDATE `creature_template` SET `minlevel`=100, `maxlevel`=102, `HealthModifier`=3 WHERE `entry`=95237;
+DELETE FROM `creature_queststarter` WHERE `quest` IN (41060, 41070, 41037, 41062, 41064, 41066, 41096, 41067);
+INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
+(95237, 41060),
+(95237, 41070),
+(95240, 41037),
+(95240, 41062),
+(103025, 41064),
+(95238, 41066),
+(95238, 41096),
+(95238, 41067);
+UPDATE `quest_template_addon` SET `PrevQuestID` = 41060, `NextQuestID` = 41064, `ExclusiveGroup` = 41070 WHERE `ID` = 41070; -- Spoils of Victory
+UPDATE `quest_template_addon` SET `PrevQuestID` = 41037, `NextQuestID` = 41064, `ExclusiveGroup` = 41070 WHERE `ID` = 41062; -- Spoils of Victory
+UPDATE `quest_template_addon` SET `PrevQuestID` = 41064 WHERE `ID` = 41066;
+UPDATE `quest_template_addon` SET `PrevQuestID` = 41066 WHERE `ID` = 41096;
+UPDATE `quest_template_addon` SET `PrevQuestID` = 41066 WHERE `ID` = 41067;
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=19 AND `SourceEntry` IN (41096, 41067);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(19,0,41096,0,0,14,0,40374,0,0,0,0,0,"","Quest 'Time is of the Essence' can only be taken if quest 'Obtained Kayn' is not taken"),
+(19,0,41067,0,0,14,0,40375,0,0,0,0,0,"","Quest 'Time is of the Essence' can only be taken if quest 'Obtained Altruis' is not taken");
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=19 AND `SourceEntry` IN (41060, 41037);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(19,0,41060,0,0,14,0,40374,0,0,0,0,0,"","Quest 'Unbridled Power' can only be taken if quest 'Obtained Kayn' is not taken"),
+(19,0,41037,0,0,14,0,40375,0,0,0,0,0,"","Quest 'Unbridled Power' can only be taken if quest 'Obtained Altruis' is not taken");
+UPDATE `gameobject_template` SET `ScriptName`='go_mardum_control_console' WHERE `entry`=254245;
+UPDATE `creature_template` SET `ScriptName`='npc_mardum_altruis_ch' WHERE `entry`=95237;
+DELETE FROM `creature_equip_template` WHERE `CreatureID` = 98650;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(98650,1,17383,0,0,0,0,0,0,0,0,25549);
+UPDATE `creature` SET `id` = 98650, `orientation` = 4.717611, `equipment_id` = 1 WHERE `guid` = 20547034;
+UPDATE `creature_template` SET `gossip_menu_id` = 98650, `minlevel` = 110, `maxlevel` = 110, `npcflag` = 3, `speed_run` = 0.992063, `ScriptName`='npc_mardum_battlelord_gaardoun' WHERE `entry`=98650;
+DELETE FROM `creature_text` WHERE `CreatureID` = 95237;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(95237, 0, 0, 'Whenever you\'re ready.', 12, 0, 100, 0, 0, 64700, 147331, 0, 'Altruis the Sufferer to Player'),
+(95237, 1, 0, 'This way. Your forces await.', 12, 0, 100, 0, 0, 58265, 147332, 0, 'Altruis the Sufferer to Player'),
+(95237, 2, 0, 'The Fel Hammer is ours at last. Gaze upon the might of the Twinblades of the Deceiver!', 12, 0, 100, 0, 0, 58266, 147333, 0, 'Altruis the Sufferer to Player'),
+(95237, 3, 0, 'We will follow $n into battle, and we will strike down the Legion once and for all!', 12, 0, 100, 0, 0, 58267, 147337, 0, 'Altruis the Sufferer to Player'),
+(95237, 4, 0, 'Glory to the Illidari!', 14, 0, 100, 0, 0, 58268, 147338, 0, 'Altruis the Sufferer to Player'),
+(95237, 5, 0, 'Welcome to the Fel Hammer, $n.', 14, 0, 100, 0, 0, 58271, 0, 0, 'Altruis the Sufferer to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 98650;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(98650, 0, 0, 'The Ashtongue will fight beside you.', 12, 0, 100, 0, 0, 64714, 147334, 0, 'Gaardoun to Player'),
+(98650, 1, 0, 'Ah, of course. Right this way.', 12, 0, 100, 0, 0, 64701, 0, 0, 'Gaardoun to Player'),
+(98650, 2, 0, 'Legion reinforcements arrived soon after you left for the Black Temple, destroying the portal behind you. Oh, it was a glorious battle!', 12, 0, 100, 0, 0, 64702, 0, 0, 'Gaardoun to Player'),
+(98650, 3, 0, 'In the aftermath, we uncovered an ancient Nathrezim forge used to create many of the Legion\'s most powerful weapons.', 12, 0, 100, 0, 0, 64703, 0, 0, 'Gaardoun to Player'),
+(98650, 4, 0, 'We\'ve guarded it carefully ever since. I think it prove quite useful to you.', 12, 0, 100, 0, 0, 64704, 0, 0, 'Gaardoun to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 103025;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(103025, 0, 0, 'Move, you fools! Show $n some respect!', 12, 0, 100, 0, 0, 64705, 0, 0, 'Gaardoun to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 98624;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(98624, 0, 0, 'You may call upon the Coilskar as well.', 12, 0, 100, 0, 0, 64715, 147335, 0, 'Lady Stheno to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 98632;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(98632, 0, 0, 'Our mission is not yel complete. We are all yours to command.', 12, 0, 100, 0, 0, 64716, 147336, 0, 'Matron Mother Nalevolence to Player');
+DELETE FROM `script_waypoint` WHERE `entry`=98650;
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `waittime`, `point_comment`) VALUES
+(98650,1,1561.03,1423.589,237.108,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,2,1577.71,1427.824,237.108,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,3,1581.88,1429.974,237.117,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,4,1585.12,1432.572,236.635,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,5,1590.02,1438.280,239.425,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,6,1593.77,1443.242,243.055,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,7,1595.04,1446.464,243.339,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,8,1594.92,1449.646,243.377,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,9,1593.88,1452.219,243.776,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,10,1590.93,1455.502,241.058,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,11,1587.41,1457.452,239.082,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,12,1579.35,1461.667,234.515,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,13,1572.21,1463.673,231.405,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,14,1566.23,1464.733,230.877,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,15,1561.88,1461.941,230.803,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,16,1561.19,1459.083,230.760,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,17,1561.52,1453.845,226.304,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,18,1561.41,1446.114,219.558,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,19,1567.48,1418.781,217.639,0,'Battlelord Gaardoun for Spoils of Victory'),
+(98650,20,1584.68,1409.386,218.026,0,'Battlelord Gaardoun for Spoils of Victory');
+DELETE FROM `gossip_menu` WHERE `MenuId` = 98650;
+INSERT INTO `gossip_menu` (`MenuId`, `TextId`, `VerifiedBuild`) VALUES
+(98650, 147331, 25549);
+DELETE FROM `gossip_menu_option` WHERE `MenuId` = 98650;
+INSERT INTO `gossip_menu_option` (`MenuId`, `OptionIndex`, `OptionIcon`, `OptionText`, `OptionBroadcastTextId`, `OptionType`, `OptionNpcFlag`, `VerifiedBuild`) VALUES
+(98650, 1, 0, 'Show me what we acquired in our conquest', 0, 1, 1, 25549);
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` IN (15) AND `SourceGroup` IN (98650);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `sourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+(15, 98650, 1, 0, 0, 9, 0, 41070, 0, 0, 0, 0, 0, '', 'Gossip Only Shows if Quest Taken');
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (207407, 213010, 213017, 212817);
+INSERT IGNORE INTO `spell_script_names` (`scriptname`, `spell_id`) VALUES
+('spell_dh_artifact_soul_carver', 207407),
+('spell_dh_artifact_charred_warblades', 213010),
+('spell_dh_artifact_fueled_by_pain', 213017),
+('spell_dh_artifact_fiery_demise', 212817);

@@ -19,9 +19,13 @@
 #include "Scenario.h"
 #include "InstanceScenario.h"
 #include "GameObject.h"
+#include "GameObjectAI.h"
 #include "PhasingHandler.h"
 #include "SceneMgr.h"
 #include "ScriptMgr.h"
+#include "CombatAI.h"
+#include "TemporarySummon.h"
+#include "Unit.h"
 
 enum DataTypes
 {
@@ -46,6 +50,7 @@ enum DataTypes
     PHASE_DH = 5875,
     PHASE_PALADIN = 5171,
     NPC_ALLARI_SOULEATER = 98882,
+    NPC_DOOMHERALD_AKVESH = 98975,
     NPC_GORGONNASH = 99046,
     NPC_DOOMHERALD_SAERA = 105095,
     NPC_DOOMHERALD_TARAAR = 105094,
@@ -56,7 +61,7 @@ enum DataTypes
     GO_FELSOUL_PORTAL_1 = 248573,
     GO_FELSOUL_PORTAL_2 = 248517,
     GO_FELSOUL_CAGE = 266029,
-    GO_STONE_WALL = 245045,
+    GO_STONE_WALL = 245119,
     NORMAL_PHASE = 169,
     DATA_BROKENSHORE = 0,
     DATA_STAGE_1 = 1,
@@ -66,7 +71,7 @@ enum DataTypes
     DATA_STAGE_5 = 5,
     DATA_STAGE_6 = 6,
     DATA_STAGE_7 = 7,
-    DH_VENGEANCE_ARTIFACT_ACQUISTION_LOOTED_SCENE = 1245,
+    DH_VENGEANCE_ARTIFACT_ACQUISTION_LOOTED_SCENE = 1601,
     QUEST_VENGEANCE_WILL_BE_OURS_1 = 40249,
     QUEST_VENGEANCE_WILL_BE_OURS_2 = 41863,
 };
@@ -79,7 +84,7 @@ struct scenario_artifact_brokenshore : public InstanceScript
     {
         SetBossNumber(DATA_MAX_ENCOUNTERS_DH);
         SetData(DATA_BROKENSHORE, NOT_STARTED);
-        for (uint8 i = 1; i < 7; ++i)
+        for (uint8 i = 1; i <= 7; ++i)
             SetData(i, NOT_STARTED);
         StepID = DATA_STAGE_1;
         isComplete = false;
@@ -97,12 +102,12 @@ struct scenario_artifact_brokenshore : public InstanceScript
     void OnPlayerEnter(Player* player) override
     {
         InstanceScript::OnPlayerEnter(player);
-        TC_LOG_ERROR("server.worldserver", " === scenario_artifact_brokenshore: Player Entered  === ");
-        if (player->GetMapId() == 1500)
-        {
+        
+        if (player->GetMapId() == 1500) {
             _playerGUID = player->GetGUID();
             PhasingHandler::AddPhase(player, NORMAL_PHASE, true);
         }
+
         SummonAllariSouleater();
     }
 
@@ -141,6 +146,11 @@ struct scenario_artifact_brokenshore : public InstanceScript
 
         switch (go->GetEntry())
         {
+        case GO_FELSOUL_PORTAL_1:
+        case GO_FELSOUL_PORTAL_2:
+            go->SetGoState(GO_STATE_ACTIVE);
+            go->setActive(true);
+            break;
         case GO_STONE_WALL:
             go->SetLootState(GO_READY);
         default:
@@ -150,7 +160,6 @@ struct scenario_artifact_brokenshore : public InstanceScript
 
     void NextStep()
     {
-        TC_LOG_ERROR("server.worldserver", " === scenario_artifact_brokenshore  NextStep  %u === ", StepID);
         if (StepID < DATA_STAGE_7)
         {
             ++StepID;
@@ -158,14 +167,15 @@ struct scenario_artifact_brokenshore : public InstanceScript
                 scenario->CompleteCurrStep();
         }
         else if (StepID == DATA_STAGE_7)
-        {
-            if (!isComplete)
-                if (Scenario* scenario = instance->GetInstanceScenario())
-                    scenario->CompleteCurrStep();
-
-            // COMPLETE SCENARIO
+        {   
             if (Scenario* scenario = instance->GetInstanceScenario())
-                scenario->CompleteScenario();
+            {
+                if (!isComplete) {
+                    scenario->CompleteCurrStep();
+                } else {
+                    scenario->CompleteScenario(); // COMPLETE SCENARIO
+                }   
+            }
         }
     }
 
@@ -179,10 +189,13 @@ struct scenario_artifact_brokenshore : public InstanceScript
         if (type == DATA_STAGE_1 && data == DONE)
         {
             NextStep();
+            SummonFelsoulPortals();
         }
         else if (type == DATA_STAGE_2 && data == DONE)
         {
             ++demonPortalsDestroyed;
+            if (demonPortalsDestroyed == 1)
+                SummonAkvesh();
             if (demonPortalsDestroyed == 2) {
                 NextStep();
                 SummonDemonTwins();
@@ -199,6 +212,7 @@ struct scenario_artifact_brokenshore : public InstanceScript
         else if (type == DATA_STAGE_4 && data == DONE)
         {
             NextStep();
+            SummonCollapsedRocks();
         }
         else if (type == DATA_STAGE_5 && data == DONE)
         {
@@ -209,33 +223,60 @@ struct scenario_artifact_brokenshore : public InstanceScript
         else if (type == DATA_STAGE_6 && data == DONE)
         {
             NextStep();
-            //summon Aldrachi Warblades GO + NPC
-            SummonAldrachiWarblades();
+            SummonAldrachiWarblades(); //summon Aldrachi Warblades GO + NPC
         }
         else if (type == DATA_STAGE_7 && data == DONE)
         {
+            isComplete = true;
             NextStep();
-            // CompleteScenario();
             DoPlayScenePackageIdOnPlayers(DH_VENGEANCE_ARTIFACT_ACQUISTION_LOOTED_SCENE);
+            SummonFelBat();
         }
     }
 
     void SummonAllariSouleater()
     {
-        TempSummon* allari = instance->SummonCreature(NPC_ALLARI_SOULEATER, Position(-2507.72f, 117.919f, 8.1995f, 0.079414f));
+        if (Creature* allari = instance->GetCreature(_allariGUID))
+            allari->Respawn();
+
+        if (TempSummon* allari = instance->SummonCreature(NPC_ALLARI_SOULEATER, Position(-2507.72f, 117.919f, 8.1995f, 0.079414f)))
+        {
+            _allariGUID = allari->GetGUID();
+        }
+    }
+
+    void SummonFelsoulPortals()
+    {
+        GameObject* felsoulPortal1 = instance->SummonGameObject(GO_FELSOUL_PORTAL_1, Position(-2648.52f, 19.5848f, 48.6442f, 0.85781f), QuaternionData(-0.0f, -0.0f, -0.415875f, -0.909422f), 300);
+        GameObject* felsoulPortal2 = instance->SummonGameObject(GO_FELSOUL_PORTAL_2, Position(-2618.59f, 78.8602f, 38.1285f, 6.15595f), QuaternionData(-0.0f, -0.0f, -0.0635752f, 0.997977f), 300);
+        
+        /*TempSummon* portalController1 = instance->SummonCreature(105204, Position(-2620.5f, 78.9889f, 38.6922f, 6.24634f));
+        TempSummon* portalController2 = instance->SummonCreature(105204, Position(-2650.28f, 17.2548f, 49.1346f, 0.858508f));*/
     }
 
     void SummonGorgonnash()
     {
-        TempSummon* gorgonnash = instance->SummonCreature(NPC_GORGONNASH, Position(-2784.22f, -98.7661f, 47.9949f, 0.511382f));
-        gorgonnash->AI()->SetData(51, 51);
+        if (TempSummon* gorgonnash = instance->SummonCreature(NPC_GORGONNASH, Position(-2784.22f, -98.7661f, 47.9949f, 0.511382f)))
+        {
+            _gorgonnashGUID = gorgonnash->GetGUID();
+            gorgonnash->AI()->SetData(51, 51);
+        }
+    }
+
+    void SummonAkvesh()
+    {
+        if (TempSummon* akvesh = instance->SummonCreature(NPC_DOOMHERALD_AKVESH, Position(-2615.104f, 65.757f, 37.2831f, 0.57653f)))
+        {   
+            akvesh->GetMotionMaster()->MoveRandom(5.0f);
+            if (Player* player = ObjectAccessor::GetPlayer(*akvesh, _playerGUID))
+                akvesh->AI()->AttackStart(player);
+        }
     }
     
     void SummonDemonTwins()
     {
         TempSummon* doomheralSaera = instance->SummonCreature(NPC_DOOMHERALD_SAERA, Position(-2751.16f, -69.521f, 46.6362f, 4.99993f));
         TempSummon* doomheralTaraar = instance->SummonCreature(NPC_DOOMHERALD_TARAAR, Position(-2746.54f, -84.4343f, 46.6362f, 1.93767f));
-        doomheralSaera->AI()->SetData(52, 52);
     }
 
     void SummonAldrachiRevenant()
@@ -252,6 +293,15 @@ struct scenario_artifact_brokenshore : public InstanceScript
     {
         TempSummon* aldrachiWb = instance->SummonCreature(NPC_ALDRACHI_WARBLADES, Position(-2746.991f, -328.47f, 38.4056f, 2.2876f));
         GameObject* aldrachiWbLoot = instance->SummonGameObject(GO_ALDRACHI_WARBLADES, Position(-2747.71f, -328.3544f, 38.4344f, 2.28768f), QuaternionData(), 300);
+    }
+
+    void SummonFelBat()
+    {
+        TempSummon* felbat = instance->SummonCreature(99227, Position(-2757.063f, -302.964f, 31.9154f, 4.57486f));
+    }
+
+    void SummonCollapsedRocks() {
+        GameObject* aldrachiWbLoot = instance->SummonGameObject(GO_STONE_WALL, Position(-2740.67f, -149.12f, 48.4044f, 1.5051f), QuaternionData(), 300);
     }
 
 private:
@@ -294,6 +344,13 @@ public:
         {
             sayGreeting = false;
             instance = me->GetInstanceScript();
+            me->LoadEquipment(2);
+        }
+
+        void Reset() override
+        {
+            _events.Reset();
+            Initialize();
         }
 
         void MoveInLineOfSight(Unit* who) override
@@ -321,7 +378,7 @@ public:
             case DATA_FREED:
                 sayGreeting = false;
                 Talk(1);
-                _events.ScheduleEvent(EVENT_SAY_3, 3000);
+                _events.ScheduleEvent(EVENT_SAY_3, 5000);
 
                 if (instance->GetData(DATA_STAGE_1) == NOT_STARTED)
                     instance->SetData(DATA_STAGE_1, DONE);
@@ -342,16 +399,15 @@ public:
                 case EVENT_YELL_1:
                     Talk(0);
                     break;
-                case EVENT_SAY_2:
-                    me->LoadEquipment(1);
-                    break;
                 case EVENT_SAY_3:
-                    me->HandleEmoteCommand(EMOTE_STATE_SIT_GROUND);
                     Talk(2);
-                    _events.ScheduleEvent(EVENT_SAY_4, 3000);
+                    me->LoadEquipment(1);
+                    _events.ScheduleEvent(EVENT_SAY_4, 5000);
                     break;
                 case EVENT_SAY_4:
                     Talk(3);
+                    me->RemoveAllAuras();
+                    me->HandleEmoteCommand(EMOTE_STATE_SIT_GROUND_2);
                     _events.ScheduleEvent(EVENT_DESPAWN, 30000);
                     break;
                 case EVENT_DESPAWN:
@@ -389,7 +445,11 @@ public:
     bool OnGossipHello(Player* player, GameObject* go) override
     {
         if (InstanceScript * instance = go->GetInstanceScript())
-        {                   
+        {
+            if (Creature* portalController = go->FindNearestCreature(105204, 20.0f, true)) {
+                portalController->AI()->SetData(59, 59);
+                portalController->DespawnOrUnsummon();
+            }
             player->CastSpell(go, SPELL_DESTROYING_LEGION_PORTAL, true);
             player->CastSpell(go, SPELL_PORTAL_EXPLOSION, true);
             go->DestroyForPlayer(player);
@@ -447,7 +507,7 @@ public:
         SPELL_DEMON_LINK = 215837,
         SPELL_SHADOW_BOLT = 215885,
         SPELL_STALKING_SHADOWS = 215861,
-        DATA_START_CONVERSATION = 52,
+        DATA_CAST_DEMON_LINK = 52,
         DATA_START_TARAAR_CONVERSATION = 53,
     };
 
@@ -480,7 +540,7 @@ public:
             if (instance->GetData(DATA_STAGE_3) == NOT_STARTED && !conversationStarted)
             {
                 conversationStarted = true;
-                _events.ScheduleEvent(EVENT_SAY_1, 500);
+                _events.ScheduleEvent(EVENT_SAY_1, 1000);
             }
         }
 
@@ -501,9 +561,9 @@ public:
         {
             switch (id)
             {
-            case DATA_START_CONVERSATION:
+            case DATA_CAST_DEMON_LINK:
                 Talk(0);
-                _events.ScheduleEvent(EVENT_SAY_2, 3000);
+                _events.ScheduleEvent(EVENT_DEMON_LINK, 3000);
                 break;
             default:
                 break;
@@ -518,6 +578,9 @@ public:
             {
                 switch (eventId)
                 {
+                case EVENT_DEMON_LINK:
+                    DoCastSelf(SPELL_DEMON_LINK, true);
+                    break;
                 case EVENT_SHADOW_BOLT:
                     DoCastVictim(SPELL_SHADOW_BOLT);
                     _events.ScheduleEvent(EVENT_SHADOW_BOLT, 4000);
@@ -528,7 +591,7 @@ public:
                     break;
                 case EVENT_SAY_1:
                     Talk(0);
-                    _events.ScheduleEvent(EVENT_SAY_2, 3000);
+                    _events.ScheduleEvent(EVENT_SAY_2, 4000);
                     break;
                 case EVENT_SAY_2:
                     Talk(1);
@@ -683,9 +746,11 @@ public:
 
     enum eGorgonnash
     {
-        EVENT_CREEPING_DOOM = 1,
-        EVENT_FEL_CLEAVE = 2,
-        EVENT_SUMMON_FEL_CRUSHER = 3,
+        EVENT_START_ANIM = 1,
+        EVENT_START_MOVE = 2,
+        EVENT_CREEPING_DOOM = 3,
+        EVENT_FEL_CLEAVE = 4,
+        EVENT_SUMMON_FEL_CRUSHER = 5,
         SPELL_CREEPING_DOOM = 215978,
         SPELL_FEL_CLEAVE = 215925,
         DATA_START_ANIM = 51,
@@ -727,8 +792,7 @@ public:
             {
                 infernalsSummoned = true;
                 _events.ScheduleEvent(EVENT_SUMMON_FEL_CRUSHER, 500);
-            }
-                
+            }   
         }
 
         void JustDied(Unit* /*killer*/) override
@@ -752,6 +816,19 @@ public:
             {
                 switch (eventId)
                 {
+                case EVENT_START_ANIM:
+                    Talk(0);
+                    me->SetAIAnimKitId(0);
+                    me->HandleEmoteCommand(EMOTE_STATE_CUSTOM_SPELL_07);
+                    _events.ScheduleEvent(EVENT_START_MOVE, 8000);
+                    break;
+                case EVENT_START_MOVE:
+                    me->HandleEmoteCommand(EMOTE_STATE_NONE);
+                    me->SetWalk(true);
+                    float x, y, z;
+                    me->GetClosePoint(x, y, z, me->GetObjectSize() / 3, 15.0f);
+                    me->GetMotionMaster()->MovePoint(0, x, y, z);
+                    break;
                 case EVENT_CREEPING_DOOM:
                     DoCastVictim(SPELL_CREEPING_DOOM);
                     _events.ScheduleEvent(EVENT_CREEPING_DOOM, urand(6000, 9000));
@@ -763,7 +840,7 @@ public:
                 case EVENT_SUMMON_FEL_CRUSHER:
                     _events.CancelEvent(EVENT_SUMMON_FEL_CRUSHER);
                     Talk(2);
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true))
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f, true))
                         SummomNearTarget(2, NPC_BURNING_CRUSHER, target->GetPosition(), 20000); // 2 Burning Crushers
                     break;
                 default:
@@ -781,8 +858,7 @@ public:
             switch (id)
             {
             case DATA_START_ANIM:
-                Talk(0);
-                me->SetAIAnimKitId(6870);
+                _events.ScheduleEvent(EVENT_START_ANIM, 100);
                 break;
             default:
                 break;
@@ -829,7 +905,7 @@ public:
         SPELL_SIGIL_OF_POWER = 216229,
         SPELL_SIGIL_OF_POWER_2 = 216228,
         SPELL_SOUL_CARVER = 216188,
-        SPELL_CALL_WARBLADES_VISUAL_1 = 195154,
+        SPELL_CALL_WARBLADES_VISUAL_1 = 195057,
         SPELL_CALL_WARBLADES_VISUAL_2 = 195151,
         EVENT_CALL_OF_THE_WARBLADES = 1,
         EVENT_FELSOUL_SLAM = 2,
@@ -840,6 +916,8 @@ public:
         EVENT_TALK_4 = 7,
         EVENT_CALL_WARBLADES_VISUAL_1 = 8,
         EVENT_CALL_WARBLADES_VISUAL_2 = 9,
+        EVENT_RESTORE_STATE = 10,
+        EVENT_CAST_CALL_WARBLADES = 11,
         TEXT_SAY_1 = 0, // 'For every soul I claim, my power grows. I will rule this world... ALL worlds!'
         TEXT_SAY_2 = 1, // 'WITNESS THE MIGHT OF THE ALDRACHI!'
         TEXT_SAY_3 = 2, // 'Your destiny awaits!'
@@ -870,7 +948,7 @@ public:
 
         void MoveInLineOfSight(Unit* who) override
         {
-            if (!who || !who->IsInWorld() || !me->IsWithinDist(who, 60.0f, false))
+            if (!who || !who->IsInWorld() || !me->IsWithinDist(who, 80.0f, false))
                 return;
 
             Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
@@ -880,13 +958,13 @@ public:
             if (instance->GetData(DATA_STAGE_6) == NOT_STARTED && !startTalk)
             {
                 startTalk = true;
-                Talk(TEXT_SAY_1);
                 _events.ScheduleEvent(EVENT_CALL_WARBLADES_VISUAL_1, 2000);
             }
         }
 
         void EnterCombat(Unit* /*who*/) override
         {
+            me->LoadEquipment(1);
             Talk(TEXT_SAY_3);
             _events.ScheduleEvent(EVENT_FELSOUL_SLAM, 1500);
             _events.ScheduleEvent(EVENT_SIGIL_OF_POWER, 8000);
@@ -922,8 +1000,9 @@ public:
                 switch (eventId)
                 {
                 case EVENT_CALL_WARBLADES_VISUAL_1:
+                    Talk(TEXT_SAY_1);
                     DoCastSelf(SPELL_CALL_WARBLADES_VISUAL_1, true);
-                    _events.ScheduleEvent(EVENT_CALL_WARBLADES_VISUAL_2, 6000);
+                    _events.ScheduleEvent(EVENT_CALL_WARBLADES_VISUAL_2, 8000);
                     break;
                 case EVENT_CALL_WARBLADES_VISUAL_2:
                     DoCastSelf(SPELL_CALL_WARBLADES_VISUAL_2, true);
@@ -955,9 +1034,21 @@ public:
                     _events.CancelEvent(SPELL_SIGIL_OF_POWER);
                     _events.CancelEvent(EVENT_SIGIL_OF_POWER_2);
                     me->SetReactState(REACT_PASSIVE);
+                    // me->AttackStop();
                     me->GetMotionMaster()->MoveJump(-2726.95f, -313.85f, 30.8943f, 2.2876f, 15.0f, 10.0f);
-                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
-                        me->CastSpell(player, SPELL_CALL_OF_THE_WARBLADES, true);
+                    events.ScheduleEvent(EVENT_CAST_CALL_WARBLADES, 1300);
+                    break;
+                case EVENT_CAST_CALL_WARBLADES:
+                    me->StopMoving();
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID)) {
+                        me->SetFacingToObject(player);
+                        DoCast(player, SPELL_CALL_OF_THE_WARBLADES);
+                    }   
+                    events.ScheduleEvent(EVENT_RESTORE_STATE, Seconds(10));
+                    break;
+                case EVENT_RESTORE_STATE:
+                    me->SetReactState(REACT_AGGRESSIVE);
+                    _events.ScheduleEvent(EVENT_FELSOUL_SLAM, 1500);
                     break;
                 default:
                     break;
@@ -1062,26 +1153,36 @@ public:
 class go_aldrachi_warblades_248785 : public GameObjectScript
 {
 public:
-    go_aldrachi_warblades_248785() : GameObjectScript("go_aldrachi_warblades_248785") { isLooted = false; }
+    go_aldrachi_warblades_248785() : GameObjectScript("go_aldrachi_warblades_248785") {
+        isLooted = false;
+        prevState = 0;
+        playerGuid = ObjectGuid::Empty;
+    }
 
     void OnLootStateChanged(GameObject* go, uint32 state, Unit* unit)
-    {
-        /*if (!isLooted)
+    {   
+        if (state == GO_ACTIVATED && unit) {
+            if (Player* player = unit->ToPlayer())
+                playerGuid = player->GetGUID();
+        }
+        if (state == GO_JUST_DEACTIVATED && prevState == GO_ACTIVATED && playerGuid != ObjectGuid::Empty && !isLooted)
         {
             isLooted = true;
-            if (Player* player = unit->ToPlayer())
+            if (Player* player = ObjectAccessor::GetPlayer(*go, playerGuid)) {
                 if (!player->GetQuestObjectiveData(42430, 1))
                     player->KilledMonsterCredit(114514);
 
-            if (InstanceScript * instance = go->GetInstanceScript())
-                if (instance->GetData(DATA_STAGE_7) == NOT_STARTED)
+                if (InstanceScript * instance = go->GetInstanceScript())
                     instance->SetData(DATA_STAGE_7, DONE);
-        }*/
-        if (state == GO_ACTIVATED && unit)
-            if (Player* player = unit->ToPlayer())
-                TC_LOG_ERROR("server.worldserver", " === go_aldrachi_warblades_248785  STATE  %u === ", state);
+
+                go->DestroyForPlayer(player);
+            }
+        }
+        prevState = state;
     }
     bool isLooted;
+    uint32 prevState;
+    ObjectGuid playerGuid;
 };
 
 class go_cavern_stones_7796 : public GameObjectScript
@@ -1107,7 +1208,192 @@ public:
     bool isUsed;
 };
 
-// AddSC
+Position const outPath[] =
+{
+    { -2757.062f, -302.963f, 60.8534f  },
+    { -2757.062f, -302.963f, 74.7343f  },
+    { -2750.630f, -292.424f, 91.0864f  },
+    { -2750.035f, -287.568f, 109.181f  }
+};
+size_t const pathSize = std::extent<decltype(outPath)>::value;
+
+class npc_illidari_felbat_99227 : public CreatureScript
+{
+public:
+    npc_illidari_felbat_99227() : CreatureScript("npc_illidari_felbat_99227") { }
+
+    enum eFelBal {
+        EVENT_START_PATH = 1,
+        EVENT_TELEPORT = 2,
+        SPELL_RIDE_VEHICLE_HARD_CODED = 46598,
+    };
+
+    struct npc_illidari_felbat_99227_AI : public VehicleAI
+    {
+        npc_illidari_felbat_99227_AI(Creature* creature) : VehicleAI(creature) { }
+
+        void Reset() override
+        {
+            _events.Reset();
+            _playerGUID = ObjectGuid::Empty;
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) override
+        {
+            if (apply && passenger->GetTypeId() == TYPEID_PLAYER) {
+                _playerGUID = passenger->ToPlayer()->GetGUID();
+                _events.ScheduleEvent(EVENT_START_PATH, Seconds(1));
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 pointId) override
+        {
+            if (type == EFFECT_MOTION_TYPE && pointId == pathSize)
+                _events.ScheduleEvent(EVENT_TELEPORT, 200);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_START_PATH:
+                    me->GetMotionMaster()->MoveSmoothPath(uint32(pathSize), outPath, pathSize, false, true);
+                    break;
+                case EVENT_TELEPORT:
+                    me->RemoveAllAuras();
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID)) {
+                        player->KilledMonsterCredit(97377, ObjectGuid::Empty);
+                        player->TeleportTo(1220, Position(-839.796f, 4259.4711f, 746.2744f, 1.207325f));
+                    }
+                    me->DespawnOrUnsummon();
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    private:
+        EventMap _events;
+        ObjectGuid _playerGUID;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_illidari_felbat_99227_AI(creature);
+    }
+};
+
+// Portal Bunny
+class npc_portal_bunny : public CreatureScript
+{
+public:
+    npc_portal_bunny() : CreatureScript("npc_portal_bunny") { }
+
+    enum eBunny
+    {
+        EVENT_SUMMON_SOULWRATH = 1,
+        DATA_CANCEL_WAVE = 59,
+    };
+
+    struct npc_portal_bunny_AI : public ScriptedAI
+    {
+        npc_portal_bunny_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            instance = me->GetInstanceScript();
+            waveStarted = false;
+            creaturesSpawned = 0;
+        }
+
+        void Reset() override
+        {
+            _events.Reset();
+            Initialize();
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (!who || !who->IsInWorld() || !me->IsWithinDist(who, 25.0f, false))
+                return;
+
+            Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (!player)
+                return;
+            if (instance->GetData(DATA_STAGE_2) == NOT_STARTED && !waveStarted)
+            {
+                waveStarted = true;
+                _events.ScheduleEvent(EVENT_SUMMON_SOULWRATH, 500);
+            }
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_CANCEL_WAVE:
+                _events.CancelEvent(EVENT_SUMMON_SOULWRATH);
+                break;
+            default:
+                break;
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_SUMMON_SOULWRATH:
+                    if (creaturesSpawned == 8) {
+                        _events.CancelEvent(EVENT_SUMMON_SOULWRATH);
+                        break;
+                    }
+
+                    if (TempSummon* soulwrath = me->SummonCreature(105000, me->GetPosition(), TEMPSUMMON_DEAD_DESPAWN, 20000, 0, true))
+                    {
+                        float x, y, z;
+                        soulwrath->GetClosePoint(x, y, z, soulwrath->GetObjectSize() / 3, 25.0f);
+                        soulwrath->GetMotionMaster()->MovePoint(0, x, y, z);
+                        soulwrath->SetReactState(REACT_AGGRESSIVE);
+                    }
+                    ++creaturesSpawned;
+                    _events.ScheduleEvent(EVENT_SUMMON_SOULWRATH, 8000);
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+    private:
+        EventMap _events;
+        InstanceScript * instance;
+        bool waveStarted;
+        uint32 creaturesSpawned;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_portal_bunny_AI(creature);
+    }
+};
+
+/*********/
+/* AddSC */
+/*********/
 void AddSC_scenario_artifact_brokenshore()
 {
     RegisterInstanceScript(scenario_artifact_brokenshore, 1500);
@@ -1121,4 +1407,6 @@ void AddSC_scenario_artifact_brokenshore()
     new npc_caria_felsoul_99184();
     new go_aldrachi_warblades_248785();
     new go_cavern_stones_7796();
+    new npc_illidari_felbat_99227();
+    new npc_portal_bunny();
 }

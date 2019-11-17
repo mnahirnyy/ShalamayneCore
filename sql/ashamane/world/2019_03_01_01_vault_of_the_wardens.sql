@@ -452,27 +452,27 @@ INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `positi
 
 UPDATE `creature_template` SET `minlevel`=99, `maxlevel`=99, `faction`=2395, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=33587720, `unit_flags2`=2048, `VehicleId`=4197, `MovementId` = 150, `AIName`='SmartAI', `InhabitType`=4 WHERE `entry`=99443;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=99443 AND `source_type`=0;
-INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(99443, 0, 0, 0, 54, 0, 100, 0, 0, 0, 0, 0, 85, 46598, 2, 0, 0, 0, 0, 1, 0, 0, 0, 4063.51, -296.51, -281.58, 0, 'Vampiric Felbat - Just Spawned - Invoker Cast Ride Vehicle Hardcoded'),
-(99443, 0, 1, 0, 27, 0, 100, 0, 0, 0, 0, 0, 53, 1, 99443, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Vampiric Felbat - Passenger Boarded - Start WP'),
-(99443, 0, 2, 3, 58, 0, 100, 0, 13, 99443, 0, 0, 11, 68576, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Vampiric Felbat - WP Ended - Cast Eject All Passengers'),
-(99443, 0, 3, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Vampiric Felbat - WP Ended - Despawn');
+-- INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+-- (99443, 0, 0, 0, 54, 0, 100, 0, 0, 0, 0, 0, 85, 46598, 2, 0, 0, 0, 0, 1, 0, 0, 0, 4063.51, -296.51, -281.58, 0, 'Vampiric Felbat - Just Spawned - Invoker Cast Ride Vehicle Hardcoded'),
+-- (99443, 0, 1, 0, 27, 0, 100, 0, 0, 0, 0, 0, 53, 1, 99443, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Vampiric Felbat - Passenger Boarded - Start WP'),
+-- (99443, 0, 2, 3, 58, 0, 100, 0, 13, 99443, 0, 0, 11, 68576, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Vampiric Felbat - WP Ended - Cast Eject All Passengers'),
+-- (99443, 0, 3, 0, 61, 0, 100, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Vampiric Felbat - WP Ended - Despawn');
 
 DELETE FROM `waypoints` WHERE `entry`=99443;
-INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
-(99443, 1, 4435.54, -289.252, -247.127, 'Vampiric Felbat1'),
-(99443, 2, 4445.98, -299.189, -234.631, 'Vampiric Felbat2'),
-(99443, 3, 4450.8, -320.845, -223.82, 'Vampiric Felbat3'),
-(99443, 4, 4450.8, -320.845, -171.81, 'Vampiric Felbat4'),
-(99443, 5, 4451.2, -321.103, -101.486, 'Vampiric Felbat5'),
-(99443, 6, 4451.2, -321.103, -30.4712, 'Vampiric Felbat6'),
-(99443, 7, 4451.2, -321.103, 5.68376, 'Vampiric Felbat7'),
-(99443, 8, 4451.2, -321.103, 42.8748, 'Vampiric Felbat8'),
-(99443, 9, 4451.2, -321.103, 78.3228, 'Vampiric Felbat9'),
-(99443, 10, 4451.2, -321.103, 129.983, 'Vampiric Felbat10'),
-(99443, 11, 4447.17, -323.197, 140.234, 'Vampiric Felbat11'),
-(99443, 12, 4449.52, -341.185, 129.249, 'Vampiric Felbat12'),
-(99443, 13, 4451.74, -359.885, 130.354, 'Vampiric Felbat13 - Despawn');
+-- INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
+-- (99443, 1, 4435.54, -289.252, -247.127, 'Vampiric Felbat1'),
+-- (99443, 2, 4445.98, -299.189, -234.631, 'Vampiric Felbat2'),
+-- (99443, 3, 4450.8, -320.845, -223.82, 'Vampiric Felbat3'),
+-- (99443, 4, 4450.8, -320.845, -171.81, 'Vampiric Felbat4'),
+-- (99443, 5, 4451.2, -321.103, -101.486, 'Vampiric Felbat5'),
+-- (99443, 6, 4451.2, -321.103, -30.4712, 'Vampiric Felbat6'),
+-- (99443, 7, 4451.2, -321.103, 5.68376, 'Vampiric Felbat7'),
+-- (99443, 8, 4451.2, -321.103, 42.8748, 'Vampiric Felbat8'),
+-- (99443, 9, 4451.2, -321.103, 78.3228, 'Vampiric Felbat9'),
+-- (99443, 10, 4451.2, -321.103, 129.983, 'Vampiric Felbat10'),
+-- (99443, 11, 4447.17, -323.197, 140.234, 'Vampiric Felbat11'),
+-- (99443, 12, 4449.52, -341.185, 129.249, 'Vampiric Felbat12'),
+-- (99443, 13, 4451.74, -359.885, 130.354, 'Vampiric Felbat13 - Despawn');
 
 UPDATE `creature_template` SET `unit_flags`=768, `npcflag`=1 WHERE `entry`=99501;
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry`=99501;
