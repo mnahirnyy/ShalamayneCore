@@ -502,30 +502,30 @@ class spell_dh_spirit_bomb_damage : public SpellScript
 // 203753 - Blade Turning
 class spell_dh_blade_turning : public SpellScriptLoader
 {
-    public:
-        spell_dh_blade_turning() : SpellScriptLoader("spell_dh_blade_turning") { }
+public:
+    spell_dh_blade_turning() : SpellScriptLoader("spell_dh_blade_turning") {}
 
-        class spell_dh_blade_turning_AuraScript : public AuraScript
+    class spell_dh_blade_turning_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dh_blade_turning_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
         {
-            PrepareAuraScript(spell_dh_blade_turning_AuraScript);
-
-            bool CheckProc(ProcEventInfo& eventInfo)
-            {
-                if (eventInfo.GetHitMask() & PROC_HIT_PARRY)
-                    return true;
-                return false;
-            }
-
-            void Register()
-            {
-                DoCheckProc += AuraCheckProcFn(spell_dh_blade_turning_AuraScript::CheckProc);
-            }
-        };
-
-        AuraScript* GetAuraScript() const
-        {
-            return new spell_dh_blade_turning_AuraScript();
+            if (eventInfo.GetHitMask() & PROC_HIT_PARRY)
+                return true;
+            return false;
         }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(spell_dh_blade_turning_AuraScript::CheckProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dh_blade_turning_AuraScript();
+    }
 };
 
 // Fel Devastation - 212084

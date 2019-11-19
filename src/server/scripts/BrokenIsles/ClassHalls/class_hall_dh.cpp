@@ -22,6 +22,8 @@
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 #include "CombatAI.h"
+#include "Item.h"
+#include "ObjectMgr.h"
 #include "GridNotifiersImpl.h"
 
 enum
@@ -252,7 +254,7 @@ public:
     }
 };
 
-// npc 98650, 103025 for the quest 41070 'Spoils of Victory'
+// npc 98650 for the quest 41070 'Spoils of Victory'
 class npc_mardum_battlelord_gaardoun : public CreatureScript {
 public:
     npc_mardum_battlelord_gaardoun() : CreatureScript("npc_mardum_battlelord_gaardoun") { }
@@ -290,14 +292,7 @@ public:
 
         return true;
     }
-
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override {
-        if (quest->GetQuestId() == 41064) {
-            player->ForceCompleteQuest(41064);
-        }
-        return true;
-    }
-
+    
     struct npc_mardum_battlelord_gaardoun_AI : public npc_escortAI
     {
         npc_mardum_battlelord_gaardoun_AI(Creature* creature) : npc_escortAI(creature)
@@ -412,6 +407,183 @@ public:
     }
 };
 
+enum eQuests {
+    QUEST_CURSED_FORGE_OF_NATHREZIM = 41064,
+    OBJECTIVE_CURSED_FORGE_OF_NATHREZIM = 46840,
+};
+
+// npc 103025 for the quest 41064 'Cursed Forge of the Nathrezim'
+class npc_mardum_battlelord_gaardoun_103025 : public CreatureScript
+{
+public:
+    npc_mardum_battlelord_gaardoun_103025() : CreatureScript("npc_mardum_battlelord_gaardoun_103025") { }
+
+    bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_CURSED_FORGE_OF_NATHREZIM)
+        {
+            if (Aura* artifactAura = player->GetAura(ARTIFACTS_ALL_WEAPONS_GENERAL_WEAPON_EQUIPPED_PASSIVE))
+                if (Item* artifact = player->GetItemByGuid(artifactAura->GetCastItemGUID()))
+                    if (artifact->GetTotalPurchasedArtifactPowers() == 0)
+                        artifact->GiveArtifactXp(100, nullptr, 0);
+        }
+        return true;
+    }
+};
+
+// temporary until necessary criteria will be implemented
+class PlayerScript_mardum_artifact_empowered : public PlayerScript
+{
+public:
+    PlayerScript_mardum_artifact_empowered() : PlayerScript("PlayerScript_mardum_artifact_empowered") {}
+
+    uint32 checkTimer = 1000;
+
+    void OnUpdate(Player* player, uint32 diff) override
+    {
+        if (checkTimer <= diff)
+        {
+            if (player->getClass() == CLASS_DEMON_HUNTER && player->GetZoneId() == 8022 && player->GetQuestStatus(QUEST_CURSED_FORGE_OF_NATHREZIM) == QUEST_STATUS_INCOMPLETE)
+            {
+                if (Aura* artifactAura = player->GetAura(ARTIFACTS_ALL_WEAPONS_GENERAL_WEAPON_EQUIPPED_PASSIVE))
+                    if (Item* artifact = player->GetItemByGuid(artifactAura->GetCastItemGUID()))
+                        if (artifact->GetTotalPurchasedArtifactPowers() != 0)
+                            if (Quest const* quest = sObjectMgr->GetQuestTemplate(QUEST_CURSED_FORGE_OF_NATHREZIM))
+                                for (QuestObjective const& obj : quest->GetObjectives())
+                                    if (obj.ObjectID == OBJECTIVE_CURSED_FORGE_OF_NATHREZIM) {
+                                        player->SetQuestObjectiveData(obj, 1);
+                                        player->SendQuestUpdateAddCredit(quest, ObjectGuid::Empty, obj, 1);
+                                    }
+            }
+
+            checkTimer = 1000;
+        }
+        else checkTimer -= diff;
+    }
+};
+
+enum eQuest41066 {
+    QUEST_THE_HUNTERS_GAZE = 41066,
+    GO_EMPOWERED_NETHER_CRUCIBLE = 250677,
+    KILLCREDIT_SPELL_GAZING = 203803,
+    KILLCREDIT_GAZE_UPON_LEGION = 103088,
+    SPELL_GAZING = 203802,
+    SCENE_GAZE_UPON_LEGION_ID = 1203, 
+};
+
+// scene 1203 "Gazing Upon Legion" - teleport player back to the fel hammer on complete
+class scene_gaze_upon_legion : public SceneScript
+{
+public:
+    scene_gaze_upon_legion() : SceneScript("scene_gaze_upon_legion") { }
+
+    void OnSceneComplete(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) override
+    {   
+        player->TeleportTo(1519, 1568.698f, 1414.967f, 217.799f, 3.3862f);
+        player->KilledMonsterCredit(KILLCREDIT_GAZE_UPON_LEGION, ObjectGuid::Empty);
+        player->RemoveAurasDueToSpell(SPELL_GAZING);
+    }
+};
+
+// gameobject 250677 for quest 41066 (The Hunters Gaze)
+class go_mardum_empowered_nether_crusible : public GameObjectScript
+{
+public:
+    go_mardum_empowered_nether_crusible() : GameObjectScript("go_mardum_empowered_nether_crusible") { }
+
+    bool OnGossipSelect(Player* player, GameObject* go, uint32 /*sender*/, uint32 /*action*/) override
+    {
+        if (player->GetQuestStatus(QUEST_THE_HUNTERS_GAZE) == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(player, SPELL_GAZING);
+        }
+        return true;
+    }
+};
+
+// playerscript to start scene after teleportation
+class PlayerScript_start_gazing : public PlayerScript
+{
+public:
+    PlayerScript_start_gazing() : PlayerScript("PlayerScript_start_gazing") {}
+
+    uint32 checkTimer = 200;
+    bool _sceneStarted = false;
+
+    void OnUpdate(Player* player, uint32 diff) override
+    {
+        if (checkTimer <= diff)
+        {
+            if (player->getClass() == CLASS_DEMON_HUNTER && player->GetAreaId() == 8553 &&
+                player->GetQuestStatus(QUEST_THE_HUNTERS_GAZE) == QUEST_STATUS_INCOMPLETE &&
+                !_sceneStarted)
+            {
+                _sceneStarted = true;
+                player->GetSceneMgr().PlayScene(SCENE_GAZE_UPON_LEGION_ID);
+                player->AddDelayedConversation(2000, 6801); // update sql file 
+            }
+            checkTimer = 200;
+        }
+        else checkTimer -= diff;
+    }
+};
+
+class q_paradise_lost : public QuestScript
+{
+public:
+    q_paradise_lost() : QuestScript("q_paradise_lost") { }
+
+    void OnQuestStatusChange(Player* player, Quest const* /*quest*/, QuestStatus oldStatus, QuestStatus newStatus) override
+    {
+        if (oldStatus == QUEST_STATUS_NONE && newStatus == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(player, 191808); // Azsuna Chosen
+        }
+    }
+};
+
+class q_stormheim : public QuestScript
+{
+public:
+    q_stormheim() : QuestScript("q_stormheim") { }
+
+    void OnQuestStatusChange(Player* player, Quest const* /*quest*/, QuestStatus oldStatus, QuestStatus newStatus) override
+    {
+        if (oldStatus == QUEST_STATUS_NONE && newStatus == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(player, 191812); // Stormheim Chosen
+        }
+    }
+};
+
+class q_the_lone_mountain : public QuestScript
+{
+public:
+    q_the_lone_mountain() : QuestScript("q_the_lone_mountain") { }
+
+    void OnQuestStatusChange(Player* player, Quest const* /*quest*/, QuestStatus oldStatus, QuestStatus newStatus) override
+    {
+        if (oldStatus == QUEST_STATUS_NONE && newStatus == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(player, 191813); // Highmountain Chosen
+        }
+    }
+};
+
+class q_the_tranquil_forest : public QuestScript
+{
+public:
+    q_the_tranquil_forest() : QuestScript("q_the_tranquil_forest") { }
+
+    void OnQuestStatusChange(Player* player, Quest const* /*quest*/, QuestStatus oldStatus, QuestStatus newStatus) override
+    {
+        if (oldStatus == QUEST_STATUS_NONE && newStatus == QUEST_STATUS_INCOMPLETE)
+        {
+            player->CastSpell(player, 191809); // Val'sharah Chosen
+        }
+    }
+};
+
 /*********/
 /* AddSC */
 /*********/
@@ -421,4 +593,13 @@ void AddSC_class_hall_dh()
     new go_mardum_control_console();
     new npc_mardum_altruis_ch();
     new npc_mardum_battlelord_gaardoun();
+    new npc_mardum_battlelord_gaardoun_103025();
+    new PlayerScript_mardum_artifact_empowered();
+    new PlayerScript_start_gazing();
+    new go_mardum_empowered_nether_crusible();
+    new scene_gaze_upon_legion();
+    new q_paradise_lost();
+    new q_stormheim();
+    new q_the_lone_mountain();
+    new q_the_tranquil_forest();
 }

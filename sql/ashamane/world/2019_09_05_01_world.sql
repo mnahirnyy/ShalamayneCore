@@ -560,12 +560,14 @@ DELETE FROM `spell_script_names` WHERE `spell_id` = 215782;
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (215782, 'spell_redoubt_teleport_to_dh_ch');
 UPDATE `creature_template` SET `minlevel`=100, `maxlevel`=102, `HealthModifier`=3 WHERE `entry`=95237;
-DELETE FROM `creature_queststarter` WHERE `quest` IN (41060, 41070, 41037, 41062, 41064, 41066, 41096, 41067);
+DELETE FROM `creature_queststarter` WHERE `quest` IN (41060, 41070, 41037, 41062, 41064, 41066, 41069, 41096, 41067, 41099);
 INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 (95237, 41060),
 (95237, 41070),
+(95237, 41099),
 (95240, 41037),
 (95240, 41062),
+(95240, 41069),
 (103025, 41064),
 (95238, 41066),
 (95238, 41096),
@@ -574,6 +576,8 @@ UPDATE `quest_template_addon` SET `PrevQuestID` = 41060, `NextQuestID` = 41064, 
 UPDATE `quest_template_addon` SET `PrevQuestID` = 41037, `NextQuestID` = 41064, `ExclusiveGroup` = 41070 WHERE `ID` = 41062; -- Spoils of Victory
 UPDATE `quest_template_addon` SET `PrevQuestID` = 41064 WHERE `ID` = 41066;
 UPDATE `quest_template_addon` SET `PrevQuestID` = 41066 WHERE `ID` = 41096;
+UPDATE `quest_template_addon` SET `PrevQuestID` = 41096 WHERE `ID` = 41099;
+UPDATE `quest_template_addon` SET `PrevQuestID` = 41067 WHERE `ID` = 41069;
 UPDATE `quest_template_addon` SET `PrevQuestID` = 41066 WHERE `ID` = 41067;
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=19 AND `SourceEntry` IN (41096, 41067);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
@@ -590,6 +594,7 @@ INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `Appearanc
 (98650,1,17383,0,0,0,0,0,0,0,0,25549);
 UPDATE `creature` SET `id` = 98650, `orientation` = 4.717611, `equipment_id` = 1 WHERE `guid` = 20547034;
 UPDATE `creature_template` SET `gossip_menu_id` = 98650, `minlevel` = 110, `maxlevel` = 110, `npcflag` = 3, `speed_run` = 0.992063, `ScriptName`='npc_mardum_battlelord_gaardoun' WHERE `entry`=98650;
+UPDATE `creature_template` SET `gossip_menu_id` = 103025, `minlevel` = 110, `maxlevel` = 110, `speed_run` = 0.992063, `ScriptName`='npc_mardum_battlelord_gaardoun_103025' WHERE `entry`=103025;
 DELETE FROM `creature_text` WHERE `CreatureID` = 95237;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
 (95237, 0, 0, 'Whenever you\'re ready.', 12, 0, 100, 0, 0, 64700, 147331, 0, 'Altruis the Sufferer to Player'),
@@ -646,8 +651,44 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` IN (15) AND `SourceGrou
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `sourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
 (15, 98650, 1, 0, 0, 9, 0, 41070, 0, 0, 0, 0, 0, '', 'Gossip Only Shows if Quest Taken');
 DELETE FROM `spell_script_names` WHERE `spell_id` IN (207407, 213010, 213017, 212817);
-INSERT IGNORE INTO `spell_script_names` (`scriptname`, `spell_id`) VALUES
+INSERT INTO `spell_script_names` (`scriptname`, `spell_id`) VALUES
 ('spell_dh_artifact_soul_carver', 207407),
 ('spell_dh_artifact_charred_warblades', 213010),
 ('spell_dh_artifact_fueled_by_pain', 213017),
 ('spell_dh_artifact_fiery_demise', 212817);
+DELETE FROM `creature_equip_template` WHERE `CreatureID` = 95238;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(95238,1,122430,0,0,0,0,0,0,0,0,25549);
+UPDATE `creature_template` SET `minlevel`=110, `maxlevel`=110 WHERE `entry` = 95238;
+UPDATE `creature` SET `id`=95238, `equipment_id`=1, `MovementType`=0, `spawndist`=0, `position_x`=1569.14, `position_y`=1410.74, `position_z`=217.681, `orientation`=6.2191 WHERE `guid` = 20547007;
+DELETE FROM `creature_text` WHERE `CreatureID` = 95238;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(95238, 0, 0, 'Gaze into the nether crucible It will show you what we have seen.', 12, 0, 100, 0, 0, 64706, 0, 0, 'Allari the Souleater to Player');
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` IN (15) AND `SourceGroup` IN (19337);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `sourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+(15, 19337, 0, 0, 0, 9, 0, 41066, 0, 0, 0, 0, 0, '', 'Gossip Only Shows if Quest Taken');
+UPDATE `gameobject_template` SET `ScriptName`='go_mardum_empowered_nether_crusible' WHERE `entry`=250677;
+UPDATE `scene_template` SET `ScriptName`='scene_gaze_upon_legion' WHERE `SceneId`=1203 AND `ScriptPackageId`=1567;
+DELETE FROM `conversation_actor_template` WHERE `Id`=60430;
+INSERT INTO `conversation_actor_template` (`Id`, `CreatureId`, `CreatureModelId`, `VerifiedBuild`) VALUES
+(60430, 95238, 60079, 26972);
+DELETE FROM `conversation_actors` WHERE `ConversationId`=6801;
+INSERT INTO `conversation_actors` (`ConversationId`, `ConversationActorId`, `ConversationActorGuid`, `Idx`, `VerifiedBuild`) VALUES
+(6801, 60430, 0, 0, 26972);
+DELETE FROM `conversation_template` WHERE `Id`=6801;
+INSERT INTO `conversation_template` (`Id`, `FirstLineId`, `LastLineEndTime`, `ScriptName`, `VerifiedBuild`) VALUES
+(6801, 13028, 18720, '', 26972);
+DELETE FROM `conversation_line_template` WHERE `Id` IN (13028, 13029, 13030);
+INSERT INTO `conversation_line_template` (`Id`, `StartTime`, `UiCameraID`, `ActorIdx`, `Flags`, `VerifiedBuild`) VALUES
+(13028, 0, 120, 0, 0, 26972),
+(13029, 6238, 120, 0, 0, 26972),
+(13030, 12472, 120, 0, 0, 26972);
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry`=95238;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=95238 AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(95238,0,0,0,19,0,100,0,41066,0,0,0,66,0,0,0,0,0,0,21,5,0,0,0,0,0,0,"Allari - On Quest 'The Hunters Gaze' Taken - Set Orientation Closest Player"),
+(95238,0,1,0,19,0,100,0,41066,0,0,0,1,0,5000,0,0,0,0,1,0,0,0,0,0,0,0,"Allari - On Quest 'The Hunters Gaze' Taken - Say Line 0");
+UPDATE `quest_template_addon` SET `ScriptName`='q_paradise_lost' WHERE `ID`=39718;
+UPDATE `quest_template_addon` SET `ScriptName`='q_stormheim' WHERE `ID`=39735;
+UPDATE `quest_template_addon` SET `ScriptName`='q_the_lone_mountain' WHERE `ID`=39733;
+UPDATE `quest_template_addon` SET `ScriptName`='q_the_tranquil_forest' WHERE `ID`=39731;

@@ -17,13 +17,25 @@ DELETE FROM `spell_misc` WHERE `ID`=197627;
 INSERT INTO `spell_misc` (`ID`,`CastingTimeIndex`,`DurationIndex`,`RangeIndex`,`SchoolMask`,`SpellIconFileDataID`,`Speed`,`ActiveIconFileDataID`,`LaunchDelay`,`DifficultyID`,`Attributes1`,`Attributes2`,`Attributes3`,`Attributes4`,`Attributes5`,`Attributes6`,`Attributes7`,`Attributes8`,`Attributes9`,`Attributes10`,`Attributes11`,`Attributes12`,`Attributes13`,`Attributes14`,`SpellID`,`VerifiedBuild`) VALUES
 (197627,1,31,291,1,132091,0,0,0,0,327696,0,67108864,0,2048,-2147483648,8388608,25165824,1,0,0,0,0,0,223591,26972);
 
-DELETE FROM `broadcast_text` WHERE `ID` BETWEEN 147331 AND 147338;
+DELETE FROM `broadcast_text` WHERE `ID` BETWEEN 147332 AND 147339;
 INSERT INTO `broadcast_text` (`ID`, `Text`, `Text1`, `EmoteID1`, `EmoteID2`, `EmoteID3`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmotesID`, `LanguageID`, `Flags`, `ConditionID`, `SoundEntriesID1`, `SoundEntriesID2`, `VerifiedBuild`) VALUES
-(147331, 'Whenever you\'re ready.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64700, 0, 27404),
-(147332, 'This way. Your forces await.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58265, 0, 27404),
-(147333, 'The Fel Hammer is ours at last. Gaze upon the might of the Twinblades of the Deceiver!', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58266, 0, 27404),
-(147334, 'The Ashtongue will fight beside you.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64714, 0, 27404),
-(147335, 'You may call upon the Coilskar as well.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64715, 0, 27404),
-(147336, 'Our mission is not yel complete. We are all yours to command.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64716, 0, 27404),
-(147337, 'We will follow $n into battle, and we will strike down the Legion once and for all!', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58267, 0, 27404),
-(147338, 'Glory to the Illidari!', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58268, 0, 27404);
+(147332, '', 'Whenever you\'re ready.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64700, 0, 27404),
+(147333, '', 'This way. Your forces await.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58265, 0, 27404),
+(147334, '', 'The Fel Hammer is ours at last. Gaze upon the might of the Twinblades of the Deceiver!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58266, 0, 27404),
+(147335, '', 'The Ashtongue will fight beside you.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64714, 0, 27404),
+(147336, '', 'You may call upon the Coilskar as well.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64715, 0, 27404),
+(147337, '', 'Our mission is not yel complete. We are all yours to command.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64716, 0, 27404),
+(147338, '', 'We will follow $n into battle, and we will strike down the Legion once and for all!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58267, 0, 27404),
+(147339, '', 'Glory to the Illidari!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58268, 0, 27404);
+
+DELETE FROM `broadcast_text` WHERE `ID` BETWEEN 147340 AND 147342;
+INSERT INTO `broadcast_text` (`ID`, `Text`, `Text1`, `EmoteID1`, `EmoteID2`, `EmoteID3`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmotesID`, `LanguageID`, `Flags`, `ConditionID`, `SoundEntriesID1`, `SoundEntriesID2`, `VerifiedBuild`) VALUES
+(147340, 'Behold the Legion\'s primary gateway into Azeroth... the Tomb of Sargeras.', 'Behold the Legion\'s primary gateway into Azeroth... the Tomb of Sargeras.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64708, 0, 26972),
+(147341, '', 'The situation is more dire than we knew. The demons have already infested the surrounding isles.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64709, 0, 26972),
+(147342, '', 'We must act now, or I fear the situation will become... unsalvageable.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64710, 0, 26972);
+
+DELETE FROM `conversation_line` WHERE `ID` IN (13028, 13029, 13030);
+INSERT INTO `conversation_line` (`ID`, `BroadcastTextID`, `SpellVisualKitID`, `AdditionalDuration`, `NextConversationLineID`, `AnimKitID`, `SpeechType`, `StartAnimation`, `EndAnimation`, `VerifiedBuild`) VALUES
+(13028, 147340, 0, 500, 13029, 0, 0, 60, 60, 26972),
+(13029, 147341, 0, 500, 13030, 0, 0, 60, 60, 26972),
+(13030, 147342, 0, 500, 0, 0, 0, 60, 60, 26972);
