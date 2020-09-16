@@ -81,176 +81,37 @@ public:
         DATA_ACTION_START = 56,
         QUEST_UNBRIDLED_POWER_ALTRUIS = 41060,
         QUEST_UNBRIDLED_POWER_KAYN = 41037,
-        SPELL_ACTIVATING_CONTROL_CONSOLE = 216679,
+        SPELL_ASSUMING_CONTROL = 203269,
+        KILL_CREDIT_ACTIVATE_THE_FEL_HAMMER = 102921,
     };
 
     bool OnGossipHello(Player* player, GameObject* go) override
     {
         go->SetGoState(GO_STATE_READY);
-        if (player->GetQuestStatus(QUEST_UNBRIDLED_POWER_ALTRUIS) == QUEST_STATUS_INCOMPLETE) {
-            player->CastSpell(go, SPELL_ACTIVATING_CONTROL_CONSOLE, false);
-            if (Creature* creature = go->FindNearestCreature(NPC_ALTRUIS, 25.0f, true)) {
-                if (TempSummon* waypointAltruis = player->SummonCreature(creature->GetEntry(), creature->GetPosition(), TEMPSUMMON_MANUAL_DESPAWN, 0, 0, true))
-                {
-                    waypointAltruis->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    waypointAltruis->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR);
-                    waypointAltruis->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                    waypointAltruis->AI()->SetData(DATA_ACTION_START, DATA_ACTION_START);
-                    creature->ForcedDespawn(1000, Seconds(15));
-                }
+        if (player->GetQuestStatus(QUEST_UNBRIDLED_POWER_ALTRUIS) == QUEST_STATUS_INCOMPLETE ||
+            player->GetQuestStatus(QUEST_UNBRIDLED_POWER_KAYN) == QUEST_STATUS_INCOMPLETE) {
+                player->CastSpell(go, SPELL_ASSUMING_CONTROL, false);
                 go->ResetDoorOrButton();
-                return true;
-            }
-        }
-        if (player->GetQuestStatus(QUEST_UNBRIDLED_POWER_KAYN) == QUEST_STATUS_INCOMPLETE) {
-            player->CastSpell(go, SPELL_ACTIVATING_CONTROL_CONSOLE, false);
-            if (Creature* creature = go->FindNearestCreature(NPC_KAYN, 25.0f, true)) {
-                if (TempSummon* waypointKayn = player->SummonCreature(creature->GetEntry(), creature->GetPosition(), TEMPSUMMON_MANUAL_DESPAWN, 0, 0, true))
-                {
-                    waypointKayn->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    waypointKayn->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR);
-                    waypointKayn->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                    waypointKayn->AI()->SetData(DATA_ACTION_START, DATA_ACTION_START);
-                    creature->ForcedDespawn(1000, Seconds(15));
-                }
-                go->ResetDoorOrButton();
-                return true;
-            }
-        }
+        }        
         return true;
     }
 };
 
-class npc_mardum_altruis_ch : public CreatureScript
+// scene 1201 "Activating the Fel Hammer" - KillCredit on End
+class scene_dh_order_formation : public SceneScript
 {
 public:
-    npc_mardum_altruis_ch() : CreatureScript("npc_mardum_altruis_ch") { }
+    scene_dh_order_formation() : SceneScript("scene_dh_order_formation") { }
 
-    enum {
-        TEXT_1 = 0, // Whenever you\'re ready.
-        TEXT_2 = 1, // This way.Your forces await.
-        TEXT_3 = 2, // The Fel Hammer is ours at last. Gaze upon the might of the Twinblades of the Deceiver!
-        TEXT_4 = 3, // We will follow our champion into battle, and we will strike down the Legion once and for all!
-        TEXT_5 = 4, // Glory to the Illidari!
-        EVENT_START_MOVE = 1,
-        EVENT_SAY_1 = 3,
-        EVENT_SAY_ASHTONGUE = 4,
-        EVENT_SAY_COILSKAR = 5,
-        EVENT_SAY_SHIVARRA = 6,
-        EVENT_SAY_3 = 7,
-        EVENT_SAY_4 = 8,
-        EVENT_DESPAWN = 9,
-        NPC_KILLCREDIT = 102921,
+    enum eScene {
         SPELL_ASSUMING_CONTROL = 203459,
-        QUEST_UNBRIDLED_POWER = 41060,
-        NPC_GAARDOUN = 98650,
-        NPC_LADY_STHENO = 98624,
-        NPC_MOTHER_MALEVOLENCE = 98632,
-        DATA_START_ANIM = 56,
+        KILL_CREDIT_ACTIVATE_THE_FEL_HAMMER = 102921,
     };
 
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+    void OnSceneComplete(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) override
     {
-        if (quest->GetQuestId() == QUEST_UNBRIDLED_POWER)
-            creature->AI()->Talk(TEXT_1);
-
-        return true;
-    }
-
-    struct npc_mardum_altruis_ch_AI : public ScriptedAI
-    {
-        npc_mardum_altruis_ch_AI(Creature* creature) : ScriptedAI(creature) {
-            Initialize();
-        }
-
-        void Reset() override
-        {
-            _events.Reset();
-        }
-
-        void Initialize() {}
-
-        void UpdateAI(uint32 diff) override
-        {
-            UpdateVictim();
-            _events.Update(diff);
-
-            while (uint32 eventId = _events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                case EVENT_START_MOVE:
-                    _events.ScheduleEvent(EVENT_START_MOVE + 1, 2500);
-                    me->SetWalk(true);
-                    me->GetMotionMaster()->MoveJump(1538.26f, 1417.64f, 237.1087f, 5.8971f, 10.0f, 0.0f);
-                    break;
-                case EVENT_START_MOVE + 1:
-                    _events.ScheduleEvent(EVENT_SAY_1, 7000);
-                    me->GetMotionMaster()->MovePoint(1, 1551.416f, 1414.738f, 237.1089f);
-                    break;
-                case EVENT_SAY_1:
-                    _events.ScheduleEvent(EVENT_SAY_ASHTONGUE, 8000);
-                    Talk(TEXT_3);
-                    break;
-                case EVENT_SAY_ASHTONGUE:
-                    _events.ScheduleEvent(EVENT_SAY_COILSKAR, 5000);
-                    if (Creature* gaardoun = me->FindNearestCreature(NPC_GAARDOUN, me->GetVisibilityRange(), true))
-                        gaardoun->AI()->Talk(0);
-                    break;
-                case EVENT_SAY_COILSKAR:
-                    _events.ScheduleEvent(EVENT_SAY_SHIVARRA, 5000);
-                    if (Creature* ladyStheno = me->FindNearestCreature(NPC_LADY_STHENO, me->GetVisibilityRange(), true))
-                        ladyStheno->AI()->Talk(0);
-                    break;
-                case EVENT_SAY_SHIVARRA:
-                    _events.ScheduleEvent(EVENT_SAY_3, 5000);
-                    if (Creature* motherMalevolence = me->FindNearestCreature(NPC_MOTHER_MALEVOLENCE, me->GetVisibilityRange(), true))
-                        motherMalevolence->AI()->Talk(0);
-                    break;
-                case EVENT_SAY_3:
-                    _events.ScheduleEvent(EVENT_SAY_4, 7000);
-                    Talk(TEXT_4);
-                    break;
-                case EVENT_SAY_4:
-                    _events.ScheduleEvent(EVENT_DESPAWN, 1000);
-                    Talk(TEXT_5);
-                    break;
-                case EVENT_DESPAWN: {
-                    std::list<Player*> players;
-                    me->GetPlayerListInGrid(players, 50.0f);
-                    for (Player* player : players) {
-                        if (player->GetQuestStatus(QUEST_UNBRIDLED_POWER) == QUEST_STATUS_INCOMPLETE)
-                            player->CastSpell(player, SPELL_ASSUMING_CONTROL, true);
-                    }
-                    me->DespawnOrUnsummon();
-                    break;
-                }   
-                default:
-                    break;
-                }
-            }
-            // no melee attacks
-        }
-
-        void SetData(uint32 id, uint32 /*value*/) override
-        {
-            switch (id) {
-            case DATA_START_ANIM:
-                Talk(TEXT_2);
-                _events.ScheduleEvent(EVENT_START_MOVE, 7000);
-                break;
-            default:
-                break;
-            }
-        }
-
-    private:
-        EventMap _events;
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_mardum_altruis_ch_AI(creature);
+        player->CastSpell(player, SPELL_ASSUMING_CONTROL);
+        player->KilledMonsterCredit(KILL_CREDIT_ACTIVATE_THE_FEL_HAMMER, ObjectGuid::Empty);
     }
 };
 
@@ -453,6 +314,7 @@ public:
                                     if (obj.ObjectID == OBJECTIVE_CURSED_FORGE_OF_NATHREZIM) {
                                         player->SetQuestObjectiveData(obj, 1);
                                         player->SendQuestUpdateAddCredit(quest, ObjectGuid::Empty, obj, 1);
+                                        player->ForceCompleteQuest(QUEST_CURSED_FORGE_OF_NATHREZIM);
                                     }
             }
 
@@ -591,7 +453,7 @@ void AddSC_class_hall_dh()
 {
     RegisterCreatureAI(npc_korvas_bloodthorn_99343);
     new go_mardum_control_console();
-    new npc_mardum_altruis_ch();
+    new scene_dh_order_formation();
     new npc_mardum_battlelord_gaardoun();
     new npc_mardum_battlelord_gaardoun_103025();
     new PlayerScript_mardum_artifact_empowered();

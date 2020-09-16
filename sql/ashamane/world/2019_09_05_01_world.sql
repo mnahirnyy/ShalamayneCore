@@ -10,7 +10,7 @@ UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_archmage_khadgar_8
 UPDATE `gossip_menu_option` SET `OptionText`='I\'m ready. Let\'s get down to Azsuna, Khadgar.' WHERE `MenuId` = '86563';
 DELETE FROM `creature_text` WHERE `CreatureID`=86563 AND `GroupID` IN (0, 1);
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
-(86563, 0, 0, 'Here you are. $n, over here, Azsuna awaits.', 12, 0, 100, 3, 0, 57419, 0, 0, 'Archmage Khadgar to Player'),
+(86563, 0, 0, 'Here you are. $p, over here, Azsuna awaits.', 12, 0, 100, 3, 0, 57419, 0, 0, 'Archmage Khadgar to Player'),
 (86563, 1, 0, 'Let me know when you are ready, champion.', 12, 0, 100, 1, 0, 58371, 0, 0, 'Archmage Khadgar to Player');
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` IN (15) AND `SourceGroup` IN (86563);
@@ -51,8 +51,8 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 (@KHADGAR, 7, 0, 'Arcane powder... soul shards... that\'s definitely not it...', 12, 0, 100, 0, 0, 64657, 0, 0, 'Archmage Khadgar to Player'),
 (@KHADGAR, 8, 0, 'A-ha! Here we are... a crystallized soul. That ought to do the trick!', 12, 0, 100, 0, 0, 64658, 0, 0, 'Archmage Khadgar to Player'),
 (@KHADGAR, 9, 0, 'Would you mind grabbing it? These crystals tend to have an adverse effect on non-demonic beings.', 12, 0, 100, 0, 0, 64659, 0, 0, 'Archmage Khadgar to Player'),
-(@KHADGAR, 10, 0, 'Be careful, $n. You\'re tapping into magic even Illidan would have considered dangerous.', 12, 0, 100, 0, 0, 64667, 0, 0, 'Archmage Khadgar to Player'),
-(@KHADGAR, 11, 0, '$n! Councilors, this is the demon hunter I spoke of.', 12, 0, 100, 0, 0, 64660, 0, 0, 'Archmage Khadgar to Player');
+(@KHADGAR, 10, 0, 'Be careful, $p. You\'re tapping into magic even Illidan would have considered dangerous.', 12, 0, 100, 0, 0, 64667, 0, 0, 'Archmage Khadgar to Player'),
+(@KHADGAR, 11, 0, '$p! Councilors, this is the demon hunter I spoke of.', 12, 0, 100, 0, 0, 64660, 0, 0, 'Archmage Khadgar to Player');
 UPDATE `creature` SET `spawntimesecs` = '30' WHERE `guid` = '280000404';
 DELETE FROM `spell_area` WHERE `area` = 7334 AND `spell` = 81004;
 INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `quest_start_status`, `quest_end_status`) VALUES
@@ -109,7 +109,7 @@ UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_jace_darkweaver_99
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_allari_souleater_104909' WHERE `entry`='104909';
 DELETE FROM `creature_text` WHERE `CreatureID` = 99254;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
-(99254, 0, 0, '$n. I have an idea.', 12, 0, 100, 1, 0, 64661, 0, 0, 'Altruis to Player');
+(99254, 0, 0, '$p. I have an idea.', 12, 0, 100, 1, 0, 64661, 0, 0, 'Altruis to Player');
 UPDATE `creature` SET `position_x`=-864.727, `position_y`=4260.450, `position_z`=745.120, `orientation`=2.93473 WHERE `guid`=20556170;
 UPDATE `gameobject` SET `position_x`=-868.421, `position_y`=4261.290 WHERE `guid`=20406041;
 -- The Aldrachi Warblades Artifact Scenario
@@ -120,7 +120,7 @@ INSERT INTO `scenarios` (`map`, `difficulty`, `scenario_A`, `scenario_H`) VALUES
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_allari_souleater_98882' WHERE `entry`='98882';
 DELETE FROM `creature_text` WHERE `CreatureID` = 98882;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
-(98882, 0, 0, '$n, is that you? Finally some good news.', 14, 0, 100, 0, 0, 58226, 0, 0, 'Allari Souleater to Player'),
+(98882, 0, 0, '$p, is that you? Finally some good news.', 14, 0, 100, 0, 0, 58226, 0, 0, 'Allari Souleater to Player'),
 (98882, 1, 0, 'Caria left me for dead... the fool!', 12, 0, 100, 0, 0, 58227, 0, 0, 'Allari Souleater to Player'),
 (98882, 2, 0, 'My wounds are severe. You\'ll have to push ahead alone.', 12, 0, 100, 0, 0, 58228, 0, 0, 'Allari Souleater to Player'),
 (98882, 3, 0, 'I\'ll join you as soon as I\'m able.', 12, 0, 100, 0, 0, 58229, 0, 0, 'Allari Souleater to Player');
@@ -451,7 +451,7 @@ UPDATE `quest_template_addon` SET `PrevQuestID`=42869 WHERE `ID`=42872;
 -- Delete NPCs Altruis and Kayn in the cells, they will be spawned as tempsummon cretures via script
 DELETE FROM `creature` WHERE `guid` IN (20542660, 20542664);
 -- Vampiric Illidari Felbat
-UPDATE `creature_template` SET `unit_flags`=0, `VehicleId`=1051, `MovementId`=0, `AIName`='', `ScriptName`='npc_vault_of_the_wardens_vampiric_felbat' WHERE `entry`=99443;
+UPDATE `creature_template` SET `unit_flags`=0, `VehicleId`=1064, `MovementId`=0, `AIName`='', `ScriptName`='npc_vault_of_the_wardens_vampiric_felbat' WHERE `entry`=99443;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=99443 AND `source_type`=0;
 UPDATE `quest_template_addon` SET `ScriptName`='q_securing_the_way' WHERE `ID`=42872;
 -- make creatures dead
@@ -513,7 +513,7 @@ DELETE FROM `creature_template_addon` WHERE `entry` IN (97225, 92782);
 UPDATE `creature_template` SET `ScriptName`='npc_elerion_bladedancer_101004' WHERE `entry`=101004;
 UPDATE `creature_template` SET `ScriptName`='npc_khadgars_upgraded_servant_114562' WHERE `entry`=114562;
 -- Illidari Redoupt Spawns
-DELETE FROM `creature` WHERE `guid` BETWEEN 280000455 AND 280000467;
+DELETE FROM `creature` WHERE `guid` BETWEEN 280000455 AND 280000470;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
 (280000455,109196,1220,8445,8445,0,0,0,0,-1,0,1,-947.054,4090.14,648.258,5.9197,30,0,0,870,0,0,0,0,0,0,0,'',22423),
 (280000456,109247,1220,7502,8284,0,0,0,0,-1,0,1,-948.914,4066.53,648.208,1.2770,30,0,0,87,0,0,0,0,0,0,0,'',22423),
@@ -527,7 +527,10 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (280000464,95237,1519,0,0,0,0,0,0,-1,0,1,1524.24,1417.57,243.791,0.0834095,30,0,0,1203351,0,0,0,0,0,0,0,'',22423),
 (280000465,95240,1519,0,0,0,0,0,0,-1,0,1,1524.21,1406.65,243.764,6.12075,30,0,0,113100,0,0,0,0,0,0,0,'',22423),
 (280000466,95237,1519,8022,8023,0,0,0,0,-1,0,1,1551.41,1414.73,237.108,6.225207,30,0,0,1203351,0,0,0,0,0,0,0,'',22423),
-(280000467,103025,1519,8022,8023,0,0,0,0,-1,0,1,1584.68,1409.38,218.026,2.990351,30,0,0,1203351,0,0,0,0,0,0,0,'',22423);
+(280000467,103025,1519,8022,8023,0,0,0,0,-1,0,1,1584.68,1409.38,218.026,2.990351,30,0,0,1203351,0,0,0,0,0,0,0,'',22423),
+(280000468,102799,1220,7502,7505,0,0,4165,0,-1,0,1,-835.92,4265.74,746.253,4.27038,30,0,0,870,0,0,0,0,0,0,0,'',26972),
+(280000469,109276,1220,7502,7505,0,0,4165,0,-1,0,1,-836.94,4266.27,746.265,4.31515,30,0,0,870,0,0,0,0,0,0,0,'',26972),
+(280000470,109277,1220,7502,7505,0,0,4165,0,-1,0,1,-834.75,4265.10,746.252,4.38190,30,0,0,870,0,0,0,0,0,0,0,'',26972);
 DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (109196, 109247, 109340, 102798, 102797, 95237);
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
 (109196,1,128360,0,0,128370,0,0,0,0,0,25549),
@@ -536,6 +539,12 @@ INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `Appearanc
 (102798,1,128361,0,0,128369,0,0,0,0,0,25549),
 (102797,1,128361,0,0,128369,0,0,0,0,0,25549),
 (95237,1,128358,0,0,128372,0,0,0,0,0,25549);
+DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (102799, 109276, 109277);
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
+(102799,1,128359,0,0,128371,0,0,0,0,0,25549),
+(109276,1,128361,0,0,128369,0,0,0,0,0,25549),
+(109277,1,128361,0,0,128369,0,0,0,0,0,25549);
+UPDATE `creature` SET `equipment_id`=0 WHERE `guid` IN (280000468, 280000469, 280000470);
 DELETE FROM `gameobject` WHERE `guid` IN (51014378, 51014379);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) VALUES
 (51014378,251528,1220,7502,8284,0,0,0,0,-1,-949.313,4090.18,648.245,05.66822,-0,-0,-0.302659,0.953099,300,255,1,0,'',26822),
@@ -588,7 +597,7 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (19,0,41060,0,0,14,0,40374,0,0,0,0,0,"","Quest 'Unbridled Power' can only be taken if quest 'Obtained Kayn' is not taken"),
 (19,0,41037,0,0,14,0,40375,0,0,0,0,0,"","Quest 'Unbridled Power' can only be taken if quest 'Obtained Altruis' is not taken");
 UPDATE `gameobject_template` SET `ScriptName`='go_mardum_control_console' WHERE `entry`=254245;
-UPDATE `creature_template` SET `ScriptName`='npc_mardum_altruis_ch' WHERE `entry`=95237;
+UPDATE `creature_template` SET `ScriptName`='' WHERE `entry`=95237;
 DELETE FROM `creature_equip_template` WHERE `CreatureID` = 98650;
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
 (98650,1,17383,0,0,0,0,0,0,0,0,25549);
@@ -600,9 +609,9 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 (95237, 0, 0, 'Whenever you\'re ready.', 12, 0, 100, 0, 0, 64700, 147331, 0, 'Altruis the Sufferer to Player'),
 (95237, 1, 0, 'This way. Your forces await.', 12, 0, 100, 0, 0, 58265, 147332, 0, 'Altruis the Sufferer to Player'),
 (95237, 2, 0, 'The Fel Hammer is ours at last. Gaze upon the might of the Twinblades of the Deceiver!', 12, 0, 100, 0, 0, 58266, 147333, 0, 'Altruis the Sufferer to Player'),
-(95237, 3, 0, 'We will follow $n into battle, and we will strike down the Legion once and for all!', 12, 0, 100, 0, 0, 58267, 147337, 0, 'Altruis the Sufferer to Player'),
+(95237, 3, 0, 'We will follow $p into battle, and we will strike down the Legion once and for all!', 12, 0, 100, 0, 0, 58267, 147337, 0, 'Altruis the Sufferer to Player'),
 (95237, 4, 0, 'Glory to the Illidari!', 14, 0, 100, 0, 0, 58268, 147338, 0, 'Altruis the Sufferer to Player'),
-(95237, 5, 0, 'Welcome to the Fel Hammer, $n.', 14, 0, 100, 0, 0, 58271, 0, 0, 'Altruis the Sufferer to Player');
+(95237, 5, 0, 'Welcome to the Fel Hammer, $p.', 14, 0, 100, 0, 0, 58271, 0, 0, 'Altruis the Sufferer to Player');
 DELETE FROM `creature_text` WHERE `CreatureID` = 98650;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
 (98650, 0, 0, 'The Ashtongue will fight beside you.', 12, 0, 100, 0, 0, 64714, 147334, 0, 'Gaardoun to Player'),
@@ -612,7 +621,7 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 (98650, 4, 0, 'We\'ve guarded it carefully ever since. I think it prove quite useful to you.', 12, 0, 100, 0, 0, 64704, 0, 0, 'Gaardoun to Player');
 DELETE FROM `creature_text` WHERE `CreatureID` = 103025;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
-(103025, 0, 0, 'Move, you fools! Show $n some respect!', 12, 0, 100, 0, 0, 64705, 0, 0, 'Gaardoun to Player');
+(103025, 0, 0, 'Move, you fools! Show $p some respect!', 12, 0, 100, 0, 0, 64705, 0, 0, 'Gaardoun to Player');
 DELETE FROM `creature_text` WHERE `CreatureID` = 98624;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
 (98624, 0, 0, 'You may call upon the Coilskar as well.', 12, 0, 100, 0, 0, 64715, 147335, 0, 'Lady Stheno to Player');
@@ -669,6 +678,7 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `sourceEntry
 (15, 19337, 0, 0, 0, 9, 0, 41066, 0, 0, 0, 0, 0, '', 'Gossip Only Shows if Quest Taken');
 UPDATE `gameobject_template` SET `ScriptName`='go_mardum_empowered_nether_crusible' WHERE `entry`=250677;
 UPDATE `scene_template` SET `ScriptName`='scene_gaze_upon_legion' WHERE `SceneId`=1203 AND `ScriptPackageId`=1567;
+UPDATE `scene_template` SET `ScriptName`='scene_dh_order_formation' WHERE `SceneId`=1201 AND `ScriptPackageId`=1564;
 DELETE FROM `conversation_actor_template` WHERE `Id`=60430;
 INSERT INTO `conversation_actor_template` (`Id`, `CreatureId`, `CreatureModelId`, `VerifiedBuild`) VALUES
 (60430, 95238, 60079, 26972);
@@ -692,3 +702,229 @@ UPDATE `quest_template_addon` SET `ScriptName`='q_paradise_lost' WHERE `ID`=3971
 UPDATE `quest_template_addon` SET `ScriptName`='q_stormheim' WHERE `ID`=39735;
 UPDATE `quest_template_addon` SET `ScriptName`='q_the_lone_mountain' WHERE `ID`=39733;
 UPDATE `quest_template_addon` SET `ScriptName`='q_the_tranquil_forest' WHERE `ID`=39731;
+UPDATE `creature_template` SET `VehicleId` = 1064, `type` = 7, `spell1` = 83573, `unit_flags2` = 2048 WHERE `entry` IN (94324, 99227);
+-- Some Phase work
+DELETE FROM `phase_area` WHERE `AreaId`=7505 AND `PhaseId`=4165;
+INSERT INTO `phase_area` (`AreaId`, `PhaseId`, `Comment`) VALUES 
+(7505, 4165, 'Krasus Landing - Phase 4165 After Quest 41863 Complete and Before Quest 42869 Rewarded');
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=26 AND `SourceGroup`=4165 AND `SourceEntry`=7505 AND `ConditionValue1` IN (41863);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+(26, 4165, 7505, 0, 0, 47, 0, 41863, 2, 0, 0, 0, 0, '', 'Krasus Landing - Phase 4165 On When Quest 41863 is Completed'),
+(26, 4165, 7505, 0, 0, 47, 0, 41863, 64, 0, 1, 0, 0, '', 'Krasus Landing - Phase 4165 Off When Quest 41863 is Rewarded');
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=26 AND `SourceGroup`=4165 AND `SourceEntry`=7505 AND `ConditionValue1` IN (41863, 42869);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+(26, 4165, 7505, 0, 0, 47, 0, 41863, 64, 0, 0, 0, 0, '', 'Krasus Landing - Phase 4165 On When Quest 41863 is Completed'),
+(26, 4165, 7505, 0, 0, 47, 0, 42869, 64, 0, 1, 0, 0, '', 'Krasus Landing - Phase 4165 Off When Quest 42869 is Rewarded');
+-- Horde Phase Area
+DELETE FROM `phase_area` WHERE `AreaId`=14 AND `PhaseId` IN (1164, 1165);
+INSERT INTO `phase_area` (`AreaId`, `PhaseId`, `Comment`) VALUES
+(14, 1164, 'Durotar - after quest 31450 complete and before quest 31012 taken'),
+(14, 1165, 'Durotar - after quest 31450 complete and before quest 31012 taken');
+DELETE FROM `phase_area` WHERE `AreaId`=1637 AND `PhaseId`IN (1165, 1166, 1167);
+INSERT INTO `phase_area` (`AreaId`, `PhaseId`, `Comment`) VALUES 
+(1637, 1165, 'Orgrimmar - after quest 31012 complete and before quest 31013 taken'),
+(1637, 1166, 'Orgrimmar - after quest 31012 rewarded and before quest 31013 rewarded');
+-- Horde Conditions
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=26 AND `SourceGroup` IN (1164, 1165) AND `SourceEntry`=14 AND `ConditionValue1` IN (31012,31450);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(26, 1164, 14, 0, 0, 47, 0, 31450, 66, 0, 0, 0, 0, '', 'Durotar Phase 1164 when Quest 31450 complete or rewarded'),
+(26, 1164, 14, 0, 0, 47, 0, 31012, 74, 0, 1, 0, 0, '', 'Durotar Phase 1164 when Quest 31012 not incomplete, not complete and not rewarded'),
+(26, 1165, 14, 0, 0, 47, 0, 31450, 66, 0, 0, 0, 0, '', 'Durotar Phase 1165 when Quest 31450 complete or rewarded'),
+(26, 1165, 14, 0, 0, 47, 0, 31012, 66, 0, 1, 0, 0, '', 'Durotar Phase 1165 when Quest 31012 not complete and not rewarded');
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=26 AND `SourceGroup` IN (1165, 1166, 1167) AND `SourceEntry`=1637 AND `ConditionValue1` IN (31012,31013);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+(26, 1165, 1637, 0, 0, 47, 0, 31012, 2, 0, 0, 0, 0, '', 'Orgrimmar Phase 1165 On when Quest 31012 is complete'),
+(26, 1165, 1637, 0, 0, 47, 0, 31012, 64, 0, 1, 0, 0, '', 'Orgrimmar Phase 1165 Off when Quest 31013 not complete and not rewarded'),
+(26, 1166, 1637, 0, 0, 47, 0, 31012, 64, 0, 0, 0, 0, '', 'Orgrimmar Phase 1165 On when Quest 31012 is complete'),
+(26, 1166, 1637, 0, 0, 47, 0, 31013, 64, 0, 1, 0, 0, '', 'Orgrimmar Phase 1165 Off when Quest 31013 not complete and not rewarded');
+-- Shang Xi's Hot Air Balloon (60571)
+UPDATE `creature` SET `PhaseId`='1165' WHERE  `guid`=21002060;
+-- Creatures
+DELETE FROM `creature` WHERE `guid` BETWEEN 280000471 AND 280000476;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+(280000471,39605,1,1637,5356,0,0,1165,0,-1,0,1,1664.15,-4354.44,26.356,2.89100,300,0,0,34897200,0,0,0,0,0,0,0,'',26972),
+(280000472,60565,0,12,7486,0,0,1164,0,-1,0,0,-9095.86,417.496,92.0562,0.677364,120,0,0,0,0,0,0,0,0,0,0,'',26972),
+(280000473,60566,0,1519,1617,0,0,1164,0,-1,0,0,-9061.69,433.50,93.055,0.70485,120,0,0,0,0,0,0,0,0,0,0,'',26972),
+(280000474,60567,0,1519,1617,0,0,1164,0,-1,0,0,-9064.97,436.71,93.055,0.68914,120,0,0,0,0,0,0,0,0,0,0,'',26972),
+(280000475,70496,0,1519,5148,0,0,0,0,-1,0,0,-8823.85,630.573,94.136,3.87463,120,0,0,0,0,0,0,0,0,0,0,'',26972),
+(280000476,39605,1,1637,5356,0,0,1166,0,-1,0,1,1664.15,-4354.44,26.356,2.89100,300,0,0,34897200,0,0,0,0,0,0,0,'',26972);
+DELETE FROM `creature_template_addon` WHERE `entry` IN (60565, 60567);
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `aiAnimKit`, `movementAnimKit`, `meleeAnimKit`, `auras`) VALUES
+(60565, 0, 0, 50331648, 1, 0, 0, 0, 0, ''),
+(60567, 0, 0, 0, 1, 0, 0, 0, 0, '115672');
+-- Quest adjusting
+UPDATE `quest_template_addon` SET `PrevQuestID`= 31012 WHERE `ID`= 31013;
+DELETE FROM `creature_queststarter` WHERE `quest`= 13841 AND `id`= 39605;
+-- 102799 Smart Scripts
+DELETE FROM `creature_text` WHERE `CreatureID` = 102799;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(102799, 0, 0, '$p. You are alive!', 12, 0, 100, 0, 0, 0, 0, 0, 'Korvas Bloodthorn to Player'),
+(102799, 1, 0, 'I think you\'ll enjoy the view, $p. Let\'s go!', 14, 0, 100, 0, 0, 0, 0, 0, 'Korvas Bloodthorn to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 109277;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(109277, 0, 0, 'The Warblades are even more impressive in person.', 12, 0, 100, 0, 0, 0, 0, 0, 'Illidari to Player');
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=102799;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=102799 AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(102799,0,0,0,10,0,100,1,1,10,30000,30000,1,0,5000,0,0,0,0,18,10,0,0,0,0,0,0,"Korvas Bloodthorn - Within 1-10 Range Out of Combat LoS - Say Line 0 (No Repeat)"),
+(102799,0,1,0,19,0,100,0,42869,0,0,0,1,1,5000,0,0,0,0,1,0,0,0,0,0,0,0,"Korvas Bloodthorn - On Quest 'Eternal Vigil' Taken - Say Line 1");
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=109277;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=109277 AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(109277,0,0,0,10,0,100,1,1,10,30000,30000,1,0,5000,0,0,0,0,18,10,0,0,0,0,0,0,"Illidari - Within 1-10 Range Out of Combat LoS - Say Line 0 (No Repeat)");
+
+UPDATE `gameobject_template` SET `type` = 3, `Data0` = 30, `Data3` = 1, `Data4` = 1, `Data5` = 1, `Data6` = 0, `Data12` = 0, `Data13` = 0, `Data18` = 20, `Data20` = 1 WHERE `entry` = 1619;
+UPDATE `gameobject_template` SET `castBarCaption` = 'Collecting' WHERE `castBarCaption` = 'Collecte';
+UPDATE `creature_template` SET `femaleName` = 'Liberated Karabor Prisoner' WHERE `entry` = 80784;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_air_baloon_55649' WHERE `entry`=55649;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_hot_air_baloon_55918' WHERE `entry`=55918;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_stormwind_aysa_cloudsinger' WHERE `entry`=60566;
+UPDATE `quest_template_addon` SET `ScriptName`='quest_joining_the_alliance' WHERE `ID`=30987;
+-- Alliance Phase Area
+DELETE FROM `phase_area` WHERE `AreaId` IN (12, 1519) AND `PhaseId` IN (1164,1165);
+INSERT INTO `phase_area` (`AreaId`, `PhaseId`, `Comment`) VALUES 
+(12, 1164, 'Elwynn Forest (Panda) - Phase 1164 After Quest 31450 Complete and Before Quest 30987 Taken'),
+(1519, 1164, 'Stormwind City (Panda) - Phase 1164 After Quest 31450 Complete and Before Quest 30987 Taken'),
+(1519, 1165, 'Stormwind City (Panda) - Phase 1165 After Quest 30987 Taken and Before Quest 30987 Rewarded');
+-- Alliance Conditions
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=26 AND `SourceGroup` IN (1164, 1165) AND `SourceEntry` IN (12, 1519) AND `ConditionValue1` IN (30987,31450);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
+(26, 1164, 12, 0, 0, 47, 0, 31450, 66, 0, 0, 0, 0, '', 'Elwynn Forest (Panda) - Phase 1164 On When Quest 31450 is Complete or Rewarded'),
+(26, 1164, 12, 0, 0, 47, 0, 30987, 74, 0, 1, 0, 0, '', 'Elwynn Forest (Panda) - Phase 1164 Off When Quest 30987 is Incomplete, Complete and Rewarded'),
+(26, 1164, 1519, 0, 0, 47, 0, 31450, 66, 0, 0, 0, 0, '', 'Stormwind City (Panda) - Phase 1164 On When Quest 31450 is Complete or Rewarded'),
+(26, 1164, 1519, 0, 0, 47, 0, 30987, 74, 0, 1, 0, 0, '', 'Stormwind City (Panda) - Phase 1164 Off When Quest 30987 is Incomplete, Complete and Rewarded'),
+(26, 1165, 1519, 0, 0, 47, 0, 30987, 8, 0, 0, 0, 0, '', 'Stormwind City (Panda) - Phase 1165 On When Quest 30987 is Taken'),
+(26, 1165, 1519, 0, 0, 47, 0, 30987, 64, 0, 0, 0, 0, '', 'Stormwind City (Panda) - Phase 1165 Off When Quest 30987 is Rewarded');
+DELETE FROM `creature_text` WHERE `CreatureID` = 60566;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(60566, 0, 0, 'Let\'s keep moving.', 12, 0, 100, 0, 0, 0, 0, 0, 'Aysa Cloudsinger to Player'),
+(60566, 1, 0, 'Let\'s get going, $p. If we are going to be of any use out here, we are going to need allies.', 12, 0, 100, 0, 0, 0, 0, 0, 'Aysa Cloudsinger to Player'),
+(60566, 2, 0, 'We\'re here to join the Alliance. We seek audience with your Emperor.', 12, 0, 100, 0, 0, 0, 0, 0, 'Aysa Cloudsinger to Player'),
+(60566, 3, 0, 'Look at this!', 14, 0, 100, 0, 0, 0, 0, 0, 'Aysa Cloudsinger to Player'),
+(60566, 4, 0, 'Well, that\'s good news. Once we join the Alliance, we certainly won\'t run out of things to do.', 12, 0, 100, 0, 0, 0, 0, 0, 'Aysa Cloudsinger to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 60567;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(60567, 0, 0, 'Let\'s... just keep moving.', 12, 0, 100, 0, 0, 0, 0, 0, 'Jojo Ironbrow to Player'),
+(60567, 1, 0, 'What\'s the Light?', 12, 0, 100, 0, 0, 0, 0, 0, 'Jojo Ironbrow to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 68 AND `GroupID` = 6;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(68, 6, 0, 'Never thought I\'d see one of your kind walk through here.', 12, 0, 100, 66, 0, 0, 0, 0, 'Stormwind City Guard to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 65153 AND `GroupID` IN (4, 5, 6);
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(65153, 4, 0, 'Pandaren? What business do you have in Stormwind?', 12, 0, 100, 0, 0, 0, 0, 0, 'General Hammond Clay to Player'),
+(65153, 5, 0, 'Emperor? You\'ll find KING Anduin inside Stormwind Keep.', 12, 0, 100, 0, 0, 0, 0, 0, 'General Hammond Clay to Player'),
+(65153, 6, 0, 'Behave yourselves inside Stormwind, pamdaren. You\'re in Alliance territory now.', 12, 0, 100, 0, 0, 0, 0, 0, 'General Hammond Clay to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 61895;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(61895, 0, 0, 'Hey, look! Gnolls!', 12, 0, 100, 0, 0, 0, 0, 0, 'Marty to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 61896;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(61896, 0, 0, 'Those aren\'t gnolls, silly. Use your eyes.', 12, 0, 100, 0, 0, 0, 0, 0, 'Josie to Player'),
+(61896, 1, 0, 'Those are FURBOLGS.', 12, 0, 100, 0, 0, 0, 0, 0, 'Josie to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 61836;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(61836, 0, 0, 'Teacher... look!', 12, 0, 100, 1, 0, 0, 0, 0, 'Moni Widdlesprock to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 61834;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(61834, 0, 0, 'Yes. Those are pandaren, Moni.', 12, 0, 100, 1, 0, 0, 0, 0, 'Alyn Black to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 61838;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(61838, 0, 0, 'Heh... pandaren. You must be here to join the Alliance.', 12, 0, 100, 0, 0, 0, 0, 0, 'Gavin Marlsbury to Player'),
+(61838, 1, 0, 'Good move. It worked out well for me.', 12, 0, 100, 0, 0, 0, 0, 0, 'Gavin Marlsbury to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 61837;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(61837, 0, 0, 'Welcome to Stormwind!', 12, 0, 100, 3, 0, 0, 0, 0, 'Leria Nightwind to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 61839;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(61839, 0, 0, 'Quiet, Naanae. Outsiders approach.', 12, 0, 100, 0, 0, 0, 0, 0, 'Lucas Severing to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 61840;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(61840, 0, 0, 'Outsiders, yes - but their intentions are good.', 12, 0, 100, 0, 0, 0, 0, 0, 'Naanae to Player'),
+(61840, 1, 0, 'Look carefully, Lucas. The Light is strong with them. Particularly that one.', 12, 0, 100, 0, 0, 0, 0, 0, 'Naanae to Player');
+-- Stormwind Pandaren Greetings scripts
+UPDATE `creature` SET `ScriptName`='npc_stormwind_guard_greet' WHERE `guid`= 188479 AND `id`= 68;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_stormwind_general_hammond_greet' WHERE `entry`= 65153;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_stormwind_marty_josie_greet' WHERE `entry`= 61895;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_stormwind_moni_greet' WHERE `entry`= 61836;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_stormwind_gavin_greet' WHERE `entry`= 61838;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_stormwind_leria_greet' WHERE `entry`= 61837;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_stormwind_lucas_naanae_greet' WHERE `entry`= 61839;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_stormwind_heros_board' WHERE `entry`= 70496;
+-- Orgrimmar Pandaren Greetings scripts
+DELETE FROM `creature_text` WHERE `CreatureID` = 3296 AND `GroupID` IN (6,7,8,9);
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(3296, 6, 0, 'Never thought I''d see one of your kind walk through here.', 12, 0, 100, 66, 0, 0, 61626, 0, 'Orgrimmar Grunt to Player'),
+(3296, 7, 0, 'Come on through. The Warchief''s expecting you.', 12, 0, 100, 1, 0, 0, 61627, 0, 'Orgrimmar Grunt to Player');
+DELETE FROM `creature_text` WHERE `CreatureID` = 60570;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(60570, 0, 0, 'Yes, warchief.', 12, 0, 100, 2, 0, 0, 0, 0, 'Ji Firepaw to Player'),
+(60570, 1, 0, 'I... I believe so. Yes.', 12, 0, 100, 1, 0, 0, 0, 0, 'Ji Firepaw to Player');
+UPDATE `creature` SET `ScriptName`='npc_orgri_guard_greet' WHERE `guid`= 250865 AND `id`= 3296;
+UPDATE `creature` SET `ScriptName`='npc_orgri_shanggok_greet' WHERE `guid`= 21011141 AND `id`= 62195;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_orgri_ji_firepaw' WHERE `entry`=60570;
+UPDATE `quest_template_addon` SET `ScriptName`='quest_joining_the_horde' WHERE `ID`=31012;
+UPDATE `quest_template_addon` SET `ScriptName`='quest_the_horde_way' WHERE `ID`=31013;
+-- UPDATE `creature` SET `ScriptName`='npc_garrosh_hellscream_39605' WHERE `guid`= 280000476 AND `id`= 39605;
+DELETE FROM `smart_scripts` WHERE `entryorguid`= 39605 AND `source_type`=0;
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_garrosh_hellscream_39605' WHERE `entry`=62087; -- SmartAI
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_garrosh_hellscream_39605' WHERE `entry`=39605;
+-- Garrosh Hellscream Waypoints
+DELETE FROM `script_waypoint` WHERE `entry`=62087;
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `waittime`, `point_comment`) VALUES
+(62087, 1, 1658.884, -4348.58, 26.36691, 0, 'Garrosh Hellscream: Talk, Pause WP'),
+(62087, 2, 1661.288, -4343.878, 26.33483, 0, 'Garrosh Hellscream: '),
+(62087, 3, 1662.198, -4341.984, 26.33634, 0, 'Garrosh Hellscream: Pause WP'),
+(62087, 4, 1659.948, -4338.556, 26.34779, 0, 'Garrosh Hellscream: Pause WP'),
+(62087, 5, 1659.042, -4344.627, 26.3592, 0, 'Garrosh Hellscream: '),
+(62087, 6, 1659.629, -4345.505, 26.36073, 0, 'Garrosh Hellscream: Set Orientation, Talk, Pause WP'),
+(62087, 7, 1658.51, -4354.894, 26.37214, 0, 'Garrosh Hellscream: '),
+(62087, 8, 1656.589, -4357.963, 26.35595, 0, 'Garrosh Hellscream: '),
+(62087, 9, 1654.036, -4359.858, 26.33619, 0, 'Garrosh Hellscream: '),
+(62087, 10, 1650.467, -4360.143, 26.33435, 0, 'Garrosh Hellscream: '),
+(62087, 11, 1647.595, -4358.606, 26.36272, 0, 'Garrosh Hellscream: Talk, Pause WP'),
+(62087, 12, 1647.685, -4355.607, 26.33666, 0, 'Garrosh Hellscream: Pause WP'),
+(62087, 13, 1639.243, -4358.776, 26.75091, 0, 'Garrosh Hellscream: '),
+(62087, 14, 1637.854, -4359.377, 26.75178, 0, 'Garrosh Hellscream: Set Orientation, Play Emote');
+-- Other Stuff
+-- Jung Duk SAI
+-- https://www.wowhead.com/quest=30776/jung-duk
+SET @ENTRY := 60801;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`event_param_string`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,54,0,100,0,0,0,0,0,'',1,0,3000,0,0,0,0,23,0,0,0,0,0,0,0,"Jung Duk - On Just Summoned - Say Line 0"),
+(@ENTRY,0,1,0,11,0,100,0,0,0,0,0,'',49,0,0,0,0,0,0,23,0,0,0,0,0,0,0,"Jung Duk - On Respawn - Start Attacking"),
+(@ENTRY,0,2,0,52,0,100,0,0,60801,0,0,'',45,1,0,0,0,0,0,19,60735,200,0,0,0,0,0,"Jung Duk - On Text 0 Over - Set Data 1 0"),
+(@ENTRY,0,3,0,2,0,100,1,0,90,0,0,'',45,1,1,0,0,0,0,19,60735,200,0,0,0,0,0,"Jung Duk - Between 0-90% Health - Set Data 1 1 (No Repeat)"),
+(@ENTRY,0,4,0,2,0,100,1,0,70,0,0,'',45,1,2,0,0,0,0,19,60735,200,0,0,0,0,0,"Jung Duk - Between 0-70% Health - Set Data 1 2 (No Repeat)"),
+(@ENTRY,0,5,0,2,0,100,1,0,20,0,0,'',45,1,3,0,0,0,0,19,60735,200,0,0,0,0,0,"Jung Duk - Between 0-20% Health - Set Data 1 3 (No Repeat)"),
+(@ENTRY,0,6,0,2,0,100,1,0,50,0,0,'',1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Jung Duk - Between 0-50% Health - Say Line 1 (No Repeat)"),
+(@ENTRY,0,7,0,6,0,100,1,0,0,0,0,'',45,1,4,0,0,0,0,19,60735,200,0,0,0,0,0,"Jung Duk - On Just Died - Set Data 1 4 (No Repeat)"),
+(@ENTRY,0,8,0,6,0,100,1,0,0,0,0,'',45,1,5,0,0,0,0,19,60735,200,0,0,0,0,0,"Jung Duk - On Just Died - Set Data 1 5 (No Repeat)"),
+(@ENTRY,0,9,0,7,0,100,1,0,0,0,0,'',45,1,5,0,0,0,0,19,60735,200,0,0,0,0,0,"Jung Duk - On Evade - Set Data 1 5 (No Repeat)"),
+(@ENTRY,0,10,0,0,0,100,0,8000,8000,15000,17000,'',11,127476,0,0,0,0,0,1,0,0,0,0,0,0,0,"Jung Duk - In Combat - Cast Whirling Blades of the Chieftan"),
+(@ENTRY,0,11,0,2,0,100,1,0,50,0,0,'',11,128809,2,0,0,0,0,1,0,0,0,0,0,0,0,"Jung Duk - Between 0-50% Health - Cast Wounded Pride (No Repeat)"),
+(@ENTRY,0,12,0,0,0,100,0,14000,14000,20000,22000,'',11,123849,0,0,0,0,0,2,0,0,0,0,0,0,0,"Jung Duk - In Combat - Cast Goring Charge");
+
+-- Katak the Defeated SAI
+SET @ENTRY := 60735;
+UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@ENTRY AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`event_param_string`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,38,0,100,1,1,0,0,0,'',1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Katak the Defeated - On Data Set 1 0 - Say Line 0 (No Repeat)"),
+(@ENTRY,0,1,0,38,0,100,1,1,1,0,0,'',1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,"Katak the Defeated - On Data Set 1 1 - Say Line 1 (No Repeat)"),
+(@ENTRY,0,2,0,38,0,100,1,1,2,0,0,'',1,2,0,0,0,0,0,1,0,0,0,0,0,0,0,"Katak the Defeated - On Data Set 1 2 - Say Line 2 (No Repeat)"),
+(@ENTRY,0,3,0,38,0,100,1,1,3,0,0,'',1,3,0,0,0,0,0,1,0,0,0,0,0,0,0,"Katak the Defeated - On Data Set 1 3 - Say Line 3 (No Repeat)"),
+(@ENTRY,0,4,0,38,0,100,1,1,4,0,0,'',1,4,0,0,0,0,0,1,0,0,0,0,0,0,0,"Katak the Defeated - On Data Set 1 4 - Say Line 4 (No Repeat)"),
+(@ENTRY,0,5,0,38,0,100,1,1,5,0,0,'',78,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Katak the Defeated - On Data Set 1 5 - Reset All Scripts (No Repeat)");
+
+DELETE FROM `creature_text` WHERE `CreatureID` = 60801;
+DELETE FROM `creature_text` WHERE `CreatureID` = 60735;
+INSERT INTO `creature_text` (`CreatureID`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `BroadcastTextId`, `TextRange`, `comment`) values
+('60801','0','0','Who dares to challenge me?','14','0','100','0','0','30854','60253','0','Jung Duk - YELL_AGGRO.'),
+('60801','1','0','Shut up, Katak!','14','0','100','0','0','30855','60446','0','Jung Duk - YELL_SHUTUP_KATAK'),
+('60735','0','0','Not running this time, Jung Duk?','12','0','100','0','0','28126','60259','0','Katak - Jung Duk After Aggro.'),
+('60735','1','0','Where are your lackeys, great chief? They cannot help you this time!','12','0','100','0','0','28127','60260','0','Katak - Jung Duk After Aggro.'),
+('60735','2','0','Deceit is no match for true strength! This one is more powerful than you!','12','0','100','0','0','28128','60261','0','Katak - Jung Duk After Aggro.'),
+('60735','3','0','I feel... at peace.','12','0','100','0','0','28129','60445','0','Katak - Jung Duk After Aggro.'),
+('60735','4','0','Ahahahaha! More than filth like you deserved.','12','0','100','0','0','28130','60262','0','Katak - Jung Duk After Aggro.');

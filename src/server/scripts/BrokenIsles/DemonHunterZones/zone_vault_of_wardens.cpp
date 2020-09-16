@@ -2091,7 +2091,6 @@ public:
                         _phase = PHASE_PEEK_WEAPONS_3;
                         break;
                     /*case PHASE_PEEK_WEAPONS_3:
-                        
                         _moveTimer = 0.5 * IN_MILLISECONDS;
                         _phase = PHASE_PEEK_WEAPONS_4;
                         break;*/
@@ -2178,7 +2177,7 @@ class npc_vault_of_the_wardens_vampiric_felbat : public CreatureScript
 public:
     npc_vault_of_the_wardens_vampiric_felbat() : CreatureScript("npc_vault_of_the_wardens_vampiric_felbat") { }
 
-    enum eFelBal {
+    enum eFelBat {
         EVENT_START_PATH = 1,
         EVENT_DESPAWN = 2,
     };

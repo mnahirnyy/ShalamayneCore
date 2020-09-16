@@ -17,6 +17,7 @@
 
 #include "Log.h"
 #include "ScriptedGossip.h"
+#include "ScriptedEscortAI.h"
 #include "PhasingHandler.h"
 #include "Conversation.h"
 
@@ -225,6 +226,565 @@ public:
     }
 };
 
+/* https://www.wowhead.com/quest=31012/joining-the-horde */
+enum eQuestHorde {
+    QUEST_JOINING_THE_HORDE = 31012,
+    NPC_JI = 60570,
+};
+
+class quest_joining_the_horde : public QuestScript
+{
+public:
+    quest_joining_the_horde() : QuestScript("quest_joining_the_horde") { }
+
+    void OnQuestStatusChange(Player* player, Quest const* /*quest*/, QuestStatus oldStatus, QuestStatus newStatus) override
+    {
+        if (newStatus == QUEST_STATUS_NONE || QUEST_STATUS_REWARDED) {
+            if (Creature* tempJi = player->GetSummonedCreatureByEntry(NPC_JI))
+                tempJi->DespawnOrUnsummon();
+        }
+    }
+};
+
+class npc_orgri_ji_firepaw : public CreatureScript
+{
+public:
+    npc_orgri_ji_firepaw() : CreatureScript("npc_orgri_ji_firepaw") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_JOINING_THE_HORDE) {
+            if (TempSummon* followerJi = player->SummonCreature(creature->GetEntry(), creature->GetPosition(), TEMPSUMMON_MANUAL_DESPAWN, 0, 0, true))
+            {
+                followerJi->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                followerJi->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR);
+                followerJi->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                followerJi->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, float(M_PI));
+            }
+        }
+        return true;
+    }
+
+    struct npc_orgri_ji_firepaw_AI : public ScriptedAI
+    {
+        npc_orgri_ji_firepaw_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Initialize() {
+            _playerGuid = ObjectGuid::Empty;
+        }
+
+        void Reset() override {
+            Initialize();
+            _events.Reset();
+        }
+
+        void IsSummonedBy(Unit* who) override
+        {
+            if (Player* player = who->ToPlayer())
+                _playerGuid = who->GetGUID();
+        }
+
+        void EnterEvadeMode(EvadeReason /*why*/) override {}
+
+        /*void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                default:
+                    break;
+                }
+            }
+            // no melee attacks
+        }
+
+        void SetData(uint32 id, uint32 value) override
+        {
+            switch (id)
+            {
+            default:
+                break;
+            }
+        }*/
+
+    private:
+        EventMap _events;
+        ObjectGuid _playerGuid;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_orgri_ji_firepaw_AI(creature);
+    }
+};
+
+class npc_orgri_guard_greet : public CreatureScript {
+public:
+    npc_orgri_guard_greet() : CreatureScript("npc_orgri_guard_greet") { }
+
+    enum eGuard {
+        EVENT_SAY_2 = 1,
+        EVENT_RESET = 2,
+    };
+
+    struct npc_orgri_guard_greet_AI : public ScriptedAI {
+        npc_orgri_guard_greet_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Reset() override {
+            Initialize();
+            _events.Reset();
+        }
+
+        void Initialize() {
+            _alreadyGreet = false;
+        }
+
+        void MoveInLineOfSight(Unit* unit) override {
+            if (!unit || !unit->IsInWorld())
+                return;
+
+            if (Player* player = unit->ToPlayer()) {
+                if (player->GetDistance(me) < 15.0f) {
+                    if (player->HasQuest(QUEST_JOINING_THE_HORDE) && !_alreadyGreet) {
+                        me->AI()->Talk(6);
+                        _alreadyGreet = true;
+                        _events.ScheduleEvent(EVENT_SAY_2, Seconds(5));
+                        _events.ScheduleEvent(EVENT_RESET, Seconds(60));
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_SAY_2:
+                    me->AI()->Talk(7);
+                    break;
+                case EVENT_RESET:
+                    Reset();
+                    break;
+                default:
+                    break;
+                }
+            }
+            // no melee attacks
+        }
+
+    private:
+        EventMap _events;
+        bool _alreadyGreet;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_orgri_guard_greet_AI(creature);
+    }
+};
+
+class npc_orgri_shanggok_greet : public CreatureScript {
+public:
+    npc_orgri_shanggok_greet() : CreatureScript("npc_orgri_shanggok_greet") { }
+
+    enum eShang {
+        EVENT_RESET = 1,
+    };
+
+    struct npc_orgri_shanggok_greet_AI : public ScriptedAI {
+        npc_orgri_shanggok_greet_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Reset() override {
+            Initialize();
+            _events.Reset();
+        }
+
+        void Initialize() {
+            _alreadyGreet = false;
+        }
+
+        void MoveInLineOfSight(Unit* unit) override {
+            if (!unit || !unit->IsInWorld())
+                return;
+
+            if (Player* player = unit->ToPlayer()) {
+                if (player->GetDistance(me) < 25.0f) {
+                    if (player->HasQuest(QUEST_JOINING_THE_HORDE) && !_alreadyGreet) {
+                        me->AI()->Talk(0);
+                        _alreadyGreet = true;
+                        _events.ScheduleEvent(EVENT_RESET, Seconds(60));
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_RESET:
+                    Reset();
+                    break;
+                default:
+                    break;
+                }
+            }
+            // no melee attacks
+        }
+
+    private:
+        bool _alreadyGreet;
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_orgri_shanggok_greet_AI(creature);
+    }
+};
+
+enum e31013 {
+    NPC_TEMP_JI = 62081,
+    NPC_TEMP_GARROSH = 62087,
+    QUEST_THE_HORDE_WAY = 31013,
+};
+
+class quest_the_horde_way : public QuestScript
+{
+public:
+    quest_the_horde_way() : QuestScript("quest_the_horde_way") { }
+
+    void OnQuestStatusChange(Player* player, Quest const* /*quest*/, QuestStatus oldStatus, QuestStatus newStatus) override
+    {
+        if (newStatus == QUEST_STATUS_NONE || QUEST_STATUS_REWARDED) {
+            if (Creature* tempJi = player->GetSummonedCreatureByEntry(NPC_TEMP_JI))
+                tempJi->DespawnOrUnsummon();
+            if (Creature* tempGarrosh = player->GetSummonedCreatureByEntry(NPC_TEMP_GARROSH))
+                tempGarrosh->DespawnOrUnsummon();
+        }
+    }
+};
+
+// npc 39605 for the quest 31013 'The Horde Way'
+class npc_garrosh_hellscream_39605 : public CreatureScript {
+public:
+    npc_garrosh_hellscream_39605() : CreatureScript("npc_garrosh_hellscream_39605") { }
+
+    enum eHellscream {
+        PHASE_NONE = 0,
+        PHASE_CONTINUE = -1,
+        DATA_EVENT_STARTER_GUID = 0,
+        WP_TALK_1 = 0,
+        WP_TALK_3 = 2,
+        WP_TALK_4 = 3,
+        WP_TALK_5 = 4,
+        WP_TALK_6 = 5,
+        WP_TALK_9 = 6,
+        WP_TALK_10 = 7,
+        WP_TALK_12 = 8,
+        WP_TALK_13 = 11,
+        PHASE_TALK_2 = 1,
+        PHASE_TALK_2_CONTINUE = 2,
+        PHASE_TALK_5 = 3,
+        PHASE_TALK_5_CONTINUE = 4,
+        PHASE_TALK_6 = 5,
+        PHASE_TALK_6_CONTINUE = 6,
+        PHASE_TALK_7 = 7,
+        PHASE_TALK_7_CONTINUE = 8,
+        PHASE_TALK_8 = 9,
+        PHASE_TALK_8_CONTINUE = 10,
+        PHASE_TALK_9 = 11,
+        PHASE_TALK_9_CONTINUE = 12,
+        PHASE_TALK_10 = 13,
+        PHASE_TALK_11 = 14,
+        PHASE_TALK_11_CONTINUE = 15,
+        PHASE_TALK_12 = 16,
+        PHASE_TALK_12_CONTINUE = 17,
+        PHASE_TALK_13 = 18,
+        PHASE_TALK_13_CONTINUE = 19,
+        PHASE_DESPAWN = 22,
+    };
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override {
+        if (quest->GetQuestId() == QUEST_THE_HORDE_WAY) {
+            if (TempSummon* waypointGarrosh = player->SummonCreature(NPC_TEMP_GARROSH, creature->GetPosition(), TEMPSUMMON_MANUAL_DESPAWN, 0, 0, true))
+            {
+                waypointGarrosh->AI()->SetGUID(player->GetGUID(), DATA_EVENT_STARTER_GUID);
+            }
+            if (TempSummon* jiFirepaw = player->SummonCreature(NPC_TEMP_JI, player->GetPosition(), TEMPSUMMON_MANUAL_DESPAWN, 0, 0, true))
+            {
+                jiFirepaw->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                jiFirepaw->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR);
+                jiFirepaw->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                jiFirepaw->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, float(M_PI));
+            }
+        }
+        return true;
+    }
+
+    struct npc_garrosh_hellscream_39605_AI : public npc_escortAI {
+        npc_garrosh_hellscream_39605_AI(Creature* creature) : npc_escortAI(creature) {
+            Initialize();
+        }
+
+        void Initialize() {
+            _phase = PHASE_NONE;
+            _moveTimer = 0;
+        }
+
+        void Reset() override {
+            Initialize();
+            _events.Reset();
+        }
+
+        ObjectGuid GetGUID(int32 type) const override {
+            if (type == DATA_EVENT_STARTER_GUID)
+                return _eventStarterGuid;
+
+            return ObjectGuid::Empty;
+        }
+
+        void SetGUID(ObjectGuid guid, int32 type) override {
+            switch (type) {
+                case DATA_EVENT_STARTER_GUID:
+                    _eventStarterGuid = guid;
+                    Start(false, false, guid);
+                    SetDespawnAtFar(false);
+                    Talk(0);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        /*void LastWaypointReached() override {
+            me->DespawnOrUnsummon();
+            me->SetFacingTo(5.631830f);
+
+            if (Player* player = ObjectAccessor::FindPlayer(playerGuid))
+                player->ForceCompleteQuest(QUEST_FINDING_A_FOOTHOLD);
+        }*/
+
+        void UpdateAI(uint32 diff) override {
+            _events.Update(diff);
+
+            if (UpdateVictim()) {
+                DoMeleeAttackIfReady();
+            }
+
+            if (HasEscortState(STATE_ESCORT_NONE))
+                return;
+
+            npc_escortAI::UpdateAI(diff);
+
+            if (_phase)
+            {
+                if (_moveTimer <= diff)
+                {
+                    switch (_phase)
+                    {
+                    case PHASE_CONTINUE:
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_TALK_2:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _eventStarterGuid))
+                        {
+                            me->SetFacingToObject(player);
+                        }
+                        Talk(2);
+                        _moveTimer = 7 * IN_MILLISECONDS;
+                        _phase = PHASE_TALK_2_CONTINUE;
+                        break;
+                    case PHASE_TALK_2_CONTINUE:
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_TALK_5:
+                        Talk(5);
+                        _moveTimer = 6 * IN_MILLISECONDS;
+                        _phase = PHASE_TALK_5_CONTINUE;
+                        break;
+                    case PHASE_TALK_5_CONTINUE:
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_TALK_6:
+                        Talk(6);
+                        _moveTimer = 6 * IN_MILLISECONDS;
+                        _phase = PHASE_TALK_7;
+                        break;
+                    case PHASE_TALK_7:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _eventStarterGuid))
+                        {
+                            me->SetFacingToObject(player);
+                        }
+                        Talk(7);
+                        _moveTimer = 6 * IN_MILLISECONDS;
+                        _phase = PHASE_TALK_7_CONTINUE;
+                        break;
+                    case PHASE_TALK_7_CONTINUE:
+                        if (Creature* jiFirepaw = me->FindNearestCreature(NPC_TEMP_JI, me->GetVisibilityRange(), true)) {
+                            jiFirepaw->SetFacingToObject(me);
+                            jiFirepaw->AI()->Talk(3);
+                        }
+                        _moveTimer = 3 * IN_MILLISECONDS;
+                        _phase = PHASE_TALK_8;
+                        break;
+                    case PHASE_TALK_8:
+                        Talk(8);
+                        _moveTimer = 2 * IN_MILLISECONDS;
+                        _phase = PHASE_TALK_8_CONTINUE;
+                        break;
+                    case PHASE_TALK_8_CONTINUE:
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_TALK_10:
+                        Talk(10);
+                        _moveTimer = 4 * IN_MILLISECONDS;
+                        _phase = PHASE_TALK_11;
+                        break;
+                    case PHASE_TALK_11:
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _eventStarterGuid))
+                        {
+                            me->SetFacingToObject(player);
+                        }
+                        Talk(11);
+                        _moveTimer = 3 * IN_MILLISECONDS;
+                        _phase = PHASE_TALK_11_CONTINUE;
+                        break;
+                    case PHASE_TALK_11_CONTINUE:
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_TALK_12:
+                        Talk(12);
+                        _moveTimer = 6 * IN_MILLISECONDS;
+                        _phase = PHASE_TALK_12_CONTINUE;
+                        break;
+                    case PHASE_TALK_12_CONTINUE:
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_TALK_13:
+                        Talk(13);
+                        _moveTimer = 6 * IN_MILLISECONDS;
+                        _phase = PHASE_TALK_12_CONTINUE;
+                        break;
+                    case PHASE_TALK_13_CONTINUE:
+                        SetEscortPaused(false);
+                        _moveTimer = 0 * IN_MILLISECONDS;
+                        _phase = PHASE_NONE;
+                        break;
+                    case PHASE_DESPAWN:
+                        me->Respawn(false);
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                else if (!me->IsInCombat())
+                    _moveTimer -= diff;
+            }
+        }
+
+        void WaypointReached(uint32 waypointId) override
+        {
+            Player* player = GetPlayerForEscort();
+            if (!player)
+                return;
+
+            switch (waypointId)
+            {
+            case WP_TALK_1:
+                SetEscortPaused(true);
+                Talk(1);
+                _moveTimer = 8 * IN_MILLISECONDS;
+                _phase = PHASE_TALK_2;
+                break;
+            case WP_TALK_3:
+                Talk(3);
+                _moveTimer = 5 * IN_MILLISECONDS;
+                _phase = PHASE_NONE;
+                break;
+            case WP_TALK_4:
+                Talk(4);
+                _moveTimer = 5 * IN_MILLISECONDS;
+                _phase = PHASE_NONE;
+                break;
+            case WP_TALK_5:
+                SetEscortPaused(true);
+                _moveTimer = 1 * IN_MILLISECONDS;
+                _phase = PHASE_TALK_5;
+                break;
+            case WP_TALK_6:
+                SetEscortPaused(true);
+                _moveTimer = 2 * IN_MILLISECONDS;
+                _phase = PHASE_TALK_6;
+                break;
+            case WP_TALK_9:
+                Talk(9);
+                _moveTimer = 12 * IN_MILLISECONDS;
+                _phase = PHASE_NONE;
+                break;
+            case WP_TALK_10:
+                SetEscortPaused(true);
+                _moveTimer = 1 * IN_MILLISECONDS;
+                _phase = PHASE_TALK_10;
+                break;
+            case WP_TALK_12:
+                SetEscortPaused(true);
+                _moveTimer = 1 * IN_MILLISECONDS;
+                _phase = PHASE_TALK_12;
+                break;
+            case WP_TALK_13:
+                SetEscortPaused(true);
+                _moveTimer = 1 * IN_MILLISECONDS;
+                _phase = PHASE_TALK_13;
+                break;
+            default:
+                break;
+            }
+        }
+
+    private:
+        int8 _phase;
+        uint32 _moveTimer;
+        ObjectGuid _eventStarterGuid;
+        GuidList _explosivesGuids;
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_garrosh_hellscream_39605_AI(creature);
+    }
+};
+
 void AddSC_orgrimmar()
 {
 	new play_fate_of_the_horde();
@@ -232,4 +792,10 @@ void AddSC_orgrimmar()
     new npc_lord_saurfang();
     new PlayerScript_summon_khadgar_servant();
     new npc_khadgars_upgraded_servant();
+    new quest_joining_the_horde();
+    new npc_orgri_ji_firepaw();
+    new npc_orgri_guard_greet();
+    new npc_orgri_shanggok_greet();
+    new npc_garrosh_hellscream_39605();
+    new quest_the_horde_way();
 }

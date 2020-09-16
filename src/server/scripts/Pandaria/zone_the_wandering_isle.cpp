@@ -27,6 +27,8 @@
 #include "SpellScript.h"
 #include "PhasingHandler.h"
 #include "Player.h"
+#include "Vehicle.h"
+#include "CombatAI.h"
 #include "Log.h"
 
 enum CaveOfMeditationSpells
@@ -1652,6 +1654,15 @@ class npc_shen_zin_shu_bunny : public CreatureScript
 public:
     npc_shen_zin_shu_bunny() : CreatureScript("npc_shen_zin_shu_bunny") { }
 
+    enum eShen {
+        DATA_TRIGGER_ANIM_0 = 52,
+        DATA_GENERAL_TRIGGER = 53,
+        DATA_TRIGGER_ANIM_1 = 54,
+        DATA_TRIGGER_ANIM_2 = 55,
+        DATA_TRIGGER_WITH_TURN = 56,
+        DATA_TRIGGER_ANIM_3 = 57,
+    };
+
     struct npc_shen_zin_shu_bunnyAI : public ScriptedAI
     {
         npc_shen_zin_shu_bunnyAI(Creature* creature) : ScriptedAI(creature) { }
@@ -1659,6 +1670,7 @@ public:
         void Initialize()
         {
             _hitCount = 0;
+            _eventParticipantGuid = ObjectGuid::Empty;
         }
 
         void Reset() override
@@ -1706,8 +1718,46 @@ public:
             }
         }
 
+        void SetGUID(ObjectGuid guid, int32 /*id*/) override
+        {
+            _eventParticipantGuid = guid;
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override {
+            if (Player* player = ObjectAccessor::GetPlayer(*me, _eventParticipantGuid))
+                switch (id) {
+                case DATA_TRIGGER_ANIM_0:
+                    me->Talk(TEXT_1, CHAT_MSG_MONSTER_SAY, 300.0f, player);
+                    me->PlayDirectSound(27822, player);
+                    break;
+                case DATA_GENERAL_TRIGGER:
+                    me->Talk(TEXT_2, CHAT_MSG_MONSTER_SAY, 300.0f, player);
+                    me->PlayDirectSound(27823, player);
+                    break;
+                case DATA_TRIGGER_ANIM_1:
+                    me->Talk(TEXT_3, CHAT_MSG_MONSTER_SAY, 300.0f, player);
+                    me->PlayDirectSound(27824, player);
+                    break;
+                case DATA_TRIGGER_ANIM_2:
+                    me->Talk(TEXT_4, CHAT_MSG_MONSTER_SAY, 300.0f, player);
+                    me->PlayDirectSound(27825, player);
+                    break;
+                case DATA_TRIGGER_ANIM_3:
+                    me->Talk(TEXT_6, CHAT_MSG_MONSTER_SAY, 350.0f, player);
+                    me->PlayDirectSound(27827, player);
+                    break;
+                case DATA_TRIGGER_WITH_TURN:
+                    me->Talk(TEXT_5, CHAT_MSG_MONSTER_SAY, 300.0f, player);
+                    me->PlayDirectSound(27826, player);
+                    break;
+                default:
+                    break;
+                }
+        }
+
     private:
         uint8 _hitCount;
+        ObjectGuid _eventParticipantGuid;
     };
 
     CreatureAI* GetAI(Creature* creature) const override
@@ -2185,6 +2235,404 @@ public:
     }
 };
 
+/* Quest 29791 Npc Shang Xi's Hot Air Baloon (summonner) */
+class npc_hot_air_baloon_55918 : public CreatureScript
+{
+public:
+    npc_hot_air_baloon_55918() : CreatureScript("npc_hot_air_baloon_55918") { }
+
+    enum eNPC
+    {
+        QUEST_SUFFERING_SHEN_ZIN_SU = 29791,
+        SPELL_SUMMON_HOT_AIR_BALOON = 105002,
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_hot_air_baloon_55918_AI(creature);
+    }
+
+    struct npc_hot_air_baloon_55918_AI : public ScriptedAI
+    {
+        npc_hot_air_baloon_55918_AI(Creature* creature) : ScriptedAI(creature) {}
+
+        void OnSpellClick(Unit* Clicker, bool& /*result*/) override {
+            if (!Clicker->IsPlayer())
+                return;
+
+            Player* player = Clicker->ToPlayer();
+
+            if (player->GetQuestStatus(QUEST_SUFFERING_SHEN_ZIN_SU) == QUEST_STATUS_INCOMPLETE) {
+                player->CastSpell(me, SPELL_SUMMON_HOT_AIR_BALOON);
+                me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                PhasingHandler::RemovePhase(player, 1885);
+            }
+        }
+    };
+};
+
+/* Quest 29791 Npc Shang Xi's Hot Air Baloon 55649 (summonned mount) */
+static const Position wanderingIslandPath[21] =
+{
+    { 934.2396f, 4571.044f, 233.6516f },
+    { 1015.715f, 4604.329f, 216.5495f },
+    { 1056.448f, 4658.655f, 187.7374f },
+    { 1081.418f, 4796.375f, 157.6622f },
+    { 1091.849f, 4926.616f, 137.9268f },
+    { 1026.328f, 5137.097f, 138.0555f },
+    { 820.472f, 5155.872f, 127.7128f },
+    { 654.553f, 5087.091f, 137.6558f },
+    { 558.9904f, 5018.591f, 129.5526f },
+    { 445.295f, 4860.305f, 117.5794f },
+    { 403.5208f, 4650.163f, 81.13639f },
+    { 341.3038f, 4475.935f, 75.50136f },
+    { 222.5573f, 4369.272f, 93.21405f },
+    { 164.7587f, 4297.126f, 112.2426f },
+    { 131.7517f, 4156.708f, 124.6377f }, // KillCredit
+    { 123.9514f, 4109.052f, 124.6377f },
+    { 112.0469f, 3931.905f, 128.3417f },
+    { 218.5f, 3824.769f, 137.5752f },
+    { 388.9236f, 3765.605f, 159.4655f },
+    { 596.5712f, 3689.253f, 183.0423f },
+    { 745.1858f, 3664.532f, 194.0496f } // Despawn
+};
+size_t const wiPathSize = std::extent<decltype(wanderingIslandPath)>::value;
+
+class npc_air_baloon_55649 : public CreatureScript
+{
+public:
+    npc_air_baloon_55649() : CreatureScript("npc_air_baloon_55649") { }
+
+    enum eAirBaloon {
+        EVENT_START_FLY = 1,
+        EVENT_FIRST_CONVERSATION = 2,
+        EVENT_SECOND_CONVERSATION = 10,
+        EVENT_THIRD_CONVERSATION = 22,
+        EVENT_FORTH_CONVERSATION = 30,
+        QUEST_SUFFERING_SHEN_ZIN_SU = 29791,
+        SPELL_RIDE_VEHICLE_HARDCODED = 46598,
+        SPELL_RIDE_VEHICLE = 63313,
+        SPELL_EJECT_PASSENGER_1 = 60603,
+        SPELL_PARACHUTE = 45472,
+        BOARD_HOT_AIR_BALOON_CREDIT = 56378,
+        SPEAK_WITH_SHEN_ZIN_SU_CREDIT = 55939,
+        NPC_AYSA = 56661,
+        NPC_JI = 56660,
+        NPC_SHEN_ZIN_SU = 57769,
+        NPC_SHEN_ZIN_SU_BUNNY = 56676,
+    };
+
+    struct npc_air_baloon_55649_AI : public VehicleAI
+    {
+        npc_air_baloon_55649_AI(Creature* creature) : VehicleAI(creature) { }
+
+        void Initialize() {
+            me->SetSpeedRate(MOVE_WALK, 1.5f);
+            me->SetSpeedRate(MOVE_FLIGHT, 1.5f);
+            me->SetSpeedRate(MOVE_RUN, 1.5f);
+            me->SetCanFly(true);
+            me->SetDisableGravity(true);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            _playerGUID = ObjectGuid::Empty;
+            _aysaGUID = ObjectGuid::Empty;
+            _jiGUID = ObjectGuid::Empty;
+            _shenGUID = ObjectGuid::Empty;
+            _waitBeforePath = true;
+            uiPoint = 0;
+            Fly = false;
+            FlyDisabled = false;
+            boarded = false;
+        }
+
+        void Reset() override
+        {
+            Initialize();
+            _events.Reset();
+        }
+
+        void IsSummonedBy(Unit* summoner) override
+        {
+            if (Player* player = summoner->ToPlayer())
+                if (player->GetQuestStatus(QUEST_SUFFERING_SHEN_ZIN_SU) == QUEST_STATUS_INCOMPLETE)
+                    if (Vehicle* vehicle = me->GetVehicleKit()) {
+                        vehicle->InstallAllAccessories(true);
+                        _playerGUID = player->GetGUID();
+                        me->CastSpell(player, SPELL_RIDE_VEHICLE_HARDCODED); // ride vehicle, script_effect
+                        player->EnterVehicle(me);
+                    }
+        }
+
+        void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) override
+        {
+            if (apply && passenger->GetTypeId() == TYPEID_PLAYER)
+            {
+                Player* player = passenger->ToPlayer();
+
+                if (Creature* ji = player->FindNearestCreature(NPC_JI, 25.0f, true)) {
+                    _jiGUID = ji->GetGUID();
+
+                    if (Creature* aysa = player->FindNearestCreature(NPC_AYSA, 25.0f, true)) {
+                        _aysaGUID = aysa->GetGUID();
+                        player->KilledMonsterCredit(BOARD_HOT_AIR_BALOON_CREDIT, ObjectGuid::Empty);
+                        aysa->CastSpell(me, SPELL_RIDE_VEHICLE);
+                        _waitBeforePath = false;
+                        _events.ScheduleEvent(EVENT_START_FLY, Seconds(1));
+                        _events.ScheduleEvent(EVENT_FIRST_CONVERSATION, Seconds(4));
+                        boarded = true;
+                    }
+                }
+            }
+        }
+
+        void MovementInform(uint32 /*type*/, uint32 pointId) override {
+            TC_LOG_ERROR("server.worldserver", " *** MovementInform %u", pointId);
+            if (pointId == uiPoint && !FlyDisabled) {
+                ++uiPoint;
+                Fly = true;
+            }
+            switch (pointId) {
+                case 4:
+                    _events.ScheduleEvent(EVENT_SECOND_CONVERSATION, Seconds(2));
+                    break;
+                case 8:
+                    _events.ScheduleEvent(EVENT_THIRD_CONVERSATION, Seconds(2));
+                    break;
+                case 12:
+                    _events.ScheduleEvent(EVENT_FORTH_CONVERSATION, Seconds(2));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void GoToTheNextPoint() {
+            me->GetMotionMaster()->MovePoint(uiPoint, wanderingIslandPath[uiPoint]);
+        }
+
+        void UpdateMovementActions() {
+            if (boarded && !FlyDisabled && !me->GetVehicleKit()->IsVehicleInUse()) {
+                me->DespawnOrUnsummon();
+                return;
+            }
+
+            if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID)) {
+                if (Fly && !FlyDisabled) {
+                    Fly = false;
+                    GoToTheNextPoint();
+                    if (uiPoint == 10) {
+                        me->SetSpeedRate(MOVE_WALK, 4.5f);
+                        me->SetSpeedRate(MOVE_FLIGHT, 4.5f);
+                        me->SetSpeedRate(MOVE_RUN, 4.5f);
+                    }
+                    if (uiPoint == 16) {
+                        if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                            player->KilledMonsterCredit(SPEAK_WITH_SHEN_ZIN_SU_CREDIT, ObjectGuid::Empty);
+                    }
+                    if (uiPoint >= 21) {
+                        // ALL DONE! DESPAWN.
+                        if (Unit *player = me->GetVehicleKit()->GetPassenger(0)) {
+                            if (Creature* aysa = ObjectAccessor::GetCreature(*me, _aysaGUID))
+                                aysa->DespawnOrUnsummon();
+                            if (Creature* ji = ObjectAccessor::GetCreature(*me, _jiGUID))
+                                ji->DespawnOrUnsummon();
+                            player->ExitVehicle(me);
+                            player->CastSpell(player, SPELL_PARACHUTE, true);
+                            player->RemoveAurasDueToSpell(105002);
+                            me->RemoveAllAuras();
+                            me->DespawnOrUnsummon();
+                            _waitBeforePath = true;
+                        }
+                        FlyDisabled = true;
+                        Fly = false;
+                        boarded = false;
+                    }
+                }
+            }
+        }
+
+        void UpdateAI(uint32 diff) override {
+            UpdateMovementActions();
+
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent()) {
+                switch (eventId)
+                {
+                case EVENT_START_FLY:
+                    me->SetOrientation(0.2443461f);
+                    me->GetMotionMaster()->MovePoint(uiPoint, wanderingIslandPath[uiPoint]);
+                    break;
+                /* Conversation about respect and the master */
+                case EVENT_FIRST_CONVERSATION:
+                    if (Creature* ji = ObjectAccessor::GetCreature(*me, _jiGUID))
+                        ji->AI()->Talk(0);
+                    _events.ScheduleEvent(EVENT_FIRST_CONVERSATION + 1, Seconds(4));
+                    break;
+                case EVENT_FIRST_CONVERSATION + 1:
+                    if (Creature* aysa = ObjectAccessor::GetCreature(*me, _aysaGUID))
+                        aysa->AI()->Talk(0);
+                    _events.ScheduleEvent(EVENT_FIRST_CONVERSATION + 2, Seconds(6));
+                    break;
+                case EVENT_FIRST_CONVERSATION + 2:
+                    if (Creature* ji = ObjectAccessor::GetCreature(*me, _jiGUID))
+                        ji->AI()->Talk(1);
+                    _events.ScheduleEvent(EVENT_FIRST_CONVERSATION + 3, Seconds(8));
+                    break;
+                case EVENT_FIRST_CONVERSATION + 3:
+                    if (Creature* aysa = ObjectAccessor::GetCreature(*me, _aysaGUID))
+                        aysa->AI()->Talk(1);
+                    _events.ScheduleEvent(EVENT_FIRST_CONVERSATION + 4, Seconds(6));
+                    break;
+                case EVENT_FIRST_CONVERSATION + 4:
+                    if (Creature* ji = ObjectAccessor::GetCreature(*me, _jiGUID))
+                        ji->AI()->Talk(2);
+                    _events.ScheduleEvent(EVENT_FIRST_CONVERSATION + 5, Seconds(6));
+                    break;
+                case EVENT_FIRST_CONVERSATION + 5:
+                    if (Creature* aysa = ObjectAccessor::GetCreature(*me, _aysaGUID))
+                        aysa->AI()->Talk(2);
+                    break;
+                /* Conversation with the Shen-zin Su */
+                case EVENT_SECOND_CONVERSATION:
+                    if (Creature* aysa = ObjectAccessor::GetCreature(*me, _aysaGUID))
+                        aysa->AI()->Talk(3);
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        if (Creature* creature = player->FindNearestCreature(NPC_SHEN_ZIN_SU, 500.0f, true)) {
+                            _shenGUID = creature->GetGUID();
+                            creature->AI()->SetGUID(player->GetGUID());
+                            me->CastSpell(creature, 114888);
+                        }
+                    _events.ScheduleEvent(EVENT_SECOND_CONVERSATION + 1, Seconds(6));
+                    break;
+                case EVENT_SECOND_CONVERSATION + 1:
+                    if (Creature* aysa = ObjectAccessor::GetCreature(*me, _aysaGUID))
+                        aysa->AI()->Talk(4);
+                    _events.ScheduleEvent(EVENT_SECOND_CONVERSATION + 2, Seconds(4));
+                    break;
+                case EVENT_SECOND_CONVERSATION + 2:
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        if (Creature* shen = ObjectAccessor::GetCreature(*me, _shenGUID)) {
+                            me->CastSpell(shen, 114898);
+                            shen->AI()->SetData(52, 52);
+                        }
+                    _events.ScheduleEvent(EVENT_SECOND_CONVERSATION + 3, Seconds(10));
+                    break;
+                case EVENT_SECOND_CONVERSATION + 3:
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        if (Creature* shen = ObjectAccessor::GetCreature(*me, _shenGUID)) {
+                            me->CastSpell(shen, 106759);
+                            shen->AI()->SetData(53, 53);
+                        }
+                    _events.ScheduleEvent(EVENT_SECOND_CONVERSATION + 4, Seconds(5));
+                    break;
+                case EVENT_SECOND_CONVERSATION + 4:
+                    if (Creature* aysa = ObjectAccessor::GetCreature(*me, _aysaGUID))
+                        aysa->AI()->Talk(5);
+                    _events.ScheduleEvent(EVENT_SECOND_CONVERSATION + 5, Seconds(4));
+                    break;
+                case EVENT_SECOND_CONVERSATION + 5:
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        if (Creature* shen = ObjectAccessor::GetCreature(*me, _shenGUID)) {
+                            me->CastSpell(shen, 118571);
+                            shen->AI()->SetData(54, 54);
+                        }
+                    _events.ScheduleEvent(EVENT_SECOND_CONVERSATION + 6, Seconds(7));
+                    break;
+                case EVENT_SECOND_CONVERSATION + 6:
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        if (Creature* shen = ObjectAccessor::GetCreature(*me, _shenGUID)) {
+                            me->CastSpell(shen, 118571);
+                            shen->AI()->SetData(55, 55);
+                        }
+                    _events.ScheduleEvent(EVENT_SECOND_CONVERSATION + 7, Seconds(7));
+                    break;
+                case EVENT_SECOND_CONVERSATION + 7:
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        if (Creature* shen = ObjectAccessor::GetCreature(*me, _shenGUID)) {
+                            me->CastSpell(shen, 118572);
+                            shen->AI()->SetData(56, 56);
+                        }
+                    _events.ScheduleEvent(EVENT_SECOND_CONVERSATION + 8, Seconds(14));
+                    break;
+                case EVENT_SECOND_CONVERSATION + 8:
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        if (Creature* shen = ObjectAccessor::GetCreature(*me, _shenGUID)) {
+                            me->CastSpell(shen, 118571);
+                            shen->AI()->SetData(57, 57);
+                        }
+                    _events.ScheduleEvent(EVENT_SECOND_CONVERSATION + 9, Seconds(7));
+                    break;
+                case EVENT_SECOND_CONVERSATION + 9:
+                    if (Creature* aysa = ObjectAccessor::GetCreature(*me, _aysaGUID))
+                        aysa->AI()->Talk(6);
+                    break;
+                /* Guessing what the thorn might be */
+                case EVENT_THIRD_CONVERSATION:
+                    if (Creature* ji = ObjectAccessor::GetCreature(*me, _jiGUID))
+                        ji->AI()->Talk(3);
+                    _events.ScheduleEvent(EVENT_THIRD_CONVERSATION + 1, Seconds(5));
+                    break;
+                case EVENT_THIRD_CONVERSATION + 1:
+                    if (Creature* ji = ObjectAccessor::GetCreature(*me, _jiGUID))
+                        ji->AI()->Talk(4);
+                    _events.ScheduleEvent(EVENT_THIRD_CONVERSATION + 2, Seconds(5));
+                    break;
+                case EVENT_THIRD_CONVERSATION + 2:
+                    if (Creature* aysa = ObjectAccessor::GetCreature(*me, _aysaGUID))
+                        aysa->AI()->Talk(7);
+                    break;
+                /* Speaking about the thorn */
+                case EVENT_FORTH_CONVERSATION:
+                    if (Creature* ji = ObjectAccessor::GetCreature(*me, _jiGUID))
+                        ji->AI()->Talk(5);
+                    _events.ScheduleEvent(EVENT_FORTH_CONVERSATION + 1, Seconds(6));
+                    break;
+                case EVENT_FORTH_CONVERSATION + 1:
+                    if (Creature* aysa = ObjectAccessor::GetCreature(*me, _aysaGUID))
+                        aysa->AI()->Talk(8);
+                    _events.ScheduleEvent(EVENT_FORTH_CONVERSATION + 2, Seconds(6));
+                    break;
+                case EVENT_FORTH_CONVERSATION + 2:
+                    if (Creature* ji = ObjectAccessor::GetCreature(*me, _jiGUID))
+                        ji->AI()->Talk(6);
+                    _events.ScheduleEvent(EVENT_FORTH_CONVERSATION + 3, Seconds(6));
+                    break;
+                case EVENT_FORTH_CONVERSATION + 3:
+                    if (Creature* aysa = ObjectAccessor::GetCreature(*me, _aysaGUID))
+                        aysa->AI()->Talk(9);
+                    _events.ScheduleEvent(EVENT_FORTH_CONVERSATION + 4, Seconds(6));
+                    break;
+                case EVENT_FORTH_CONVERSATION + 4:
+                    if (Creature* aysa = ObjectAccessor::GetCreature(*me, _aysaGUID))
+                        aysa->AI()->Talk(10);
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    private:
+        EventMap _events;
+        ObjectGuid _playerGUID;
+        ObjectGuid _aysaGUID;
+        ObjectGuid _jiGUID;
+        ObjectGuid _shenGUID;
+        bool _waitBeforePath;
+        uint8 uiPoint;
+        bool FlyDisabled;
+        bool Fly;
+        bool FlyAway;
+        bool boarded;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_air_baloon_55649_AI(creature);
+    }
+};
+/* Hot Air Baloon End */
+
 class spell_summon_deep_sea_aggressor : public SpellScriptLoader
 {
 public:
@@ -2573,4 +3021,6 @@ void AddSC_the_wandering_isle()
     new spell_pandaren_faction_choice();
     new spell_faction_choice_trigger();
     new spell_balloon_exit_timer();
+    new npc_hot_air_baloon_55918();
+    new npc_air_baloon_55649();
 }
