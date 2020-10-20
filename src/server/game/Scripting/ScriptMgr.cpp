@@ -1532,6 +1532,10 @@ void ScriptMgr::OnGroupRateCalculation(float& rate, uint32 count, bool isRaid)
     FOREACH_SCRIPT(FormulaScript)->OnGroupRateCalculation(rate, count, isRaid);
 }
 
+void ScriptMgr::OnUpdateCraftSkill(Player* me, uint32 spelllevel, uint32 SkillId, uint32 craft_skill_gain, bool& result)
+{
+    FOREACH_SCRIPT(FormulaScript)->OnUpdateCraftSkill( me, spelllevel, SkillId, craft_skill_gain,  result);
+}
 #define SCR_MAP_BGN(M, V, I, E, C, T) \
     if (V->GetEntry() && V->GetEntry()->T()) \
     { \
@@ -2467,6 +2471,11 @@ void ScriptMgr::OnCooldownStart(Player* player, SpellInfo const* spellInfo, uint
 void ScriptMgr::OnChargeRecoveryTimeStart(Player* player, uint32 chargeCategoryId, int32& chargeRecoveryTime)
 {
     FOREACH_SCRIPT(PlayerScript)->OnChargeRecoveryTimeStart(player, chargeCategoryId, chargeRecoveryTime);
+}
+
+void ScriptMgr::OnPlayerReleasedGhost(Player* player)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnPlayerReleasedGhost(player);
 }
 
 void ScriptMgr::OnCompleteQuestChoice(Player* player, uint32 choiceId, uint32 responseId)

@@ -4415,6 +4415,8 @@ void Player::BuildPlayerRepop()
 
     // set and clear other
     SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_ANIM_TIER, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+
+    sScriptMgr->OnPlayerReleasedGhost(this);
 }
 
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
@@ -5444,7 +5446,7 @@ bool Player::UpdateCraftSkill(uint32 spellid)
         GetName().c_str(), GetGUID().ToString().c_str(), spellid);
 
     SkillLineAbilityMapBounds bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellid);
-
+    bool result = false;
     for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
     {
         if (_spell_idx->second->SkillLine)
@@ -5461,14 +5463,16 @@ bool Player::UpdateCraftSkill(uint32 spellid)
 
             uint32 craft_skill_gain = _spell_idx->second->NumSkillUps * sWorld->getIntConfig(CONFIG_SKILL_GAIN_CRAFTING);
 
-            return UpdateSkillPro(_spell_idx->second->SkillLine, SkillGainChance(SkillValue,
+            result = UpdateSkillPro(_spell_idx->second->SkillLine, SkillGainChance(SkillValue,
                 _spell_idx->second->TrivialSkillLineRankHigh,
                 (_spell_idx->second->TrivialSkillLineRankHigh + _spell_idx->second->TrivialSkillLineRankLow)/2,
                 _spell_idx->second->TrivialSkillLineRankLow),
                 craft_skill_gain);
+            sScriptMgr->OnUpdateCraftSkill(this, _spell_idx->second->MinSkillLineRank, _spell_idx->second->SkillLine, craft_skill_gain, result);
         }
     }
-    return false;
+    
+    return result;
 }
 
 bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator)
@@ -26642,13 +26646,6 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, AELootResult* aeResult/* 
         SendNotifyLootItemRemoved(loot->GetGUID(), lootSlot);
         currency->is_looted = true;
         --loot->unlootedCount;
-        return;
-    }
-
-    // dont allow protected item to be looted by someone else
-    if (!item->rollWinnerGUID.IsEmpty() && item->rollWinnerGUID != GetGUID())
-    {
-        SendLootRelease(GetLootGUID());
         return;
     }
 

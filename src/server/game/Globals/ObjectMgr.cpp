@@ -676,58 +676,6 @@ void ObjectMgr::LoadCreatureTemplateAddons()
     TC_LOG_INFO("server.loading", ">> Loaded %u creature template addons in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-void ObjectMgr::LoadCreatureSparringTemplate()
-{
-    uint32 oldMSTime = getMSTime();
-
-    //                                               0              1             2
-    QueryResult result = WorldDatabase.Query("SELECT AttackerEntry, VictimEntry, HealthLimitPct FROM creature_sparring_template");
-
-    if (!result)
-    {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 creature template sparring definitions. DB table `creature_sparring_template` is empty.");
-        return;
-    }
-
-    uint32 count = 0;
-    do
-    {
-        Field* fields = result->Fetch();
-
-        uint32 entry = fields[0].GetUInt32();
-        uint32 victim = fields[1].GetUInt32();
-        float healthPct = fields[2].GetFloat();
-
-        if (!sObjectMgr->GetCreatureTemplate(entry))
-        {
-            TC_LOG_ERROR("sql.sql", "Creature template (Entry: %u) does not exist but has a record in `creature_sparring_template`", entry);
-            continue;
-        }
-
-        if (!sObjectMgr->GetCreatureTemplate(victim))
-        {
-            TC_LOG_ERROR("sql.sql", "Creature template (Entry: %u) does not exist but has a record in `creature_sparring_template`", entry);
-            continue;
-        }
-
-        if (healthPct > 100.0f)
-        {
-            TC_LOG_ERROR("sql.sql", "Sparring entry (Entry: %u, Victim: %u) exceeds the health percentage limit. Setting to 100.", entry, victim);
-            healthPct = 100.0f;
-        }
-
-        if (healthPct <= 0.0f)
-        {
-            TC_LOG_ERROR("sql.sql", "Sparring entry (Entry: %u, Victim: %u) has a negative or too small health percentage. Setting to 0.1.", entry, victim);
-            healthPct = 0.1f;
-        }
-
-        _creatureSparringTemplateStore[entry].emplace_back(CreatureSparring(victim, healthPct));
-    } while (result->NextRow());
-
-    TC_LOG_INFO("server.loading", ">> Loaded %u creature sparring templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
-}
-
 void ObjectMgr::LoadCreatureScalingData()
 {
     uint32 oldMSTime = getMSTime();
@@ -2159,8 +2107,8 @@ void ObjectMgr::LoadCreatures()
                     int gx = (MAX_NUMBER_OF_GRIDS - 1) - gridCoord.x_coord;
                     int gy = (MAX_NUMBER_OF_GRIDS - 1) - gridCoord.y_coord;
 
-                    VMAP::LoadResult result = vmgr->existsMap((sWorld->GetDataPath() + "vmaps").c_str(), data.mapid, gx, gy);
-                    if (result != VMAP::LoadResult::Success)
+                    bool exists = vmgr->existsMap((sWorld->GetDataPath() + "vmaps").c_str(), data.mapid, gx, gy);
+                    if (!exists)
                         TC_LOG_ERROR("sql.sql", "Table `creature` has creature (GUID: " UI64FMTD " Entry: %u MapID: %u) spawned on a possible invalid position (X: %f Y: %f Z: %f)",
                             guid, data.id, data.mapid, data.posX, data.posY, data.posZ);
                 }
@@ -2521,8 +2469,8 @@ void ObjectMgr::LoadGameobjects()
                     int gx = (MAX_NUMBER_OF_GRIDS - 1) - gridCoord.x_coord;
                     int gy = (MAX_NUMBER_OF_GRIDS - 1) - gridCoord.y_coord;
 
-                    VMAP::LoadResult result = vmgr->existsMap((sWorld->GetDataPath() + "vmaps").c_str(), data.mapid, gx, gy);
-                    if (result != VMAP::LoadResult::Success)
+                    bool exists = vmgr->existsMap((sWorld->GetDataPath() + "vmaps").c_str(), data.mapid, gx, gy);
+                    if (!exists)
                         TC_LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: " UI64FMTD " Entry: %u MapID: %u) spawned on a possible invalid position (X: %f Y: %f Z: %f)",
                             guid, data.id, data.mapid, data.posX, data.posY, data.posZ);
                 }
@@ -5697,7 +5645,7 @@ void ObjectMgr::LoadInstanceTemplate()
 
     if (!result)
     {
-        TC_LOG_INFO("server.loading", ">> Loaded 0 instance templates. DB table `page_text` is empty!");
+        TC_LOG_INFO("server.loading", ">> Loaded 0 instance templates. DB table `instance_template` is empty!");
         return;
     }
 

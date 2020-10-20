@@ -2103,7 +2103,7 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
                 if (Unit* unit = (*itr)->ToUnit())
                 {
                     uint32 deficit = unit->GetMaxHealth() - unit->GetHealth();
-                    if ((deficit > maxHPDeficit || foundItr == tempTargets.end()) && target->IsWithinDist(unit, jumpRadius) && target->IsWithinLOSInMap(unit, VMAP::ModelIgnoreFlags::M2))
+                    if ((deficit > maxHPDeficit || foundItr == tempTargets.end()) && target->IsWithinDist(unit, jumpRadius) && target->IsWithinLOSInMap(unit))
                     {
                         foundItr = itr;
                         maxHPDeficit = deficit;
@@ -2118,10 +2118,10 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
             {
                 if (foundItr == tempTargets.end())
                 {
-                    if ((!isBouncingFar || target->IsWithinDist(*itr, jumpRadius)) && target->IsWithinLOSInMap(*itr, VMAP::ModelIgnoreFlags::M2))
+                    if ((!isBouncingFar || target->IsWithinDist(*itr, jumpRadius)) && target->IsWithinLOSInMap(*itr))
                         foundItr = itr;
                 }
-                else if (target->GetDistanceOrder(*itr, *foundItr) && target->IsWithinLOSInMap(*itr, VMAP::ModelIgnoreFlags::M2))
+                else if (target->GetDistanceOrder(*itr, *foundItr) && target->IsWithinLOSInMap(*itr))
                     foundItr = itr;
             }
         }
@@ -2187,6 +2187,7 @@ void Spell::prepareDataForTriggerSystem()
             // For other spells trigger procflags are set in Spell::DoAllEffectOnTarget
             // Because spell positivity is dependant on target
     }
+    m_hitMask = PROC_HIT_NONE;
 
     // Hunter trap spells - activation proc for Lock and Load, Entrapment and Misdirection
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER &&
@@ -2662,13 +2663,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             m_damage = damageInfo.damage;
 
             caster->DealSpellDamage(&damageInfo, true);
-
-            // Sparring Checks
-            if (Creature* me = caster->ToCreature())
-                if (Creature* target = damageInfo.target->ToCreature())
-                    if (me->CanSparWith(target))
-                        if (target->GetHealthPct() <= me->GetSparringHealthLimitPctFor(target))
-                            damageInfo.damage = 0;
 
             // Send log damage message to client
             caster->SendSpellNonMeleeDamageLog(&damageInfo);
@@ -5264,7 +5258,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint
                     if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell->Id))
                         losTarget = dynObj;
 
-                if (!m_spellInfo->HasAttribute(SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS) && !target->IsWithinLOSInMap(losTarget, VMAP::ModelIgnoreFlags::M2))
+                if (!m_spellInfo->HasAttribute(SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS) && !target->IsWithinLOSInMap(losTarget))
                     return SPELL_FAILED_LINE_OF_SIGHT;
             }
         }
@@ -5276,7 +5270,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint
         float x, y, z;
         m_targets.GetDstPos()->GetPosition(x, y, z);
 
-        if (!m_spellInfo->HasAttribute(SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS) && !m_caster->IsWithinLOS(x, y, z, VMAP::ModelIgnoreFlags::M2))
+        if (!m_spellInfo->HasAttribute(SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS) && !m_caster->IsWithinLOS(x, y, z))
             return SPELL_FAILED_LINE_OF_SIGHT;
     }
 
@@ -6984,7 +6978,7 @@ SpellCastResult Spell::CheckItems(uint32* param1 /*= nullptr*/, uint32* param2 /
                         151649, 151821, 151642, 151808, 151809, 151810, 151646, 151787, 151786, 151814, 151640, 151795, 151796,
                         151644, 151782, 151812, 151813, 151650, 151822, 151823, 151824, 151647, 151785, 151819, 151641, 151803,
                         151805, 151807, 144259, 150936, 151817, 151815, 151818, 151639, 151798, 151799, 151643, 151784, 151788,
-                        151811, 151636, 151783, 151800, 151801, 151802, 146666, 146667, 146668, 146669
+                        151811, 151636, 151783, 151800, 151801, 151802, 146666, 146667, 146668, 146669, 152626
                     };
 
                     bool ItemFound = false;
@@ -7250,7 +7244,7 @@ bool Spell::CheckEffectTarget(Unit const* target, SpellEffectInfo const* effect,
     /// @todo shit below shouldn't be here, but it's temporary
     //Check targets for LOS visibility
     if (losPosition)
-        return target->IsWithinLOS(losPosition->GetPositionX(), losPosition->GetPositionY(), losPosition->GetPositionZ(), VMAP::ModelIgnoreFlags::M2);
+        return target->IsWithinLOS(losPosition->GetPositionX(), losPosition->GetPositionY(), losPosition->GetPositionZ());
     else
     {
         // Get GO cast coordinates if original caster -> GO
@@ -7259,7 +7253,7 @@ bool Spell::CheckEffectTarget(Unit const* target, SpellEffectInfo const* effect,
             caster = m_caster->GetMap()->GetGameObject(m_originalCasterGUID);
         if (!caster)
             caster = m_caster;
-        if (target != m_caster && !target->IsWithinLOSInMap(caster, VMAP::ModelIgnoreFlags::M2))
+        if (target != m_caster && !target->IsWithinLOSInMap(caster))
             return false;
     }
 

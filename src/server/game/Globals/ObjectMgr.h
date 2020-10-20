@@ -489,8 +489,6 @@ struct ScriptParam
 typedef std::map<ObjectGuid, ObjectGuid> LinkedRespawnContainer;
 typedef std::unordered_map<uint32, CreatureTemplate> CreatureTemplateContainer;
 typedef std::unordered_map<uint32, CreatureAddon> CreatureTemplateAddonContainer;
-typedef std::vector<CreatureSparring> CreatureSparringList;
-typedef std::unordered_map<uint32, CreatureSparringList> CreatureSparringTemplateMap;
 typedef std::unordered_map<uint32, uint32> CreatureTemplateJournalContainer;
 typedef std::unordered_map<ObjectGuid::LowType, CreatureData> CreatureDataContainer;
 typedef std::unordered_map<ObjectGuid::LowType, CreatureAddon> CreatureAddonContainer;
@@ -1205,7 +1203,6 @@ class TC_GAME_API ObjectMgr
         void LoadCreatureTemplates();
         void LoadCreatureTemplateJournals();
         void LoadCreatureTemplateAddons();
-        void LoadCreatureSparringTemplate();
         void LoadScriptParams();
         void LoadCreatureTemplate(Field* fields);
         void LoadCreatureScalingData();
@@ -1459,19 +1456,6 @@ class TC_GAME_API ObjectMgr
         }
         GameObjectData& NewGOData(ObjectGuid::LowType guid) { return _gameObjectDataStore[guid]; }
         void DeleteGOData(ObjectGuid::LowType guid);
-
-        CreatureSparring const* GetCreatureSparringInfo(uint32 attackerEntry, uint32 victimEntry) const
-        {
-            auto itr = _creatureSparringTemplateStore.find(attackerEntry);
-            if (itr == _creatureSparringTemplateStore.end())
-                return nullptr;
-
-            for (CreatureSparring const& sparring : itr->second)
-                if (sparring.victimEntry == victimEntry)
-                    return &sparring;
-
-            return nullptr;
-        }
 
         TrinityString const* GetTrinityString(uint32 entry) const
         {
@@ -1768,7 +1752,6 @@ class TC_GAME_API ObjectMgr
         CreatureTemplateJournalContainer _creatureTemplateJournalStore;
         CreatureModelContainer _creatureModelStore;
         CreatureAddonContainer _creatureAddonStore;
-        CreatureSparringTemplateMap _creatureSparringTemplateStore;
         GameObjectAddonContainer _gameObjectAddonStore;
         GameObjectQuestItemMap _gameObjectQuestItemStore;
         CreatureQuestItemMap _creatureQuestItemStore;

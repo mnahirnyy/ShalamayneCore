@@ -534,7 +534,7 @@ inline void Battleground::_ProcessJoin(uint32 diff)
         SetRemainingTime(GetRemainingTime() - diff);
 	
 	//Honorable Medallion...
-    for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+    /*for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
         if (Player* player = ObjectAccessor::FindPlayer(itr->first))
         {
             if (!player->IsInWorld())
@@ -542,7 +542,7 @@ inline void Battleground::_ProcessJoin(uint32 diff)
 
             if (!player->HasAura(197912))
                 player->CastSpell(player, 197912, true);
-        }
+        }*/
 }
 
 inline void Battleground::_ProcessLeave(uint32 diff)
@@ -802,7 +802,7 @@ void Battleground::EndBattleground(uint32 winner)
             player->getHostileRefManager().deleteReferences();
         }
 		
-		if (isArena())
+		/*if (isArena())
         {
             //if (!player->GetChallenge())
             {
@@ -835,7 +835,7 @@ void Battleground::EndBattleground(uint32 winner)
         {
             if (team == winner)
                 player->KilledMonsterCredit(1127299); // Kill Credit for Win BG
-        }
+        }*/
 
         // remove temporary currency bonus auras before rewarding player
         player->RemoveAura(SPELL_HONORABLE_DEFENDER_25Y);
@@ -868,43 +868,37 @@ void Battleground::EndBattleground(uint32 winner)
         }
 
         // Reward winner team
-        if (!isArena())
+        if (team == winner)
         {
-            if (team == winner)
+            if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
             {
-                if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
+                UpdatePlayerScore(player, SCORE_BONUS_HONOR, GetBonusHonorFromKill(winnerKills));
+                if (!player->GetRandomWinner())
                 {
-                    UpdatePlayerScore(player, SCORE_BONUS_HONOR, GetBonusHonorFromKill(winnerKills));
-
-                    if (!player->GetRandomWinner())
-                    {
-                        player->SetRandomWinner(true);
-                        player->RewardHonor(player, 0, 300, false);
-                    }
-                }
-                else
-                {
-                    player->RewardHonor(player, 0, 300, false);
-                }
-
-                player->UpdateCriteria(CRITERIA_TYPE_WIN_BG, 1);
-                if (!guildAwarded)
-                {
-                    guildAwarded = true;
-                    if (ObjectGuid::LowType guildId = GetBgMap()->GetOwnerGuildId(player->GetBGTeam()))
-                    {
-                        if (Guild* guild = sGuildMgr->GetGuildById(guildId))
-                            guild->UpdateCriteria(CRITERIA_TYPE_WIN_BG, 1, 0, 0, NULL, player);
-                    }
+                    player->SetRandomWinner(true);
+                    // TODO: win honor xp
                 }
             }
             else
             {
-                if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
-                    player->RewardHonor(player, 0, 100, false);
-                else
-                    player->RewardHonor(player, 0, 50, false);
+                // TODO: loss honor xp
             }
+
+            player->UpdateCriteria(CRITERIA_TYPE_WIN_BG, 1);
+            if (!guildAwarded)
+            {
+                guildAwarded = true;
+                if (ObjectGuid::LowType guildId = GetBgMap()->GetOwnerGuildId(player->GetBGTeam()))
+                {
+                    if (Guild* guild = sGuildMgr->GetGuildById(guildId))
+                        guild->UpdateCriteria(CRITERIA_TYPE_WIN_BG, 1, 0, 0, NULL, player);
+                }
+            }
+        }
+        else
+        {
+            if (IsRandom() || BattlegroundMgr::IsBGWeekend(GetTypeID()))
+                UpdatePlayerScore(player, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loserKills));
         }
 
         player->ResetAllPowers();
@@ -1221,8 +1215,8 @@ void Battleground::AddOrSetPlayerToCorrectBgGroup(Player* player, uint32 team)
         }
     }
 	
-	if (!player->HasAura(197912))
-        player->CastSpell(player, 197912, true);
+	/*if (!player->HasAura(197912))
+        player->CastSpell(player, 197912, true);*/
 }
 
 // This method should be called when player logs into running battleground

@@ -23,6 +23,9 @@
 #include "GarrisonPackets.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "Creature.h"
+#include "SpellMgr.h"
+#include "SpellInfo.h"
 
 void WorldSession::HandleGetGarrisonInfo(WorldPackets::Garrison::GetGarrisonInfo& /*getGarrisonInfo*/)
 {
@@ -85,7 +88,16 @@ void WorldSession::HandleGarrisonOpenMissionNpc(WorldPackets::Garrison::Garrison
         return;
 
     GarrisonType garType = GARRISON_TYPE_CLASS_HALL; // Todo : differenciate depending of NPC
-
+    switch (garrisonOpenMissionNpcClient.NpcGUID.GetEntry())
+    {
+    case 80432:
+    case 81546:
+        garType = GARRISON_TYPE_GARRISON;
+        break;
+    default:
+        garType = GARRISON_TYPE_CLASS_HALL;
+        break;
+    }
     Garrison const* garrison = _player->GetGarrison(garType);
 
     if (!garrison)

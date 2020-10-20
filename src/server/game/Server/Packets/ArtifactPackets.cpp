@@ -29,7 +29,6 @@ void WorldPackets::Artifact::ArtifactAddPower::Read()
     _worldPacket >> ArtifactGUID;
     _worldPacket >> ForgeGUID;
     PowerChoices.resize(_worldPacket.read<uint32>());
-
     for (ArtifactPowerChoice& artifactPowerChoice : PowerChoices)
         _worldPacket >> artifactPowerChoice;
 }
@@ -66,7 +65,7 @@ WorldPacket const* WorldPackets::Artifact::ArtifactRespecConfirm::Write()
 WorldPacket const* WorldPackets::Artifact::ArtifactXpGain::Write()
 {
     _worldPacket << ArtifactGUID;
-    _worldPacket << Amount;
+    _worldPacket << uint64(Amount);
 
     return &_worldPacket;
 }

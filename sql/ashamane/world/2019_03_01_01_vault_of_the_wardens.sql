@@ -1097,24 +1097,6 @@ DELETE FROM `creature_text` WHERE `CreatureID` = 102543;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
 (102543, 0, 0, 'I live to serve.', 12, 0, 100, 0, 0, 55363, 0, 0, 'Felblade Assassin to Demon Hunter');
 
--- Fel Spreader SAI
-SET @FEL_SPREADER := 97142;
-UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@FEL_SPREADER;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@FEL_SPREADER AND `source_type`=0;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@FEL_SPREADER,0,0,1,73,0,100,0,0,0,0,0,11,191827,6,0,0,0,0,1,0,0,0,0,0,0,0,"Fel Spreader - On Spellclick - Cast 'Fel Spreader Destroyed'"),
-(@FEL_SPREADER,0,1,2,61,0,100,1,0,0,0,0,206,581,0,0,0,0,0,7,0,0,0,0,0,0,0,"Fel Spreader - On Spellclick Play Conversation"),
-(@FEL_SPREADER,0,2,3,61,0,100,0,0,0,0,0,11,207508,16,0,0,0,0,1,0,0,0,0,0,0,0,"Fel Spreader - On Spellclick - Cast 'Fel Spreader Explosion'"),
-(@FEL_SPREADER,0,3,0,61,0,100,0,0,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0,"Fel Spreader - On Spellclick - Despawn Instant");
-
--- Legion Communicator SAI
-SET @GO_LEGION_COMMUNICATOR := 244439;
-UPDATE `gameobject_template` SET `AIName`="SmartGameObjectAI" WHERE `entry`=@GO_LEGION_COMMUNICATOR;
-DELETE FROM `smart_scripts` WHERE `entryorguid`=@GO_LEGION_COMMUNICATOR AND `source_type`=1;
-INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@GO_LEGION_COMMUNICATOR,1,0,1,64,0,100,0,0,0,0,0,206,558,0,0,0,0,0,7,0,0,0,0,0,0,0,"Legion Communicator - On Gossip Hello - Play Conversation"),
-(@GO_LEGION_COMMUNICATOR,1,1,2,61,0,100,0,0,0,0,0,72,0,0,0,0,0,0,7,0,0,0,0,0,0,0,"Legion Communicator - On Gossip Hello - Close Gossip"); 
-
 -- Mardum Scripts
 UPDATE `creature_template` SET `ScriptName` = 'npc_brood_queen_tyranna' WHERE `entry` = 93802;
 UPDATE `creature` SET `ScriptName` = 'npc_kayn_tyranna_fight' WHERE `guid` = 20542609;

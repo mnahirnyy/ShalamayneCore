@@ -48,7 +48,7 @@
 #include "ScenarioMgr.h"
 #include "SpellMgr.h"
 #include "GridNotifiers.h"
-#include "CELLIMPL.h"
+#include "CellImpl.h"
 
 
 inline uint32 secsToTimeBitFields(time_t secs)

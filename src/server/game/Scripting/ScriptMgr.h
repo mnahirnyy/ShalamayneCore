@@ -313,6 +313,8 @@ class TC_GAME_API FormulaScript : public ScriptObject
 
         // Called when calculating the experience rate for group experience.
         virtual void OnGroupRateCalculation(float& /*rate*/, uint32 /*count*/, bool /*isRaid*/) { }
+        virtual void OnUpdateCraftSkill(Player* /*me*/, uint32 /*spelllevel*/, uint32 /*SkillId*/, uint32 /*craft_skill_gain*/, bool& /*result*/) { }
+
 };
 
 template<class TMap>
@@ -825,6 +827,9 @@ class TC_GAME_API PlayerScript : public UnitScript
         // Called when a charge recovery cooldown start for that player
         virtual void OnChargeRecoveryTimeStart(Player* /*player*/, uint32 /*chargeCategoryId*/, int32& /*chargeRecoveryTime*/) { }
 
+        // Called when a player released ghost
+        virtual void OnPlayerReleasedGhost(Player* /*player*/){ }
+
         virtual void OnCompleteQuestChoice(Player* /*player*/, uint32 /*choiceId*/, uint32 /*responseId*/) { }
 
 		// Called when a player UnsummonPetTemporary
@@ -1109,6 +1114,7 @@ class TC_GAME_API ScriptMgr
         void OnBaseGainCalculation(uint32& gain, uint8 playerLevel, uint8 mobLevel);
         void OnGainCalculation(uint32& gain, Player* player, Unit* unit);
         void OnGroupRateCalculation(float& rate, uint32 count, bool isRaid);
+        void OnUpdateCraftSkill(Player* me, uint32 spelllevel, uint32 SkillId, uint32 craft_skill_gain, bool& result);
 
     public: /* MapScript */
 
@@ -1271,6 +1277,7 @@ class TC_GAME_API ScriptMgr
         void OnPlayerChoiceResponse(Player* player, uint32 choiceId, uint32 responseId);
         void OnCooldownStart(Player* player, SpellInfo const* spellInfo, uint32 itemId, int32& cooldown, uint32& categoryId, int32& categoryCooldown);
         void OnChargeRecoveryTimeStart(Player* player, uint32 chargeCategoryId, int32& chargeRecoveryTime);
+        void OnPlayerReleasedGhost(Player* player);
         void OnCompleteQuestChoice(Player* player, uint32 choiceId, uint32 responseId);
 		void OnPlayerUnsummonPetTemporary(Player* player);
         void OnPlayerResummonPetTemporary(Player* player);

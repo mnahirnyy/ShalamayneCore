@@ -2153,8 +2153,8 @@ public:
                 if (m_newMael < 0)
                     m_newMael = 0;
                 caster->SetPower(POWER_MAELSTROM, m_newMael);
-                if (Player* player = caster->ToPlayer())
-                    player->SendPowerUpdate(POWER_MAELSTROM, m_newMael);
+                /*if (Player* player = caster->ToPlayer())
+                    player->SendPowerUpdate(POWER_MAELSTROM, m_newMael);*/
             }
         }
 

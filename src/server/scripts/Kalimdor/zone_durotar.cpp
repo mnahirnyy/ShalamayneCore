@@ -25,6 +25,7 @@
 #include "SpellInfo.h"
 #include "SpellScript.h"
 #include "PhasingHandler.h"
+#include "ObjectMgr.h"
 
 enum eQuest {
     QUEST_AUDIENCE_WARCHIEF = 40976,
@@ -250,6 +251,130 @@ public:
     }
 };
 
+/*######
+## npc_durotar_duelist
+## quest 44281
+######*/
+#define GOSSIP_LETS_DUEL "Let's duel."
+
+enum eDuelist
+{   
+    QUEST_TO_BE_PREPARED = 44281,
+    KILL_CREDIT_WARM_DUEL = 108722,
+    EVENT_DO_CAST = 1,
+    EVENT_STOP_DUEL = 2,
+    DATA_START_DUEL = 10,
+};
+
+std::map<uint32, uint32> const creatureAbilities
+{
+    { 113955,  172675 }, // Utona Wolfeye : Lighting Bolt
+    { 113951,  171884 }, // Sahale : Denounce
+    { 113947,  172769 }, // Maska : Mortal Strike
+    { 113545,  171764 }, // Dawn Merculus : Fireball
+    { 113961,  172028 }, // Pinkee Rizzo : Sinister Strike
+    { 113956,  171858 }, // Taela Shatterborne : Frostbolt
+    { 113952,  171957 }, // Aila Dourblade : Hemorrhage
+    { 113948,  172673 }, // Arienne Black : Holy Smite
+    { 113542,  11538 }, // Marius Sunshard : Frostbolt + Ice Barrier (33245)
+    { 113954,  171919 }, // Argonis Solheart : Crusader Strike
+    { 113544,  171777 }, // Neejala : Starfire
+    { 113950,  172779 }, // Lonan : Stormstrike
+    { 113546,  172673 }, // Yaalo : Holy Smite
+};
+
+class npc_durotar_duelist : public CreatureScript
+{
+public:
+    npc_durotar_duelist() : CreatureScript("npc_durotar_duelist") { }
+
+    struct npc_durotar_duelist_AI : public ScriptedAI {
+        npc_durotar_duelist_AI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() override
+        {
+            _events.Reset();
+            me->RestoreFaction();
+            me->SetReactState(REACT_DEFENSIVE);
+        }
+
+        void EnterCombat(Unit* who) override {
+            _events.ScheduleEvent(EVENT_DO_CAST, 1000);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (damage >= me->GetHealth())
+            {
+                damage = me->GetHealth() - 1;
+                _events.Reset();
+                me->RemoveAllAuras();
+                me->setFaction(35);
+                me->AttackStop();
+                attacker->AttackStop();
+                attacker->ClearInCombat();
+                attacker->ToPlayer()->KilledMonsterCredit(KILL_CREDIT_WARM_DUEL);
+                _events.ScheduleEvent(EVENT_STOP_DUEL, 1000);
+            }
+        }
+
+        void UpdateAI(uint32 diff) override {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent()) {
+                switch (eventId) {
+                    case EVENT_DO_CAST:
+                        DoCastVictim(creatureAbilities.at(me->GetEntry()));
+                        _events.RescheduleEvent(EVENT_DO_CAST, 4000);
+                        break;
+                    case EVENT_STOP_DUEL:
+                        me->Say("Fine duel.", LANG_UNIVERSAL, nullptr);
+                        me->GetMotionMaster()->MoveTargetedHome();
+                        break;
+                    default:
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+
+        void SetGUID(ObjectGuid guid, int32 /*id*/) override {
+            _playerGuid = guid;
+        }
+
+    private:
+        EventMap _events;
+        ObjectGuid _playerGuid = ObjectGuid::Empty;
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature) override {
+        if (player->GetQuestStatus(QUEST_TO_BE_PREPARED) == QUEST_STATUS_INCOMPLETE)
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, GOSSIP_LETS_DUEL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        SendGossipMenuFor(player, player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF + 1) {
+            creature->AI()->SetGUID(player->GetGUID());
+            creature->setFaction(FACTION_TEMPLATE_ENEMY_SPAR);
+            creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            creature->SetReactState(REACT_AGGRESSIVE);
+            creature->AI()->AttackStart(player);
+            CloseGossipMenuFor(player);
+        }
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const override {
+        return new npc_durotar_duelist_AI(creature);
+    }
+};
+
 void AddSC_durotar()
 {
     new npc_lazy_peon();
@@ -257,4 +382,5 @@ void AddSC_durotar()
     new npc_lady_sylvana_funeral();
     new scene_demons_among_them_horde();
     new PlayerScript_durotar_funeral();
+    new npc_durotar_duelist();
 }

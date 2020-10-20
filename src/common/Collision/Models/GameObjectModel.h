@@ -31,7 +31,6 @@ namespace VMAP
 {
     class WorldModel;
     struct AreaInfo;
-    enum class ModelIgnoreFlags : uint32;
 }
 
 class GameObject;
@@ -70,7 +69,7 @@ public:
     bool isCollisionEnabled() const { return _collisionEnabled; }
     bool isMapObject() const { return isWmo; }
 
-    bool intersectRay(G3D::Ray const& ray, float& maxDist, bool stopAtFirstHit, PhaseShift const& phaseShift, VMAP::ModelIgnoreFlags ignoreFlags) const;
+    bool intersectRay(G3D::Ray const& ray, float& maxDist, bool stopAtFirstHit, PhaseShift const& phaseShift) const;
     void intersectPoint(G3D::Vector3 const& point, VMAP::AreaInfo& info, PhaseShift const& phaseShift) const;
 
     static GameObjectModel* Create(std::unique_ptr<GameObjectModelOwnerBase> modelOwner, std::string const& dataPath);

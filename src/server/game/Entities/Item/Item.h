@@ -96,12 +96,12 @@ enum ItemForgedConstant : uint32
 
     BONUS_CACHE_MYTHIC                = 569,
     BONUS_CACHE_HEROIC                = 570,
-    BONUS_ITEM_T19_LEVEL_START        = 1472, // nitehold t19
+    BONUS_ITEM_T19_LEVEL_START        = 1472, // nighthold t19
     BONUS_ITEM_T19_EPIC               = 3514,
     BONUS_ITEM_T19_HEROIC             = 3516,
     BONUS_ITEM_T19_MYTHIC             = 3518,
 
-    BONUS_ITEM_T20_LEVEL_START        = 1482, // gs t20
+    BONUS_ITEM_T20_LEVEL_START        = 1482, // gearscore t20
     BONUS_ITEM_T20_EPIC               = 3561,
     BONUS_ITEM_T20_HEROIC             = 3562,
     BONUS_ITEM_T20_MYTHIC             = 3563,

@@ -32,7 +32,7 @@ class TC_GAME_API InstanceScenario : public Scenario
         void SaveToDB();
         void LoadInstanceData(uint32 instanceId);
 
-        void CompleteScenario() override;       
+        void CompleteScenario() override;
 
     protected:
         std::string GetOwnerInfo() const override;

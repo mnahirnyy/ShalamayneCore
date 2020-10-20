@@ -21,7 +21,6 @@
 #include "GameObjectModel.h"
 #include "Log.h"
 #include "MapTree.h"
-#include "ModelIgnoreFlags.h"
 #include "ModelInstance.h"
 #include "RegularGrid.h"
 #include "Timer.h"
@@ -143,7 +142,7 @@ struct DynamicTreeIntersectionCallback
 
     bool operator()(G3D::Ray const& r, GameObjectModel const& obj, float& distance)
     {
-        _didHit = obj.intersectRay(r, distance, true, _phaseShift, VMAP::ModelIgnoreFlags::Nothing);
+        _didHit = obj.intersectRay(r, distance, true, _phaseShift);
         return _didHit;
     }
 

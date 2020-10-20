@@ -437,9 +437,9 @@ DELETE FROM `spell_area` WHERE `area` = 7873 AND `spell` = 59074;
 UPDATE `creature` SET `ScriptName` = 'npc_maiev_shadowsong' WHERE `guid`= 20542899 AND `id` = 92718;
 UPDATE `creature_template` SET `ScriptName` = 'npc_illidari_felbat_94324' WHERE `entry` = 94324;
 UPDATE `creature_template` SET `ScriptName` = 'npc_illidari_felbat_99227' WHERE `entry` = 99227;
-DELETE FROM `creature` WHERE `guid` = 280000453;
+DELETE FROM `creature` WHERE `guid` = 280000452;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
-(280000453,94324,1220,8445,8445,0,0,0,0,-1,0,0,-845.698,4252.15,746.286,1.05337,300,0,0,87,0,0,0,0,0,0,0,'',26972);
+(280000452,94324,1220,8445,8445,0,0,0,0,-1,0,0,-845.698,4252.15,746.286,1.05337,300,0,0,87,0,0,0,0,0,0,0,'',26972);
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (99227, 94324);
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES
 (99227, 46598, 1, 0),

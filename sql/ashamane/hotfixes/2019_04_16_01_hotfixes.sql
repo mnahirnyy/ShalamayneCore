@@ -39,3 +39,13 @@ INSERT INTO `conversation_line` (`ID`, `BroadcastTextID`, `SpellVisualKitID`, `A
 (13028, 147340, 0, 500, 13029, 0, 0, 60, 60, 26972),
 (13029, 147341, 0, 500, 13030, 0, 0, 60, 60, 26972),
 (13030, 147342, 0, 500, 0, 0, 0, 60, 60, 26972);
+
+DELETE FROM `broadcast_text` WHERE `ID` IN (147343, 147344);
+INSERT INTO `broadcast_text` (`ID`, `Text`, `Text1`, `EmoteID1`, `EmoteID2`, `EmoteID3`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmotesID`, `LanguageID`, `Flags`, `ConditionID`, `SoundEntriesID1`, `SoundEntriesID2`, `VerifiedBuild`) VALUES
+(147343, 'That device you just destroyed helps stabilize the Legion\'s buildings.', 'That device you just destroyed helps stabilize the Legion\'s buildings.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55235, 0, 26972),
+(147344, 'See if there are others around the fortress.', 'See if there are others around the fortress.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55236, 0, 26972);
+
+DELETE FROM `conversation_line` WHERE `ID` IN (13031, 13032);
+INSERT INTO `conversation_line` (`ID`, `BroadcastTextID`, `SpellVisualKitID`, `AdditionalDuration`, `NextConversationLineID`, `AnimKitID`, `SpeechType`, `StartAnimation`, `EndAnimation`, `VerifiedBuild`) VALUES
+(13031, 147343, 0, 0, 13032, 0, 0, 60, 60, 26972),
+(13032, 147344, 0, 0, 0, 0, 0, 60, 60, 26972);

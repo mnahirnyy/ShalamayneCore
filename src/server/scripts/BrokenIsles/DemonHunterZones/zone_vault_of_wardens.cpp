@@ -1055,9 +1055,10 @@ enum eBastillax
     EVENT_FEL_ANNIHILATION = 0,
     EVENT_CRUSHING_SHADOWS = 1,
     EVENT_BLUR_OF_SHADOWS = 2,
-    SPELL_FEL_ANNIHILATION = 200007,
-    SPELL_CRUSHING_SHADOWS = 200027,
-    SPELL_BLUR_OF_SHADOWS = 200002,
+    SPELL_FEL_ANNIHILATION = 200007, // 5 + 35
+    SPELL_CRUSHING_SHADOWS = 200027, // 45
+    SPELL_BLUR_OF_SHADOWS = 200002, // 23 say
+    SPELL_3 = 200353,  // 16 + 50  say + summon
 };
 
 class npc_bastillax : public CreatureScript
@@ -1085,9 +1086,9 @@ public:
 
         void EnterCombat(Unit* /*who*/) override
         {
-            events.ScheduleEvent(EVENT_FEL_ANNIHILATION, urand(6000, 8000));
-            events.ScheduleEvent(EVENT_CRUSHING_SHADOWS, urand(10000, 12000));
-            events.ScheduleEvent(EVENT_BLUR_OF_SHADOWS, 3000);
+            events.RescheduleEvent(EVENT_FEL_ANNIHILATION, urand(4000, 6000));
+            events.RescheduleEvent(EVENT_CRUSHING_SHADOWS, 45000);
+            events.RescheduleEvent(EVENT_BLUR_OF_SHADOWS, 23000);
         }
 
         void UpdateAI(uint32 diff) override
@@ -1102,20 +1103,41 @@ public:
                     if (Unit* target = me->GetVictim())
                         me->CastSpell(me, SPELL_FEL_ANNIHILATION, true);
 
-                    events.ScheduleEvent(EVENT_FEL_ANNIHILATION, urand(8000, 10000));
+                    events.RescheduleEvent(EVENT_FEL_ANNIHILATION, 35000);
                     break;
                 case EVENT_CRUSHING_SHADOWS:
                     if (Unit* target = me->GetVictim())
                         me->CastSpell(target, SPELL_CRUSHING_SHADOWS, true);
 
-                    events.ScheduleEvent(EVENT_CRUSHING_SHADOWS, 6000);
+                    events.RescheduleEvent(EVENT_CRUSHING_SHADOWS, 45000);
                     break;
                 case EVENT_BLUR_OF_SHADOWS:
                     if (Unit* target = me->GetVictim())
                         me->CastSpell(target, SPELL_BLUR_OF_SHADOWS, true);
 
-                    events.ScheduleEvent(EVENT_BLUR_OF_SHADOWS, 6000);
+                    events.RescheduleEvent(EVENT_BLUR_OF_SHADOWS, 23000);
                     break;
+                /*case EVENT_3:
+                    DoCast(SPELL_3);
+                    Talk(1);
+                    for (uint8 i = 0; i < 4; i++)
+                    {
+                        if (Creature* add = me->SummonCreature(101505, 4221.51f + irand(-3, 3), -627.92f + irand(-3, 3), 255.12f, 3.10f))
+                        {
+                            add->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+                            DoZoneInCombat(add, 50.0f);
+                        }
+                    }
+                    for (uint8 i = 0; i < 4; i++)
+                    {
+                        if (Creature* add = me->SummonCreature(101505, 4146.97f + irand(-3, 3), -626.29f + irand(-3, 3), 255.12f, 6.27f))
+                        {
+                            add->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+                            DoZoneInCombat(add, 50.0f);
+                        }
+                    }
+                    events.RescheduleEvent(EVENT_3, 50000);
+                    break;*/
                 }
             }
 
