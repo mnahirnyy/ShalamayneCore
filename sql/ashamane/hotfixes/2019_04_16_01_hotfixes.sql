@@ -1,5 +1,7 @@
-DELETE FROM `broadcast_text` WHERE `ID` BETWEEN 147324 AND 147331;
+DELETE FROM `broadcast_text` WHERE `ID` BETWEEN 147322 AND 147331;
 INSERT INTO `broadcast_text` (`ID`, `Text`, `Text1`, `EmoteID1`, `EmoteID2`, `EmoteID3`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmotesID`, `LanguageID`, `Flags`, `ConditionID`, `SoundEntriesID1`, `SoundEntriesID2`, `VerifiedBuild`) VALUES
+(147322, 'That device you just destroyed helps stabilize the Legion\'s buildings.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55235, 0, 27404),
+(147323, 'See if there are others around the fortress.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55236, 0, 27404),
 (147324, '<Saurfang looks you up and down with narrowed eyes.>\n\nWhen Khadgar claimed we would be seeing demon hunters today, I laughed in his face. When he said I should hear you out, I laught louder.\n\nAnd yet, here you are.\n\nI will permit you alone to enter the Hold. You will leave your weapons and companions at the door. You will not speak until spoken to.\n\nOne false move and my axe will end you.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27404),
 (147325, 'You are the demon hunters who escaped the Vault of the Wardens?\n\nYou draw your very power from those who seek to destroy our world. Tell me, why should I possibly trust you?', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27404),
 (147326, 'We are indomitable. We are Illidari.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27404),
@@ -34,18 +36,12 @@ INSERT INTO `broadcast_text` (`ID`, `Text`, `Text1`, `EmoteID1`, `EmoteID2`, `Em
 (147341, '', 'The situation is more dire than we knew. The demons have already infested the surrounding isles.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64709, 0, 26972),
 (147342, '', 'We must act now, or I fear the situation will become... unsalvageable.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 64710, 0, 26972);
 
-DELETE FROM `conversation_line` WHERE `ID` IN (13028, 13029, 13030);
+DELETE FROM `conversation_line` WHERE `ID` BETWEEN 13028 AND 13030;
 INSERT INTO `conversation_line` (`ID`, `BroadcastTextID`, `SpellVisualKitID`, `AdditionalDuration`, `NextConversationLineID`, `AnimKitID`, `SpeechType`, `StartAnimation`, `EndAnimation`, `VerifiedBuild`) VALUES
 (13028, 147340, 0, 500, 13029, 0, 0, 60, 60, 26972),
 (13029, 147341, 0, 500, 13030, 0, 0, 60, 60, 26972),
 (13030, 147342, 0, 500, 0, 0, 0, 60, 60, 26972);
-
-DELETE FROM `broadcast_text` WHERE `ID` IN (147343, 147344);
-INSERT INTO `broadcast_text` (`ID`, `Text`, `Text1`, `EmoteID1`, `EmoteID2`, `EmoteID3`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmotesID`, `LanguageID`, `Flags`, `ConditionID`, `SoundEntriesID1`, `SoundEntriesID2`, `VerifiedBuild`) VALUES
-(147343, 'That device you just destroyed helps stabilize the Legion\'s buildings.', 'That device you just destroyed helps stabilize the Legion\'s buildings.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55235, 0, 26972),
-(147344, 'See if there are others around the fortress.', 'See if there are others around the fortress.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55236, 0, 26972);
-
-DELETE FROM `conversation_line` WHERE `ID` IN (13031, 13032);
+DELETE FROM `conversation_line` WHERE `ID` BETWEEN 13019 AND 13020;
 INSERT INTO `conversation_line` (`ID`, `BroadcastTextID`, `SpellVisualKitID`, `AdditionalDuration`, `NextConversationLineID`, `AnimKitID`, `SpeechType`, `StartAnimation`, `EndAnimation`, `VerifiedBuild`) VALUES
-(13031, 147343, 0, 0, 13032, 0, 0, 60, 60, 26972),
-(13032, 147344, 0, 0, 0, 0, 0, 60, 60, 26972);
+(13019, 147322, 0, 0, 13020, 0, 0, 60, 60, 26972),
+(13020, 147323, 0, 500, 0, 0, 0, 60, 60, 26972);

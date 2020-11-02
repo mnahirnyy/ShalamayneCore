@@ -1107,7 +1107,7 @@ UPDATE `creature` SET `spawntimesecs` = 300 WHERE `guid` = 20542608;
 
 DELETE FROM `creature_text` WHERE `CreatureID` = 93802;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
-(93802, 0, 0, '$n, You and your demon hunters are nothing.', 12, 0, 100, 0, 3000, 55363, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),
+(93802, 0, 0, '$p, You and your demon hunters are nothing.', 12, 0, 100, 0, 3000, 55363, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),
 (93802, 1, 0, 'The keystone was entrusted to me by Sargeras himself. You will not have it!', 12, 0, 100, 0, 4000, 55065, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),
 (93802, 2, 0, 'None can resist my kiss.', 14, 0, 100, 0, 0, 55068, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),
 (93802, 3, 0, 'Come forth, my children. Feast upon our enemies.', 14, 0, 100, 0, 0, 55069, 0, 0, 'Brood Queen Tyranna to Demon Hunter'),

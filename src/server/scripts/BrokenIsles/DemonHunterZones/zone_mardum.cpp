@@ -162,7 +162,7 @@ public:
 
     void OnSceneStart(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) override
     {
-        player->AddDelayedConversation(3000, 705);
+        player->AddDelayedConversation(2000, 705);
     }
 
     void OnSceneComplete(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) override
@@ -928,7 +928,7 @@ public:
     enum eSevis {
         SPELL_SACRIFICING_SEVIS_BRIGHTFLAME = 196731,
         SPELL_SEVIS_SACRIFICE_ME = 196735,
-        SPELL_ANQUISHED_SOUL = 200521, // Well of Souls Visual
+        SPELL_ANQUISHED_SOUL = 203789, // Well of Souls Visual
         CREATURE_TEXT_1 = 0, // We have a huge problem here.
         CREATURE_TEXT_2 = 1, // It has been... an honor.
         CREATURE_TEXT_3 = 2, // Your sacrifice will NOT be in vain!
@@ -936,6 +936,7 @@ public:
         EVENT_SACRIFICE_PLAYER = 2,
         DATA_SACRIFICE_SEVIS = 10,
         DATA_SACRIFICE_PLAYER = 11,
+        NPC_PORTAL_BUNNY = 24021
     };
 
     struct npc_mardum_sevis_brightflame_shivarra_AI : public ScriptedAI
@@ -968,7 +969,8 @@ public:
                     me->SetRespawnDelay(60);
                     me->AI()->Talk(CREATURE_TEXT_2);
                     if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGuid)) {
-                        me->CastSpell(me, SPELL_ANQUISHED_SOUL, true);
+                        if (Creature* bunny = me->FindNearestCreature(NPC_PORTAL_BUNNY, me->GetVisibilityRange(), true))
+                            player->CastSpell(bunny, SPELL_ANQUISHED_SOUL, true);
                     }
                     me->KillSelf();
                     break;
@@ -976,7 +978,8 @@ public:
                     me->AI()->Talk(CREATURE_TEXT_3);
                     if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGuid)) {
                         player->KillSelf(false);
-                        me->CastSpell(player, SPELL_ANQUISHED_SOUL, true);
+                        if (Creature* bunny = me->FindNearestCreature(NPC_PORTAL_BUNNY, me->GetVisibilityRange(), true))
+                            me->CastSpell(bunny, SPELL_ANQUISHED_SOUL, true);
                     }
                     break;
                 default:
@@ -1576,61 +1579,98 @@ public:
     }
 };
 
-// Freeing Battlelord Gaardoun (97459) - Spell 191481
-class spell_freeing_gaardoun : public SpellScriptLoader
+// 97459
+class npc_mardum_gaardoun : public CreatureScript
 {
 public:
-    spell_freeing_gaardoun() : SpellScriptLoader("spell_freeing_gaardoun") { }
+    npc_mardum_gaardoun() : CreatureScript("npc_mardum_gaardoun") { }
 
-    class spell_freeing_gaardoun_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_freeing_gaardoun_SpellScript);
-
-        enum eSpellData
-        {
-            NPC_KING_VORAS = 97059,
-            SPELL_WEBBED = 191989,
-            SAY_1 = 1,
-            SAY_2 = 2,
-        };
-
-        void HandleScriptEffect(SpellEffIndex effIndex)
-        {
-            // PreventHitDefaultEffect(EFFECT_0);
-
-            if (Unit* caster = GetCaster())
-            {
-                Player *player = caster->ToPlayer();
-
-                if (!player)
-                    return;
-
-                if (Unit * target = GetHitUnit())
-                {
-                    target->ToCreature()->AI()->Talk(1);
-
-                    if (target->HasAura(SPELL_WEBBED))
-                        target->RemoveAura(SPELL_WEBBED);
-
-                    if (Creature* voras = target->FindNearestCreature(NPC_KING_VORAS, target->GetVisibilityRange(), true))
-                    {   
-                        target->GetAI()->AttackStart(voras);
-                        target->GetAI()->DoCastVictim(198258);
-                        target->GetAI()->DoMeleeAttackIfReady();
-                    }
-                }
-            }
-        }
-
-        void Register() override
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_freeing_gaardoun_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
-        }
+    enum eData {
+        ABILITY_BATTLE_SHOUT = 198258,
+        ABILITY_BRUTAL_STRIKE = 198259,
+        EVENT_SHOUT = 1,
+        EVENT_STRIKE = 2,
+        EVENT_REMOVE_AURA = 3,
+        EVENT_FREE = 4,
+        EVENT_GO_OUT = 5,
+        SPELL_WEBBED = 191989,
+        NPC_KING_VORAS = 97059,
     };
 
-    SpellScript* GetSpellScript() const override
+    struct npc_mardum_gaardoun_AI : public ScriptedAI
     {
-        return new spell_freeing_gaardoun_SpellScript();
+        npc_mardum_gaardoun_AI(Creature* creature) : ScriptedAI(creature) { Initialize(); }
+
+        void Initialize() {}
+
+        void Reset() override {
+            Initialize();
+            events.Reset();
+        }
+
+        void OnSpellClick(Unit* clicker, bool& result) override
+        {
+            events.ScheduleEvent(EVENT_REMOVE_AURA, 2000);
+        }
+
+        void EnterCombat(Unit* who) override
+        {
+            events.ScheduleEvent(EVENT_SHOUT, 2s);
+            events.ScheduleEvent(EVENT_STRIKE, 9s);
+        }
+
+        void JustReachedHome() override {
+            events.ScheduleEvent(EVENT_FREE, 2000);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_REMOVE_AURA:
+                    me->RemoveAurasDueToSpell(SPELL_WEBBED);
+                    if (Creature* voras = me->FindNearestCreature(NPC_KING_VORAS, me->GetVisibilityRange(), true))
+                        me->GetAI()->AttackStart(voras);
+                    else
+                        events.ScheduleEvent(EVENT_FREE, 2000);
+                    break;
+                case EVENT_FREE:
+                    Talk(1);
+                    events.ScheduleEvent(EVENT_GO_OUT, 3000);
+                    break;
+                case EVENT_GO_OUT:
+                    Talk(2);
+                    float x, y, z;
+                    me->GetClosePoint(x, y, z, me->GetObjectSize() / 3, 50.0f);
+                    me->GetMotionMaster()->MovePoint(0, x, y, z);
+                    me->DespawnOrUnsummon(5s);
+                    break;
+                case EVENT_SHOUT:
+                    DoCast(ABILITY_BATTLE_SHOUT);
+                    events.RescheduleEvent(EVENT_SHOUT, 15s);
+                    break;
+                case EVENT_STRIKE:
+                    DoCast(ABILITY_BRUTAL_STRIKE);
+                    events.RescheduleEvent(EVENT_STRIKE, 18s);
+                    break;
+                }
+            }
+
+            if (UpdateVictim())
+                DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_mardum_gaardoun_AI(creature);
     }
 };
 
@@ -1929,7 +1969,7 @@ public:
 
     enum eStheno
     {
-        ABILITY_BUBBLE_SHIELD = 200884,
+        ABILITY_BUBBLE_SHIELD = 224717,
         ABILITY_HEALING_WAVE = 197744,
         SAY_ON_LOS = 0,
         EVENT_SHIELD = 1,
@@ -2015,6 +2055,13 @@ class spell_destroying_stabilizer : public SpellScriptLoader
 public:
     spell_destroying_stabilizer() : SpellScriptLoader("spell_destroying_stabilizer") { }
 
+    enum eData {
+        FIRST_STABILIZER_DESTROYED_CREDIT = 97409,
+        STABILIZER_DESTROYED_CREDIT = 101947,
+        QUEST_THEIR_NUMBERS_ARE_LEGION = 38819,
+        JACE_CONVERSATION = 4601,
+    };
+
     class spell_destroying_stabilizer_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_destroying_stabilizer_SpellScript);
@@ -2034,14 +2081,20 @@ public:
 
                 if (Unit * target = GetHitUnit())
                 {
-                    // target->DestroyForPlayer(player);
-                    player->KilledMonsterCredit(target->GetEntry());
+                    if (player->GetReqKillOrCastCurrentCount(QUEST_THEIR_NUMBERS_ARE_LEGION, FIRST_STABILIZER_DESTROYED_CREDIT) == 0
+                        && player->GetQuestStatus(QUEST_THEIR_NUMBERS_ARE_LEGION) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        player->KilledMonsterCredit(FIRST_STABILIZER_DESTROYED_CREDIT, ObjectGuid::Empty);
+                        Conversation* conversation = new Conversation;
+                        if (!conversation->CreateConversation(JACE_CONVERSATION, player, player->GetPosition(), { player->GetGUID() }))
+                            delete conversation;
+                    }
+                    else {
+                        player->KilledMonsterCredit(STABILIZER_DESTROYED_CREDIT, ObjectGuid::Empty);
+                    }
 
-                    Conversation* conversation = new Conversation;
-                    if (!conversation->CreateConversation(6802, player, player->GetPosition(), { player->GetGUID() }))
-                        delete conversation;
-
-                    target->HandleEmoteCommand(EMOTE_STATE_CUSTOM_SPELL_10);
+                    // target->HandleEmoteCommand(EMOTE_ONESHOT_DEATH);
+                    target->PlayOneShotAnimKitId(ANIM_FLY_DESTROY);
                     target->ToCreature()->DespawnOrUnsummon(2s);
                 }
             }
@@ -2056,6 +2109,64 @@ public:
     SpellScript* GetSpellScript() const override
     {
         return new spell_destroying_stabilizer_SpellScript();
+    }
+};
+
+// Destroying Soul Harvester - Spell 192252
+class spell_destroying_soulharvester : public SpellScriptLoader
+{
+public:
+    spell_destroying_soulharvester() : SpellScriptLoader("spell_destroying_soulharvester") { }
+
+    enum eData {
+        FIRST_HARVESTER_DESTROYED_CREDIT = 97383,
+        HARVESTER_DESTROYED_CREDIT = 97382,
+        QUEST_THEIR_NUMBERS_ARE_LEGION = 38819,
+    };
+
+    class spell_destroying_soulharvester_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_destroying_soulharvester_SpellScript);
+
+        enum eSpellData {};
+
+        void HandleScriptEffect(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(EFFECT_0);
+
+            if (Unit* caster = GetCaster())
+            {
+                Player *player = caster->ToPlayer();
+
+                if (!player)
+                    return;
+
+                if (Unit * target = GetHitUnit())
+                {
+                    if (player->GetReqKillOrCastCurrentCount(QUEST_THEIR_NUMBERS_ARE_LEGION, FIRST_HARVESTER_DESTROYED_CREDIT) == 0
+                        && player->GetQuestStatus(QUEST_THEIR_NUMBERS_ARE_LEGION) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        player->KilledMonsterCredit(FIRST_HARVESTER_DESTROYED_CREDIT, ObjectGuid::Empty);
+                    }
+                    else {
+                        player->KilledMonsterCredit(HARVESTER_DESTROYED_CREDIT, ObjectGuid::Empty);
+                    }
+
+                    target->HandleEmoteCommand(EMOTE_STATE_DEAD);
+                    target->ToCreature()->DespawnOrUnsummon(2s);
+                }
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_destroying_soulharvester_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_destroying_soulharvester_SpellScript();
     }
 };
 
@@ -2116,7 +2227,7 @@ public:
 
     enum eBombardment {
         SPELL_FROST_PORTAL_BEAM = 70684,
-        SPELL_FROST_BEAM = 232279,
+        SPELL_FROST_BEAM = 99490,
         SPELL_DEVASTATOR_FROST_STATE = 191568,
         SPELL_KNOCKBACK_FROM_DEVASTATOR = 198908,
         SPELL_PLANT_BOMB = 251112,
@@ -2163,7 +2274,7 @@ public:
                             targ_1->GetScheduler().Schedule(Seconds(3), [](TaskContext context)
                             {
                                 if (Creature* targetEntry = GetContextUnit()->FindNearestCreature(93762, 25.0f, true))
-                                    GetContextUnit()->CastSpell(targetEntry, 184432, false);
+                                    GetContextUnit()->CastSpell(targetEntry, SPELL_FROST_BEAM, false);
                             });
                             targ_1->GetScheduler().Schedule(Seconds(8), [](TaskContext context)
                             {
@@ -2177,7 +2288,7 @@ public:
                             targ_2->GetScheduler().Schedule(Seconds(3), [](TaskContext context)
                             {
                                 if (Creature* targetEntry = GetContextUnit()->FindNearestCreature(93762, 25.0f, true))
-                                    GetContextUnit()->CastSpell(targetEntry, 184432, false);
+                                    GetContextUnit()->CastSpell(targetEntry, 197751, false);
                             });
                             targ_2->GetScheduler().Schedule(Seconds(8), [](TaskContext context)
                             {
@@ -2191,7 +2302,7 @@ public:
                             targ_3->GetScheduler().Schedule(Seconds(3), [](TaskContext context)
                             {
                                 if (Creature* targetEntry = GetContextUnit()->FindNearestCreature(93762, 25.0f, true))
-                                    GetContextUnit()->CastSpell(targetEntry, 184432, false);
+                                    GetContextUnit()->CastSpell(targetEntry, SPELL_FROST_BEAM, false);
                             });
                             targ_3->GetScheduler().Schedule(Seconds(8), [](TaskContext context)
                             {
@@ -2205,7 +2316,7 @@ public:
                             targ_4->GetScheduler().Schedule(Seconds(3), [](TaskContext context)
                             {
                                 if (Creature* targetEntry = GetContextUnit()->FindNearestCreature(93762, 25.0f, true))
-                                    GetContextUnit()->CastSpell(targetEntry, 184432, false);
+                                    GetContextUnit()->CastSpell(targetEntry, SPELL_FROST_BEAM, false);
                             });
                             targ_4->GetScheduler().Schedule(Seconds(8), [](TaskContext context)
                             {
@@ -2478,224 +2589,25 @@ public:
 };
 
 // Brood Quieen Tyranna Script
-enum TyrannaFightData
+enum eTyrannaAttacker
 {
     DATA_TYRANNA_DEATH = 1,
-};
-
-enum TyrannaFightTexts
-{
     TEXT_DEATH = 0,
-};
-
-enum TyrannaFightMisc
-{
     BROOD_QUEEN_TYRANNA = 93802,
 };
 
 // Kayn: 20542609 (Entry: 97244)
-class npc_kayn_tyranna_fight : public CreatureScript
-{
-public:
-    npc_kayn_tyranna_fight() : CreatureScript("npc_kayn_tyranna_fight") { }
-
-    struct npc_kayn_tyranna_fightAI : public ScriptedAI
-    {
-        npc_kayn_tyranna_fightAI(Creature* creature) : ScriptedAI(creature) {
-            me->SetReactState(REACT_DEFENSIVE);
-        }
-
-        void MoveInLineOfSight(Unit* who) override
-        {
-            if (who->IsPlayer())
-                if (Creature* creature = me->FindNearestCreature(BROOD_QUEEN_TYRANNA, me->GetVisibilityRange(), true))
-                    AttackStart(creature);
-        }
-
-        void EnterCombat(Unit* who) override
-        {
-            who->GetAI()->AttackStart(me);
-        }
-
-        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
-        {
-            if (HealthAbovePct(75))
-                damage = urand(1, 2);
-            else
-                me->SetHealth(me->GetMaxHealth() * 0.85f);
-        }
-
-        void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override {}
-
-        void SetData(uint32 id, uint32 /*value*/) override
-        {
-            switch (id)
-            {
-            case DATA_TYRANNA_DEATH:
-                Talk(TEXT_DEATH);
-                EnterEvadeMode(EVADE_REASON_OTHER);
-                break;
-            }
-        }
-
-        void JustReachedHome() override {}
-
-        void UpdateAI(uint32 diff) override
-        {
-            _events.Update(diff);
-
-            // while loop goes here
-
-            DoMeleeAttackIfReady();
-        }
-
-    private:
-        EventMap _events;
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_kayn_tyranna_fightAI(creature);
-    }
-};
-
 // Allari: 20542497 (Entry: 97962)
-class npc_allari_tyranna_fight : public CreatureScript
-{
-public:
-    npc_allari_tyranna_fight() : CreatureScript("npc_allari_tyranna_fight") { }
-
-    struct npc_allari_tyranna_fightAI : public ScriptedAI
-    {
-        npc_allari_tyranna_fightAI(Creature* creature) : ScriptedAI(creature) {
-            me->SetReactState(REACT_DEFENSIVE);
-        }
-
-        void MoveInLineOfSight(Unit* who) override
-        {
-            if (who->IsPlayer())
-                if (Creature* creature = me->FindNearestCreature(BROOD_QUEEN_TYRANNA, me->GetVisibilityRange(), true))
-                    AttackStart(creature);
-        }
-
-        void EnterCombat(Unit* who) override
-        {
-            who->GetAI()->AttackStart(me);
-        }
-
-        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
-        {
-            if (HealthAbovePct(75))
-                damage = urand(1, 2);
-            else
-                me->SetHealth(me->GetMaxHealth() * 0.85f);
-        }
-
-        void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override {}
-
-        void SetData(uint32 id, uint32 /*value*/) override
-        {
-            switch (id)
-            {
-            case DATA_TYRANNA_DEATH:
-                EnterEvadeMode(EVADE_REASON_OTHER);
-                break;
-            }
-        }
-
-        void JustReachedHome() override {}
-
-        void UpdateAI(uint32 diff) override
-        {
-            _events.Update(diff);
-
-            // while loop goes here
-
-            DoMeleeAttackIfReady();
-        }
-
-    private:
-        EventMap _events;
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_allari_tyranna_fightAI(creature);
-    }
-};
-
 // Jace: 20542610 (Entry: 97959)
-class npc_jace_tyranna_fight : public CreatureScript
-{
-public:
-    npc_jace_tyranna_fight() : CreatureScript("npc_jace_tyranna_fight") { }
-
-    struct npc_jace_tyranna_fightAI : public ScriptedAI
-    {
-        npc_jace_tyranna_fightAI(Creature* creature) : ScriptedAI(creature) {
-            me->SetReactState(REACT_DEFENSIVE);
-        }
-
-        void MoveInLineOfSight(Unit* who) override
-        {
-            if (who->IsPlayer())
-                if (Creature* creature = me->FindNearestCreature(BROOD_QUEEN_TYRANNA, me->GetVisibilityRange(), true))
-                    AttackStart(creature);
-        }
-
-        void EnterCombat(Unit* who) override
-        {
-            who->GetAI()->AttackStart(me);
-        }
-
-        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
-        {
-            if (HealthAbovePct(75))
-                damage = urand(1, 2);
-            else
-                me->SetHealth(me->GetMaxHealth() * 0.85f);
-        }
-
-        void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override {}
-
-        void SetData(uint32 id, uint32 /*value*/) override
-        {
-            switch (id)
-            {
-            case DATA_TYRANNA_DEATH:
-                EnterEvadeMode(EVADE_REASON_OTHER);
-                break;
-            }
-        }
-
-        void JustReachedHome() override {}
-
-        void UpdateAI(uint32 diff) override
-        {
-            _events.Update(diff);
-
-            DoMeleeAttackIfReady();
-        }
-
-    private:
-        EventMap _events;
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_jace_tyranna_fightAI(creature);
-    }
-};
-
 // Korvas: 20542498 (Entry: 98712)
-class npc_korvas_tyranna_fight : public CreatureScript
+class npc_tyranna_attacker : public CreatureScript
 {
 public:
-    npc_korvas_tyranna_fight() : CreatureScript("npc_korvas_tyranna_fight") { }
+    npc_tyranna_attacker() : CreatureScript("npc_tyranna_attacker") { }
 
-    struct npc_korvas_tyranna_fightAI : public ScriptedAI
+    struct npc_tyranna_attacker_AI : public ScriptedAI
     {
-        npc_korvas_tyranna_fightAI(Creature* creature) : ScriptedAI(creature) {
+        npc_tyranna_attacker_AI(Creature* creature) : ScriptedAI(creature) {
             me->SetReactState(REACT_DEFENSIVE);
         }
 
@@ -2726,6 +2638,9 @@ public:
             switch (id)
             {
             case DATA_TYRANNA_DEATH:
+                if (me->GetEntry() == 97244) {
+                    Talk(TEXT_DEATH);
+                }
                 EnterEvadeMode(EVADE_REASON_OTHER);
                 break;
             }
@@ -2746,44 +2661,32 @@ public:
 
     CreatureAI* GetAI(Creature* creature) const override
     {
-        return new npc_korvas_tyranna_fightAI(creature);
+        return new npc_tyranna_attacker_AI(creature);
     }
 };
 
-enum TyrannaTexts
+enum eTyranna
 {
-    TEXT_START_COMBAT = 0,
-    TEXT_KEYSTONE = 1,
-    TEXT_KISS = 2,
-    TEXT_CHILDREN = 3,
-    TEXT_TYRANNA_DEATH = 4,
-};
-
-enum TyrannaEvents
-{
+    SPELL_BROOD_SWARM = 197627, // 1
+    SPELL_INTO_THE_SHADOWS = 197414, // // phase -35%
+    SPELL_QUEENS_BITE = 197486,
     EVENT_BROOD_SWARM = 1,
     EVENT_INTO_THE_SHADOWS = 2,
     EVENT_QUEENS_BITE = 3,
     EVENT_SAY_TEXT_2 = 4,
     EVENT_SAY_TEXT_1 = 5,
     EVENT_TYRANNA_DIED = 6,
-};
-
-enum TyrannaSpells
-{
-    SPELL_BROOD_SWARM = 197627,
-    SPELL_INTO_THE_SHADOWS = 197414,
-    SPELL_QUEENS_BITE = 197486,
-};
-
-enum TyrannaMisc
-{
+    TEXT_START_COMBAT = 0,
+    TEXT_KEYSTONE = 1,
+    TEXT_KISS = 2,
+    TEXT_CHILDREN = 3,
+    TEXT_TYRANNA_DEATH = 4,
     NPC_KORVAS_TYRANNA = 98712,
     NPC_JACE_TYRANNA = 97959,
     NPC_KAYN_TYRANNA = 97244,
     NPC_ALLARI_TYRANNA = 97962,
     NPC_TYRANNA_SPAWN = 100334,
-    NPC_SKITTERING_BROODLING = 100333,
+    NPC_SKITTERING_BROODLING = 100333, // NPC_ADD
 };
 
 // 93802
@@ -2889,8 +2792,8 @@ public:
             {
                 uint8 rand = urand(1, 2);
                 float angle = frand(0.0f, 2.0f * float(M_PI));
-                float x = targetPos.GetPositionX() + (5.0f * std::cos(angle));
-                float y = targetPos.GetPositionY() + (5.0f * std::sin(angle));
+                float x = targetPos.GetPositionX() + (10.0f * std::cos(angle));
+                float y = targetPos.GetPositionY() + (10.0f * std::sin(angle));
                 Position randomPosition = {
                     x, y, targetPos.GetPositionZ(), targetPos.GetOrientation()
                 };
@@ -2913,9 +2816,6 @@ public:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                     {
                         Talk(TEXT_CHILDREN, me->GetOwner());
-                        // commented out cast of the brood swarm spell because I've failed with the implementation
-                        // leave here a workaround with the regular summon
-                        // DoCast(target, SPELL_BROOD_SWARM);
                         SummomNearTarget(2, NPC_TYRANNA_SPAWN, target->GetPosition(), 20000); // 2 bigger spiders
                         SummomNearTarget(3, NPC_SKITTERING_BROODLING, target->GetPosition(), 15000); // 3 small spiders
                     }
@@ -2961,45 +2861,21 @@ public:
     }
 };
 
-// TEST
-class scene_mardum_metamorphosis : public SceneScript
-{
-public:
-    scene_mardum_metamorphosis() : SceneScript("scene_mardum_metamorphosis") { }
-
-    void OnSceneEnd(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) override
-    {
-        Position pos = player->GetPosition();
-        player->GetMap()->LoadGrid(pos.GetPositionX(), pos.GetPositionY());
-        player->UpdateVisibilityForPlayer();
-        std::list<Creature*> dhunters;
-        dhunters = player->FindAllCreaturesInRange(player->GetVisibilityRange());
-        for (std::list<Creature*>::const_iterator itr = dhunters.begin(); itr != dhunters.end(); ++itr) {
-            Creature * creat = (*itr)->ToCreature();
-            creat->SetVisible(true);
-            creat->ReLoad(true);
-            PhasingHandler::AddPhase(creat, 171, true);
-        }   
-        TC_LOG_ERROR("server.worldserver", "*** Scene has been ended ***");
-        player->GetMap()->PlayerRelocation(player, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
-    }
-};
-
 // 97303
-class npc_mardum_kayn_sunfury_end : public CreatureScript
-{
-public:
-    npc_mardum_kayn_sunfury_end() : CreatureScript("npc_mardum_kayn_sunfury_end") { }
-
-    bool OnQuestReward(Player* /*player*/, Creature* /*creature*/, Quest const* /*quest*/, uint32 /*opt*/) override
-    {
-        // This Scene make the mobs disappear ATM
-        //if (quest->GetQuestId() == QUEST_THE_KEYSTONE)
-        //    player->CastSpell(player, 193387, true); // Scene
-
-        return true;
-    }
-};
+//class npc_mardum_kayn_sunfury_end : public CreatureScript
+//{
+//public:
+//    npc_mardum_kayn_sunfury_end() : CreatureScript("npc_mardum_kayn_sunfury_end") { }
+//
+//    bool OnQuestReward(Player* /*player*/, Creature* /*creature*/, Quest const* /*quest*/, uint32 /*opt*/) override
+//    {
+//        // This Scene make the mobs disappear ATM
+//        //if (quest->GetQuestId() == QUEST_THE_KEYSTONE)
+//        //    player->CastSpell(player, 193387, true); // Scene
+//
+//        return true;
+//    }
+//};
 
 // 245728
 class go_mardum_the_keystone : public GameObjectScript
@@ -3007,9 +2883,9 @@ class go_mardum_the_keystone : public GameObjectScript
 public:
     go_mardum_the_keystone() : GameObjectScript("go_mardum_the_keystone") { }
 
-    bool OnGossipHello(Player* player, GameObject* /*go*/) override
+    bool OnGossipHello(Player* player, GameObject* go) override
     {
-        player->KilledMonsterCredit(100651);
+        player->KilledMonsterCredit(100651); // return-to-the-black-temple-keystone-activated-quest-kill-credit
         return false;
     }
 };
@@ -3046,6 +2922,52 @@ class spell_mardum_back_to_black_temple : public SpellScript
     }
 };
 
+// Spell 192262 Rallying
+class spell_rallying : public SpellScriptLoader
+{
+public:
+    spell_rallying() : SpellScriptLoader("spell_rallying") { }
+
+    class spell_rallying_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rallying_SpellScript);
+
+        void ApplyAura(SpellEffIndex effIndex)
+        {
+            Unit* target = GetHitUnit();
+
+            if (!target)
+                return;
+
+            if (Creature* injuredDH = target->ToCreature()) {
+                injuredDH->RemoveAllAuras();
+                injuredDH->HandleEmoteCommand(EMOTE_STATE_STAND);
+                injuredDH->AI()->Talk(0);
+                injuredDH->GetScheduler().Schedule(Seconds(2), [](TaskContext context)
+                {
+                    GetContextUnit()->ToCreature()->AI()->Talk(1);
+                    float x, y, z;
+                    GetContextUnit()->ToCreature()->GetClosePoint(x, y, z, GetContextUnit()->GetObjectSize() / 3, 50.0f);
+                    GetContextUnit()->ToCreature()->GetMotionMaster()->MovePoint(0, x, y, z);
+                    GetContextUnit()->ToCreature()->DespawnOrUnsummon(5000);
+                });
+                PreventHitDefaultEffect(effIndex);
+            }
+                
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_rallying_SpellScript::ApplyAura, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+        }
+    };
+
+    SpellScript *GetSpellScript() const override
+    {
+        return new spell_rallying_SpellScript();
+    }
+};
+
 void AddSC_zone_mardum()
 {
     new PlayerScript_mardum_welcome_scene_trigger();
@@ -3078,12 +3000,9 @@ void AddSC_zone_mardum()
     new PlayerScript_mardum_spec_choice();
     new npc_mardum_dh_learn_spec();
     new npc_mardum_izal_whitemoon();
-    new npc_kayn_tyranna_fight();
-    new npc_allari_tyranna_fight();
-    new npc_jace_tyranna_fight();
-    new npc_korvas_tyranna_fight();
+    new npc_tyranna_attacker();
     new npc_brood_queen_tyranna();
-    new npc_mardum_kayn_sunfury_end();
+    // new npc_mardum_kayn_sunfury_end();   
     new go_mardum_the_keystone();
     RegisterSpellScript(spell_mardum_back_to_black_temple);
     new PlayerScript_mardum_conversation_trigger();
@@ -3091,8 +3010,8 @@ void AddSC_zone_mardum()
     new npc_king_voras();
 	new go_q39279();
     new spell_destroying_fel_spreader();
-    new spell_freeing_gaardoun();
     new spell_destroying_stabilizer();
+    new spell_destroying_soulharvester();
     new npc_mardum_devastator();
     new npc_mardum_announcer();
     new PlayerScript_event_warning();
@@ -3100,5 +3019,6 @@ void AddSC_zone_mardum()
     new npc_count_nefarious();
     new go_well_of_souls();
     new npc_lady_stheno_soulengine();
-    new scene_mardum_metamorphosis();
+    new npc_mardum_gaardoun();
+    new spell_rallying();
 }
