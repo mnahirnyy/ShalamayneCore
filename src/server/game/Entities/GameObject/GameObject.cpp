@@ -2043,9 +2043,9 @@ void GameObject::CastSpell(Unit* target, uint32 spellId, TriggerCastFlags trigge
         return;
 
     // remove immunity flags, to allow spell to target anything
-    trigger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
+    trigger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC); // SetImmuneToAll
 
-    PhasingHandler::InheritPhaseShift(trigger, this);
+    PhasingHandler::InheritPhaseShift(trigger, this); // Core / GameObjects: trigger npcs that are summoned for gameobject casting will now inherit their gameobject's phase shift as well
 
     if (Unit* owner = GetOwner())
     {

@@ -37,6 +37,8 @@
 #include "Vehicle.h"
 #include "WorldSession.h"
 #include "zone_gilneas.h"
+#include "CombatAI.h"
+#include "Log.h"
 
 enum eDuskHaven
 {
@@ -618,7 +620,7 @@ public:
                     npc->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE);
                     m_events.CancelEvent(EVENT_CAST_BOULDER);
                     m_events.CancelEvent(EVENT_CHECK_PLAYER);
-                    m_events.ScheduleEvent(EVENT_MASTER_RESET, 180000);
+                    // m_events.ScheduleEvent(EVENT_MASTER_RESET, 180000);
                     me->setFaction(35);
                     me->RemoveAllAuras();
                     me->HandleEmoteCommand(EMOTE_ONESHOT_NONE);
@@ -679,7 +681,7 @@ public:
                 case EVENT_PLAYER_LANDING:
                 {
 
-                    m_events.RescheduleEvent(EVENT_MASTER_RESET, 10000);
+                    // m_events.RescheduleEvent(EVENT_MASTER_RESET, 10000);
                     m_playerGUID = ObjectGuid::Empty;
 
                     break;
@@ -1080,7 +1082,8 @@ public:
     }
 };
 
-// Phase 183(16384) // from here: WorldMap 678 and TerrainSwap 655
+// Phase 183(16384)
+// from here: WorldMap 678 and TerrainSwap 655
 
 // 36440
 class npc_drowning_watchman_36440 : public CreatureScript
@@ -1107,7 +1110,7 @@ public:
             m_isOnPlayer = false;
         }
 
-        void SpellHit(Unit* caster, SpellInfo const* spell) override
+        /*void SpellHit(Unit* caster, SpellInfo const* spell) override
         {
             if (!m_isOnPlayer)
                 if (spell->Id == SPELL_RESCUE_DROWNING_WATCHMANN)
@@ -1119,6 +1122,22 @@ public:
                             m_events.ScheduleEvent(EVENT_MASTER_RESET, 60000);
                             m_events.ScheduleEvent(EVENT_CHECK_NEAR_GREYMANE, 1000);
                         }
+        }*/
+
+        void OnSpellClick(Unit* Clicker, bool& /*result*/) override
+        {
+            if (!Clicker->IsPlayer())
+                return;
+
+            if (!m_isOnPlayer) {
+                Player* player = Clicker->ToPlayer();
+                if (player->GetQuestStatus(QUEST_GASPING_FOR_BREATH) == QUEST_STATUS_INCOMPLETE) {
+                    m_isOnPlayer = true;
+                    m_playerGUID = player->GetGUID();
+                    m_events.ScheduleEvent(EVENT_MASTER_RESET, 60000);
+                    m_events.ScheduleEvent(EVENT_CHECK_NEAR_GREYMANE, 1000);
+                }
+            }
         }
 
         void UpdateAI(uint32 diff) override
@@ -1142,8 +1161,8 @@ public:
                                     player->CastSpell(me, SPELL_SAVE_DROWNING_MILITIA_EFFECT, true);
                                     player->CastSpell(me, SPELL_EXIT_VEHICLE, true);
                                     Talk(0, player);
-                                    //me->ExitVehicle();
-                                    m_events.ScheduleEvent(EVENT_DESPAWN_PART_00, 3000);
+                                    me->ExitVehicle();
+                                    m_events.ScheduleEvent(EVENT_DESPAWN_PART_00, 1000);
                                     break;
                                 }
 
@@ -1477,9 +1496,9 @@ public:
         EVENT_CHECK_HEALTH_AND_LORNA = 901,
     };
 
-    struct npc_mountain_horse_36540AI : public ScriptedAI
+    struct npc_mountain_horse_36540AI : public VehicleAI
     {
-        npc_mountain_horse_36540AI(Creature* creature) : ScriptedAI(creature) { }
+        npc_mountain_horse_36540AI(Creature* creature) : VehicleAI(creature) { }
 
         EventMap    m_events;
         ObjectGuid  m_playerGUID;
@@ -1499,9 +1518,9 @@ public:
         }
 
         void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) override
-        {
+        {   
             if (apply)
-            {
+            {   
                 if (Player* player = passenger->ToPlayer())
                 {
                     m_playerGUID = player->GetGUID();
@@ -1510,7 +1529,7 @@ public:
                 m_events.ScheduleEvent(EVENT_CHECK_HEALTH_AND_LORNA, 1000);
             }
             else if (Player* player = ObjectAccessor::GetPlayer(*me, m_playerGUID))
-            {
+            {   
                 if (m_lornaIsNear)
                 {
                     player->KilledMonsterCredit(36560);
@@ -1537,7 +1556,7 @@ public:
                     if (Creature* lorna = ObjectAccessor::GetCreature(*me, m_lornaGUID))
                         if (Player* player = ObjectAccessor::GetPlayer(*me, m_playerGUID))
                         {
-                            m_lornaIsNear = player->GetDistance(lorna) < 7.0f;
+                            m_lornaIsNear = player->GetDistance(lorna) < 10.0f;
 
                             if (m_lornaIsNear)
                                 player->ExitVehicle();
@@ -1771,6 +1790,29 @@ public:
     }
 };
 
+static const Position greymaneManorPath[21] =
+{
+    { -1897.25f, 2260.34f, 42.3233f },
+    { -1856.48f, 2298.407f, 42.2751f },
+    { -1828.07f, 2326.007f, 37.2874f },
+    { -1806.25f, 2341.49f, 35.8007f },
+    { -1789.14f, 2356.74f, 37.4380f },
+    { -1781.66f, 2383.98f, 43.5483f },
+    { -1779.509f, 2417.72f, 53.8031f },
+    { -1769.45f, 2447.63f, 62.3517f },
+    { -1759.62f, 2459.43f, 67.1536f },
+    { -1756.905f, 2462.21f, 68.4139f },
+    { -1749.53f, 2463.18f, 70.5280f },
+    { -1712.74f, 2467.504f, 82.5859f },
+    { -1707.58f, 2469.71f, 84.6752f },
+    { -1704.76f, 2472.15f, 86.1085f },
+    { -1702.96f, 2474.909f, 87.3626f },
+    { -1687.96f, 2499.91f, 96.8781f },
+    { -1686.606f, 2501.53f, 97.2075f },
+    { -1671.16f, 2519.94f, 97.8956f } // Despawn
+};
+size_t const greymaneManorPathSize = std::extent<decltype(greymaneManorPath)>::value;
+
 // 36741
 class npc_swift_mountain_horse_36741 : public CreatureScript
 {
@@ -1782,24 +1824,48 @@ public:
         WAYPOINT_ID = 3674101,
     };
 
-    struct npc_swift_mountain_horse_36741AI : public ScriptedAI
+    struct npc_swift_mountain_horse_36741AI : public VehicleAI
     {
-        npc_swift_mountain_horse_36741AI(Creature* creature) : ScriptedAI(creature) { }
+        npc_swift_mountain_horse_36741AI(Creature* creature) : VehicleAI(creature) { }
 
-        EventMap    m_events;
-        ObjectGuid  m_playerGUID;
+        void Initialize() {
+            m_playerGUID = ObjectGuid::Empty;
+            uiPoint = 0;
+            boarded = false;
+        }
 
         void Reset() override
         {
+            Initialize();
             m_events.Reset();
-            m_playerGUID = ObjectGuid::Empty;
         }
 
         void MovementInform(uint32 type, uint32 id) override
         {
-            if (type == WAYPOINT_MOTION_TYPE)
-                if (id == 11)
-                    me->GetVehicleKit()->RemoveAllPassengers();
+            TC_LOG_ERROR("server.worldserver", "*** MovementInform %u, %u", type, id);
+            if (id == uiPoint) {
+                ++uiPoint;
+            }
+            if (type == POINT_MOTION_TYPE && id == 17) {
+                boarded = false;
+                me->GetVehicleKit()->RemoveAllPassengers();
+                me->DespawnOrUnsummon();
+            }       
+        }
+
+        void GoToTheNextPoint() {
+            me->GetMotionMaster()->MovePoint(uiPoint, greymaneManorPath[uiPoint]);
+        }
+
+        void UpdateMovementActions() {
+            if (boarded && !me->GetVehicleKit()->IsVehicleInUse()) {
+                me->DespawnOrUnsummon();
+                return;
+            }
+
+            if (Player* player = ObjectAccessor::GetPlayer(*me, m_playerGUID)) {
+                GoToTheNextPoint();
+            }
         }
 
         void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) override
@@ -1812,7 +1878,9 @@ public:
                     player->AddAura(SPELL_PHASE_QUEST_ZONE_SPECIFIC_08, player);
                     player->AddAura(SPELL_PHASE_QUEST_ZONE_SPECIFIC_09, player);
                     me->CastSpell(player, SPELL_FORCECAST_UPDATE_ZONE_AURAS, true);
-                    me->GetMotionMaster()->MovePath(WAYPOINT_ID, false);
+                    // me->GetMotionMaster()->MovePath(WAYPOINT_ID, false);
+                    me->GetMotionMaster()->MovePoint(uiPoint, greymaneManorPath[uiPoint]);
+                    boarded = true;
                 }
             }
             else
@@ -1827,6 +1895,20 @@ public:
                 me->DespawnOrUnsummon(1000);
             }
         }
+
+        void UpdateAI(uint32 diff) override {
+            UpdateMovementActions();
+
+            m_events.Update(diff);
+
+            while (uint32 eventId = m_events.ExecuteEvent()) { }
+        }
+
+    private:
+        EventMap m_events;
+        ObjectGuid m_playerGUID;
+        uint8 uiPoint;
+        bool boarded;
     };
 
     CreatureAI* GetAI(Creature* creature) const override

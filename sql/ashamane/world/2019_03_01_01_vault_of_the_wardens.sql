@@ -492,7 +492,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (@CGUID+268,96656,1468,0,0,0,0,0,0,-1,0,1,4362.25,-457.504,-274.719,3.95586,300,0,0,1266732,0,0,0,0,0,0,0,'',25549);
 
 UPDATE `creature` SET `spawntimesecs`=60 WHERE `guid` IN (20542822, 20542748, 20542855, 20542737);
-UPDATE `creature` SET `spawntimesecs`=30 WHERE `guid` IN (20542615, 20542616);
+UPDATE `creature` SET `spawntimesecs`=60 WHERE `guid` IN (20542615, 20542616);
 UPDATE `creature_template` SET `unit_flags`=384 WHERE (entry = 100717);
 
 UPDATE `creature_template_addon` SET `path_id`=99631 WHERE `entry`=99631;
@@ -1139,13 +1139,13 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 (96313, 3, 0, 'You may enter the hold, but I will not put the lives of my guards at risk for your mission. Is that clear?', 12, 0, 100, 0, 0, 64641, 0, 0, 'Warden Alturas to Player');
 
 DELETE FROM `spell_area` WHERE `area` = 7873 AND `spell` = 59074;
-INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `quest_start_status`, `quest_end_status`) VALUES
-(59074, 7873, 38672, 38672, @QUEST_TAKEN, @QUEST_STATUS_COMPLETED_REWARDED);
+-- INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `quest_start_status`, `quest_end_status`) VALUES
+-- (59074, 7873, 38672, 38672, @QUEST_TAKEN, @QUEST_STATUS_COMPLETED_REWARDED);
 
 -- 92718
 DELETE FROM `creature` WHERE `guid`=280000401;
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
-(280000401,92718,1468,7814,7873,0,0,171,0,-1,0,0,4325.95,-605.75,-281.759,4.69607,720,0,0,0,0,0,0,0,0,0,0,'',25549);
+-- INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+-- (280000401,92718,1468,7814,7873,0,0,181,0,-1,0,0,4325.95,-605.75,-281.759,4.69607,720,0,0,0,0,0,0,0,0,0,0,'',25549);
 
 DELETE FROM `creature_text` WHERE `CreatureID` = 99473;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES

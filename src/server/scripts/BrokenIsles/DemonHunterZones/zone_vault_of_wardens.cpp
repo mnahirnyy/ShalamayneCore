@@ -63,6 +63,7 @@ enum eSpells
     SPELL_FEL_INFUSION          = 133508,
     SPELL_UNLOCKING_ALTRUIS     = 184012,
     SPELL_UNLOCKING_KAYN        = 177803,
+    SPELL_PRISON_EXPLOSION      = 232248,
 };
 
 enum eKillCredits
@@ -73,6 +74,75 @@ enum eKillCredits
     KILL_CREDIT_REUNION_FINISHED_ALTRUIS        = 112287,
 };
 
+class npc_maiev_shadowsong_welcome : public CreatureScript
+{
+public:
+    npc_maiev_shadowsong_welcome() : CreatureScript("npc_maiev_shadowsong_welcome") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_BREAKING_OUT) {
+            player->SummonCreature(92718, creature->GetPosition(), TEMPSUMMON_MANUAL_DESPAWN, 10000, 0, true);
+        }
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_maiev_shadowsong_welcome_AI(creature);
+    }
+
+    struct npc_maiev_shadowsong_welcome_AI : public ScriptedAI
+    {
+        npc_maiev_shadowsong_welcome_AI(Creature* creature) : ScriptedAI(creature)
+        {
+            timer = 0;
+            movein = false;
+        }
+
+        uint32 timer;
+        bool movein;
+
+        void IsSummonedBy(Unit* summoner) override
+        {
+            Player* player = summoner->ToPlayer();
+
+            if (!player)
+                return;
+
+            timer = 2000;
+            movein = true;
+
+            Talk(0);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (movein)
+            {
+                if (timer <= diff)
+                {
+                    if (GameObject* go = me->FindNearestGameObject(244925, me->GetVisibilityRange()))
+                        go->UseDoorOrButton();
+
+                    me->GetMotionMaster()->MovePath(1092718, false);
+
+                    me->GetScheduler().Schedule(Seconds(4), [this](TaskContext context)
+                    {
+                        Creature* maiev = GetContextCreature();
+                        if (GameObject* go = maiev->FindNearestGameObject(244925, maiev->GetVisibilityRange()))
+                            go->ResetDoorOrButton();
+                    });
+
+                    movein = false;
+                    me->DespawnOrUnsummon(5000);
+                }
+                else timer -= diff;
+            }
+        }
+    };
+};
+
 // 103658
 class npc_kayn_cell : public CreatureScript
 {
@@ -81,18 +151,14 @@ public:
 
    bool OnGossipHello(Player* player, Creature* creature) override
    {
-       /*player->CastSpell(creature, SPELL_UNLOCKING_KAYN, true);
-       creature->DespawnOrUnsummon(25);
-       player->KilledMonsterCredit(KILL_CREDIT_REUNION_FINISHED_KAYN, ObjectGuid::Empty);
-       player->KilledMonsterCredit(KILL_CREDIT_KAYN_PICKED_UP_WEAPONS, ObjectGuid::Empty);*/
        if (player->GetQuestStatus(QUEST_BREAKING_OUT) == QUEST_STATUS_INCOMPLETE)
        {
            if (creature == nullptr)
                return false;
 
            player->CastSpell(creature, SPELL_UNLOCKING_KAYN, true);
-           creature->DespawnOrUnsummon(25);
-           player->SummonCreature(99631, 4343.16f, -589.57f, -281.40f, 3.38f, TEMPSUMMON_TIMED_DESPAWN, 20000);
+           creature->DespawnOrUnsummon(60);
+           player->SummonCreature(99631, 4343.16f, -589.57f, -281.40f, 3.38f, TEMPSUMMON_TIMED_DESPAWN, 60000, false);
        }
        return true;
    }
@@ -105,19 +171,15 @@ public:
     npc_altruis_cell() : CreatureScript("npc_altruis_cell") { }
 
     bool OnGossipHello(Player* player, Creature* creature) override
-    {
-        // player->CastSpell(creature, SPELL_UNLOCKING_ALTRUIS, true);
-        // creature->DespawnOrUnsummon(25);
-        // player->KilledMonsterCredit(KILL_CREDIT_REUNION_FINISHED_ALTRUIS, ObjectGuid::Empty);
-        // player->KilledMonsterCredit(KILL_CREDIT_ALTRUIS_PICKED_UP_WEAPONS, ObjectGuid::Empty);
+    {   
         if (player->GetQuestStatus(QUEST_BREAKING_OUT) == QUEST_STATUS_INCOMPLETE)
         {
             if (creature == nullptr)
                 return false;
 
             player->CastSpell(creature, SPELL_UNLOCKING_ALTRUIS, true);
-            creature->DespawnOrUnsummon(25);
-            player->SummonCreature(99632, 4309.94f, -589.618f, -281.407f, 6.13126f, TEMPSUMMON_TIMED_DESPAWN, 20000);
+            creature->DespawnOrUnsummon(60);
+            player->SummonCreature(99632, 4309.94f, -589.618f, -281.407f, 6.13126f, TEMPSUMMON_TIMED_DESPAWN, 60000, false);
         }
         return true;
     }
@@ -143,10 +205,23 @@ public:
         }
         else if (newStatus == QUEST_STATUS_COMPLETE)
         {
-            if (Creature* Kayn = player->FindNearestCreature(99631, 30.0f))
-                Kayn->AI()->Talk(1);
-            if (Creature* Altruis = player->FindNearestCreature(99632, 30.0f))
-                Altruis->AI()->Talk(1);
+            if (Creature* Kayn = player->FindNearestCreature(99631, player->GetVisibilityRange(), true)) {
+                Kayn->AI()->SetData(21, 21);
+                Kayn->GetScheduler().Schedule(Seconds(3), [](TaskContext context)
+                {
+                    Creature* kayn = GetContextCreature();
+                    kayn->AI()->Talk(1);
+                });
+            }
+                
+            if (Creature* Altruis = player->FindNearestCreature(99632, player->GetVisibilityRange(), true)) {
+                Altruis->AI()->SetData(21, 21);
+                Altruis->GetScheduler().Schedule(Seconds(8), [](TaskContext context)
+                {
+                    Creature* altruis = GetContextCreature();
+                    altruis->AI()->Talk(1);
+                });
+            }
         }
     }
 };
@@ -1842,6 +1917,8 @@ public:
         WP_START = 1,
         WP_AT_WEAPON_CRATE = 6,
         WP_AT_HOME = 10,
+        DATA_TALK_QUEST_COMPLETE = 21,
+        EVENT_TALK_1 = 22,
     };
 
     struct npc_altruis_sufferer_freed_99632_AI : public npc_escortAI
@@ -1877,6 +1954,18 @@ public:
             }
         }
 
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_TALK_QUEST_COMPLETE:
+                _events.ScheduleEvent(EVENT_TALK_1, 2s);
+                break;
+            default:
+                break;
+            }
+        }
+
         void Reset() override
         {
             Initialize();
@@ -1898,13 +1987,21 @@ public:
         {
             _events.Update(diff);
 
-            if (UpdateVictim())
-            {
-                DoMeleeAttackIfReady();
+            while (uint32 eventId = _events.ExecuteEvent()) {
+                switch (eventId) {
+                case EVENT_TALK_1:
+                    Talk(1);
+                    break;
+                default:
+                    break;
+                }
             }
 
-            if (HasEscortState(STATE_ESCORT_NONE))
-                return;
+            if (UpdateVictim())
+                DoMeleeAttackIfReady();
+
+            /*if (HasEscortState(STATE_ESCORT_NONE))
+                return;*/
 
             npc_escortAI::UpdateAI(diff);
 
@@ -1920,7 +2017,6 @@ public:
                         _phase = PHASE_NONE;
                         break;
                     case PHASE_PEEK_WEAPONS_1:
-                        // me->HandleEmoteCommand(EMOTE_STATE_KNEEL_2);
                         me->LoadEquipment(3);
                         _moveTimer = 2 * IN_MILLISECONDS;
                         _phase = PHASE_PEEK_WEAPONS_2;
@@ -1931,24 +2027,19 @@ public:
                         if (Player* player = ObjectAccessor::GetPlayer(*me, _eventStarterGuid))
                         {
                             player->KilledMonsterCredit(KILL_CREDIT_ALTRUIS_PICKED_UP_WEAPONS, ObjectGuid::Empty);
-                            player->KilledMonsterCredit(KILL_CREDIT_REUNION_FINISHED_ALTRUIS, ObjectGuid::Empty);
                         }   
                         _moveTimer = 2 * IN_MILLISECONDS;
                         _phase = PHASE_PEEK_WEAPONS_3;
                         break;
-                    /*case PHASE_PEEK_WEAPONS_3:
-                        me->HandleEmoteCommand(EMOTE_STATE_NONE);
-                        _moveTimer = 0.5 * IN_MILLISECONDS;
-                        _phase = PHASE_PEEK_WEAPONS_4;
-                        break;*/
                     case PHASE_PEEK_WEAPONS_3:
                         me->HandleEmoteCommand(EMOTE_STATE_NONE);
                         SetEscortPaused(false);
                         _moveTimer = 0 * IN_MILLISECONDS;
                         _phase = PHASE_NONE;
                         break;
+                        SetEscortPaused(true);
                     case PHASE_DESPAWN:
-                        me->DespawnOrUnsummon();
+                        // me->DespawnOrUnsummon();
                         break;
                     default:
                         break;
@@ -1980,6 +2071,9 @@ public:
                 _phase = PHASE_PEEK_WEAPONS_1;
                 break;
             case WP_AT_HOME:
+                if (Player* player = ObjectAccessor::GetPlayer(*me, _eventStarterGuid)) {
+                    player->KilledMonsterCredit(KILL_CREDIT_REUNION_FINISHED_ALTRUIS, ObjectGuid::Empty);
+                }
                 _moveTimer = 0.2 * IN_MILLISECONDS;
                 _phase = PHASE_DESPAWN;
                 break;
@@ -2018,6 +2112,8 @@ public:
         WP_START = 1,
         WP_AT_WEAPON_CRATE = 6,
         WP_AT_HOME = 13,
+        DATA_TALK_QUEST_COMPLETE = 21,
+        EVENT_TALK_1 = 22,
     };
 
     struct npc_kayn_sunfury_freed_99631_AI : public npc_escortAI
@@ -2053,6 +2149,18 @@ public:
             }
         }
 
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_TALK_QUEST_COMPLETE:
+                _events.ScheduleEvent(EVENT_TALK_1, 7s);
+                break;
+            default:
+                break;
+            }
+        }
+
         void Reset() override
         {
             Initialize();
@@ -2074,13 +2182,21 @@ public:
         {
             _events.Update(diff);
 
-            if (UpdateVictim())
-            {
-                DoMeleeAttackIfReady();
+            while (uint32 eventId = _events.ExecuteEvent()) {
+                switch (eventId) {
+                case EVENT_TALK_1:
+                    Talk(1);
+                    break;
+                default:
+                    break;
+                }
             }
 
-            if (HasEscortState(STATE_ESCORT_NONE))
-                return;
+            if (UpdateVictim())
+                DoMeleeAttackIfReady();
+
+            /*if (HasEscortState(STATE_ESCORT_NONE))
+                return;*/
 
             npc_escortAI::UpdateAI(diff);
 
@@ -2096,7 +2212,6 @@ public:
                         _phase = PHASE_NONE;
                         break;
                     case PHASE_PEEK_WEAPONS_1:
-                        // me->HandleEmoteCommand(EMOTE_STATE_KNEEL_2);
                         me->LoadEquipment(3);
                         _moveTimer = 2 * IN_MILLISECONDS;
                         _phase = PHASE_PEEK_WEAPONS_2;
@@ -2107,23 +2222,19 @@ public:
                         if (Player* player = ObjectAccessor::GetPlayer(*me, _eventStarterGuid))
                         {
                             player->KilledMonsterCredit(KILL_CREDIT_KAYN_PICKED_UP_WEAPONS, ObjectGuid::Empty);
-                            player->KilledMonsterCredit(KILL_CREDIT_REUNION_FINISHED_KAYN, ObjectGuid::Empty);
                         }   
                         _moveTimer = 2 * IN_MILLISECONDS;
                         _phase = PHASE_PEEK_WEAPONS_3;
                         break;
-                    /*case PHASE_PEEK_WEAPONS_3:
-                        _moveTimer = 0.5 * IN_MILLISECONDS;
-                        _phase = PHASE_PEEK_WEAPONS_4;
-                        break;*/
                     case PHASE_PEEK_WEAPONS_3:
                         me->HandleEmoteCommand(EMOTE_STATE_NONE);
                         SetEscortPaused(false);
                         _moveTimer = 0 * IN_MILLISECONDS;
                         _phase = PHASE_NONE;
+                        SetEscortPaused(true);
                         break;
                     case PHASE_DESPAWN:
-                        me->DespawnOrUnsummon();
+                        // me->DespawnOrUnsummon();
                         break;
                     default:
                         break;
@@ -2155,6 +2266,9 @@ public:
                 _phase = PHASE_PEEK_WEAPONS_1;
                 break;
             case WP_AT_HOME:
+                if (Player* player = ObjectAccessor::GetPlayer(*me, _eventStarterGuid)) {
+                    player->KilledMonsterCredit(KILL_CREDIT_REUNION_FINISHED_KAYN, ObjectGuid::Empty);
+                }
                 _moveTimer = 0.2 * IN_MILLISECONDS;
                 _phase = PHASE_DESPAWN;
                 break;
@@ -2313,4 +2427,5 @@ void AddSC_zone_vault_of_wardens()
     new npc_altruis_sufferer_freed_99632();
     new npc_kayn_sunfury_freed_99631();
     new npc_vault_of_the_wardens_vampiric_felbat();
+    new npc_maiev_shadowsong_welcome();
 }
