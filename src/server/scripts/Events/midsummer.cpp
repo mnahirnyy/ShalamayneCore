@@ -30,10 +30,12 @@
 /*######
 ## npc_dancing_flames
 ######*/
-
-#define SPELL_BRAZIER       45423
-#define SPELL_SEDUCTION     47057
-#define SPELL_FIERY_AURA    45427
+enum DancingFlames
+{
+    SPELL_BRAZIER = 45423,
+    SPELL_SEDUCTION = 47057,
+    SPELL_FIERY_AURA = 45427
+};
 
 class npc_dancing_flames : public CreatureScript
 {
@@ -42,25 +44,30 @@ public:
 
     struct npc_dancing_flamesAI : public ScriptedAI
     {
-        npc_dancing_flamesAI(Creature* c) : ScriptedAI(c) {}
+        npc_dancing_flamesAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            Active = true;
+            CanIteract = 3500;
+        }
 
         bool Active;
         uint32 CanIteract;
 
         void Reset() override
         {
-            Active = true;
-            CanIteract = 3500;
+            Initialize();
             DoCast(me, SPELL_BRAZIER, true);
             DoCast(me, SPELL_FIERY_AURA, false);
             float x, y, z;
             me->GetPosition(x, y, z);
             me->Relocate(x, y, z + 0.94f);
-            me->AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
+            me->SetDisableGravity(true);
             me->HandleEmoteCommand(EMOTE_ONESHOT_DANCE);
-            //WorldPacket data;                       //send update position to client
-            //me->BuildHeartBeatMsg(&data);
-            //me->SendMessageToSet(&data, true);
         }
 
         void UpdateAI(uint32 diff) override
@@ -84,30 +91,27 @@ public:
         {
             if (me->IsWithinLOS(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ()) && me->IsWithinDistInMap(player, 30.0f))
             {
-                me->SetInFront(player);
+                me->SetFacingToObject(player);
                 Active = false;
 
-                //WorldPacket data;
-                //me->BuildHeartBeatMsg(&data);
-                //me->SendMessageToSet(&data, true);
-                switch(emote)
+                switch (emote)
                 {
-                    case TEXT_EMOTE_KISS:
-                        me->HandleEmoteCommand(EMOTE_ONESHOT_SHY);
-                        break;
-                    case TEXT_EMOTE_WAVE:
-                        me->HandleEmoteCommand(EMOTE_ONESHOT_WAVE);
-                        break;
-                    case TEXT_EMOTE_BOW:
-                        me->HandleEmoteCommand(EMOTE_ONESHOT_BOW);
-                        break;
-                    case TEXT_EMOTE_JOKE:
-                        me->HandleEmoteCommand(EMOTE_ONESHOT_LAUGH);
-                        break;
-                    case TEXT_EMOTE_DANCE:
-                        if (!player->HasAura(SPELL_SEDUCTION))
-                            DoCast(player, SPELL_SEDUCTION, true);
-                        break;
+                case TEXT_EMOTE_KISS:
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_SHY);
+                    break;
+                case TEXT_EMOTE_WAVE:
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_WAVE);
+                    break;
+                case TEXT_EMOTE_BOW:
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_BOW);
+                    break;
+                case TEXT_EMOTE_JOKE:
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_LAUGH);
+                    break;
+                case TEXT_EMOTE_DANCE:
+                    if (!player->HasAura(SPELL_SEDUCTION))
+                        DoCast(player, SPELL_SEDUCTION, true);
+                    break;
                 }
             }
         }

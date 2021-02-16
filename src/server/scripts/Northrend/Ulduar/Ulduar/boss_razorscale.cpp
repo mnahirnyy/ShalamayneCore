@@ -871,8 +871,12 @@ class npc_devouring_flame : public CreatureScript
 
             void Reset() override
             {
-                DoCast(SPELL_FLAME_GROUND);
+                me->SetReactState(REACT_PASSIVE);
+                DoCastSelf(SPELL_FLAME_GROUND, true);
             }
+
+            // Evade caused by Spell::SummonGuardian. Creature dont need evade at all, is despawned if razorscale enter in evade
+            void EnterEvadeMode(EvadeReason why) override { }
         };
 
         CreatureAI* GetAI(Creature* creature) const override

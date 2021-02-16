@@ -1842,7 +1842,7 @@ public:
 
         void MovementInform(uint32 type, uint32 id) override
         {
-            TC_LOG_ERROR("server.worldserver", "*** MovementInform %u, %u", type, id);
+            // TC_LOG_ERROR("server.worldserver", "*** MovementInform %u, %u", type, id);
             if (id == uiPoint) {
                 ++uiPoint;
             }

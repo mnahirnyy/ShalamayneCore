@@ -8861,7 +8861,7 @@ void ObjectMgr::LoadTrainers()
             if (spell.ReqSkillLine && !sSkillLineStore.LookupEntry(spell.ReqSkillLine))
             {
                 TC_LOG_ERROR("sql.sql", "Table `trainer_spell` references non-existing skill (ReqSkillLine: %u) for TrainerId %u and SpellId %u, ignoring",
-                    spell.ReqSkillLine, spell.SpellId, trainerId);
+                    spell.ReqSkillLine, trainerId, spell.SpellId); // Core/Misc: Fix loading error log in the LoadTrainers
                 continue;
             }
 
@@ -8872,7 +8872,7 @@ void ObjectMgr::LoadTrainers()
                 if (requiredSpell && !sSpellMgr->GetSpellInfo(requiredSpell))
                 {
                     TC_LOG_ERROR("sql.sql", "Table `trainer_spell` references non-existing spell (ReqAbility" SZFMTD ": %u) for TrainerId %u and SpellId %u, ignoring",
-                        i + 1, requiredSpell, spell.SpellId, trainerId);
+                        i + 1, requiredSpell, trainerId, spell.SpellId); // Core/Misc: Fix loading error log in the LoadTrainers
                     allReqValid = false;
                 }
             }

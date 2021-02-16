@@ -70,6 +70,8 @@ enum MageSpells
     SPELL_MAGE_BRAIN_FREEZE_IMPROVED             = 231584,
     SPELL_MAGE_JOUSTER                           = 214626,
     SPELL_MAGE_CHAIN_REACTION                    = 195419,
+    SPELL_MAGE_TOUCH_OF_THE_MAGI_AURA            = 210824,
+    SPELL_MAGE_TOUCH_OF_THE_MAGI_EXPLODE         = 210833,
     SPELL_MAGE_CHILLED_TO_THE_CORE               = 195448,
     SPELL_MAGE_GLARITY_OF_THOUGHT                = 195351,
     SPELL_MAGE_ICE_NOVA                          = 157997,
@@ -1449,6 +1451,49 @@ class spell_mage_chilled_to_the_core : public AuraScript
     void Register() override
     {
         DoCheckProc += AuraCheckProcFn(spell_mage_chilled_to_the_core::CheckProc);
+    }
+};
+
+// 210824 - Touch of the Magi (Aura)
+class spell_mage_touch_of_the_magi_aura : public AuraScript
+{
+    PrepareAuraScript(spell_mage_touch_of_the_magi_aura);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) override
+    {
+        return ValidateSpellInfo({ SPELL_MAGE_TOUCH_OF_THE_MAGI_EXPLODE });
+    }
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        DamageInfo* damageInfo = eventInfo.GetDamageInfo();
+        if (damageInfo)
+        {
+            if (damageInfo->GetAttacker() == GetCaster() && damageInfo->GetVictim() == GetTarget())
+            {
+                uint32 extra = CalculatePct(damageInfo->GetDamage(), 25);
+                if (AuraEffect* magi = GetEffect(EFFECT_0)) {
+                    if (extra > 0)
+                        magi->ChangeAmount(aurEff->GetAmount() + extra);
+                }
+            }
+        }
+    }
+
+    void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+    {
+        int32 amount = aurEff->GetAmount();
+        if (!amount || GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+            return;
+
+        if (Unit* caster = GetCaster())
+            caster->CastCustomSpell(SPELL_MAGE_TOUCH_OF_THE_MAGI_EXPLODE, SPELLVALUE_BASE_POINT0, amount, GetTarget(), TRIGGERED_FULL_MASK);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_mage_touch_of_the_magi_aura::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        AfterEffectRemove += AuraEffectRemoveFn(spell_mage_touch_of_the_magi_aura::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
     }
 };
 
@@ -3328,6 +3373,7 @@ void AddSC_mage_spell_scripts()
     RegisterSpellScript(spell_mage_arcane_barrage);
     RegisterSpellScript(spell_mage_arcane_missiles_damage);
     RegisterSpellScript(spell_mage_arcane_explosion);
+    RegisterAuraScript(spell_mage_touch_of_the_magi_aura);
 
     RegisterAuraScript(spell_mage_chrono_shift);
     RegisterAuraScript(spell_mage_arcane_missiles);

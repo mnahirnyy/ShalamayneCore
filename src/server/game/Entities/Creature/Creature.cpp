@@ -2782,7 +2782,7 @@ uint32 Creature::GetPetAutoSpellOnPos(uint8 pos) const
 
 float Creature::GetPetChaseDistance() const
 {
-    float range = MELEE_RANGE;
+    float range = 0.f;
 
     for (uint8 i = 0; i < GetPetAutoSpellSize(); ++i)
     {
@@ -2791,11 +2791,13 @@ float Creature::GetPetChaseDistance() const
             continue;
 
         if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellID))
-        {
-            if (spellInfo->GetRecoveryTime() == 0 &&  // No cooldown
-                    spellInfo->RangeEntry->ID != 1 /*Self*/ && spellInfo->RangeEntry->ID != 2 /*Combat Range*/ &&
-                        spellInfo->GetMinRange() > range)
-                range = spellInfo->GetMinRange();
+        {   
+            if (spellInfo->GetRecoveryTime() == 0 && // No cooldown
+                spellInfo->RangeEntry->ID != 1 /*Self*/ &&
+                spellInfo->RangeEntry->ID != 2 /*Combat Range*/ &&
+                spellInfo->GetMaxRange() > range
+            )
+                range = spellInfo->GetMaxRange();
         }
     }
 
