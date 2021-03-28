@@ -2208,11 +2208,8 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
             if (obj->IsVisibleBySummonerOnly())
             {
                 if (Creature const* creature = obj->ToCreature())
-                {
-                    if (TempSummon const* tempSummon = creature->ToTempSummon())
-                        if (GetGUID() != tempSummon->GetSummonerGUID())
-                            return false;
-                }
+                    if (TempSummon::IsPersonalSummonOfAnotherPlayer(creature, GetGUID()))
+                        return false;
                 else if (GameObject const* gameObject = obj->ToGameObject())
                 {
                     if (GetGUID() != gameObject->GetOwnerGUID())
