@@ -361,7 +361,6 @@ public:
         player->PlayerTalkClass->ClearMenus();
         if (action == GOSSIP_ACTION_INFO_DEF + 1) {
             creature->AI()->SetGUID(player->GetGUID());
-            creature->setFaction(FACTION_TEMPLATE_ENEMY_SPAR);
             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             creature->SetReactState(REACT_AGGRESSIVE);
             creature->AI()->AttackStart(player);
