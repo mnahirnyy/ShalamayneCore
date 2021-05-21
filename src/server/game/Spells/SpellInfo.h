@@ -684,6 +684,8 @@ class TC_GAME_API SpellInfo
         bool CanSpellProvideImmunityAgainstAura(SpellInfo const* auraSpellInfo) const;
         bool SpellCancelsAuraEffect(AuraEffect const* aurEff) const;
 
+        uint32 GetAllowedMechanicMask() const;
+
         bool IsAreaTriggerAuraEffect(uint32 difficulty, bool onlyplayer) const;
 
     private:
@@ -709,6 +711,7 @@ class TC_GAME_API SpellInfo
         AuraStateType _auraState;
 
         SpellDiminishInfo _diminishInfo;
+        uint32 _allowedMechanicMask;
 };
 
 #endif // _SPELLINFO_H

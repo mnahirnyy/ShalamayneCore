@@ -264,6 +264,10 @@ enum eDuelist
     EVENT_DO_CAST = 1,
     EVENT_STOP_DUEL = 2,
     DATA_START_DUEL = 10,
+    SPELL_DUEL = 52996,
+    SPELL_DUEL_TRIGGERED = 52990,
+    SPELL_DUEL_VICTORY = 52994,
+    SPELL_DUEL_FLAG = 52991,
 };
 
 std::map<uint32, uint32> const creatureAbilities
@@ -361,9 +365,13 @@ public:
         player->PlayerTalkClass->ClearMenus();
         if (action == GOSSIP_ACTION_INFO_DEF + 1) {
             creature->AI()->SetGUID(player->GetGUID());
-            creature->setFaction(FACTION_TEMPLATE_ENEMY_SPAR);
+            creature->setFaction(FACTION_TEMPLATE_FLAG_PVP);
             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             creature->SetReactState(REACT_AGGRESSIVE);
+
+            player->CastSpell(creature, SPELL_DUEL, false);
+            player->CastSpell(player, SPELL_DUEL_FLAG, true);
+
             creature->AI()->AttackStart(player);
             CloseGossipMenuFor(player);
         }

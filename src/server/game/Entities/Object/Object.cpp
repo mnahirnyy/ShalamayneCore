@@ -54,6 +54,16 @@
 #include "WorldSession.h"
 #include <G3D/Vector3.h>
 
+constexpr float VisibilityDistances[AsUnderlyingType(VisibilityDistanceType::Max)] =
+{
+    DEFAULT_VISIBILITY_DISTANCE,
+    VISIBILITY_DISTANCE_TINY,
+    VISIBILITY_DISTANCE_SMALL,
+    VISIBILITY_DISTANCE_LARGE,
+    VISIBILITY_DISTANCE_GIGANTIC,
+    MAX_VISIBILITY_DISTANCE
+};
+
 Object::Object()
 {
     m_objectTypeId      = TYPEID_OBJECT;
@@ -537,9 +547,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
         bool hasMorphCurveID        = areaTriggerMiscTemplate != nullptr ? areaTriggerMiscTemplate->MorphCurveId  != 0 : false;
         bool hasFacingCurveID       = areaTriggerMiscTemplate != nullptr ? areaTriggerMiscTemplate->FacingCurveId != 0 : false;
         bool hasMoveCurveID         = areaTriggerMiscTemplate != nullptr ? areaTriggerMiscTemplate->MoveCurveId   != 0 : false;
-        bool hasUnk2                = areaTriggerTemplate->HasFlag(AREATRIGGER_FLAG_UNK2);
+        bool hasAnimation           = areaTriggerTemplate->HasFlag(AREATRIGGER_FLAG_HAS_ANIM_ID);
         bool hasUnk3                = areaTriggerTemplate->HasFlag(AREATRIGGER_FLAG_UNK3);
-        bool hasUnk4                = areaTriggerTemplate->HasFlag(AREATRIGGER_FLAG_UNK4);
+        bool hasAnimKitID           = areaTriggerTemplate->HasFlag(AREATRIGGER_FLAG_HAS_ANIM_KIT_ID);
         bool hasAreaTriggerSphere   = areaTriggerTemplate->IsSphere();
         bool hasAreaTriggerBox      = areaTriggerTemplate->IsBox();
         bool hasAreaTriggerPolygon  = areaTriggerTemplate->IsPolygon();
@@ -558,9 +568,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
         data->WriteBit(hasMorphCurveID);
         data->WriteBit(hasFacingCurveID);
         data->WriteBit(hasMoveCurveID);
-        data->WriteBit(hasUnk2);
+        data->WriteBit(hasAnimation);
         data->WriteBit(hasUnk3);
-        data->WriteBit(hasUnk4);
+        data->WriteBit(hasAnimKitID);
         data->WriteBit(hasAreaTriggerSphere);
         data->WriteBit(hasAreaTriggerBox);
         data->WriteBit(hasAreaTriggerPolygon);
@@ -596,11 +606,11 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint32 flags) const
         if (hasMoveCurveID)
             *data << uint32(areaTriggerMiscTemplate->MoveCurveId);
 
-        if (hasUnk2)
-            *data << int32(0);
+        if (hasAnimation)
+            *data << int32(areaTriggerMiscTemplate->AnimId);
 
-        if (hasUnk4)
-            *data << uint32(0);
+        if (hasAnimKitID)
+            *data << uint32(areaTriggerMiscTemplate->AnimKitId);
 
         if (hasAreaTriggerSphere)
         {
@@ -1593,6 +1603,15 @@ void WorldObject::setActive(bool on)
     }
 }
 
+void WorldObject::SetVisibilityDistanceOverride(VisibilityDistanceType type)
+{
+    ASSERT(type < VisibilityDistanceType::Max);
+    if (GetTypeId() == TYPEID_PLAYER)
+        return;
+
+    m_visibilityDistanceOverride = VisibilityDistances[AsUnderlyingType(type)];
+}
+
 void WorldObject::CleanupsBeforeDelete(bool /*finalCleanup*/)
 {
     if (IsInWorld())
@@ -2108,28 +2127,25 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
 
 float WorldObject::GetGridActivationRange() const
 {
-    if (ToPlayer())
+    if (isActiveObject())
     {
-        if (ToPlayer()->GetCinematicMgr()->IsOnCinematic())
-            return DEFAULT_VISIBILITY_INSTANCE;
+        if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->GetCinematicMgr()->IsOnCinematic())
+            return std::max(DEFAULT_VISIBILITY_INSTANCE, GetMap()->GetVisibilityRange());
+
         return GetMap()->GetVisibilityRange();
     }
-    else if (ToCreature())
-        return ToCreature()->m_SightDistance;
-    else if (ToDynObject())
-    {
-        if (isActiveObject())
-            return GetMap()->GetVisibilityRange();
-        else
-            return 0.0f;
-    }
-    else
-        return 0.0f;
+
+    if (Creature const* thisCreature = ToCreature())
+        return thisCreature->m_SightDistance;
+
+    return 0.0f;
 }
 
 float WorldObject::GetVisibilityRange() const
 {
-    if (isActiveObject() && !ToPlayer())
+    if (IsVisibilityOverridden() && !ToPlayer())
+        return *m_visibilityDistanceOverride;
+    else if (isActiveObject() && !ToPlayer())
         return MAX_VISIBILITY_DISTANCE;
     else
         return GetMap()->GetVisibilityRange();
@@ -2141,7 +2157,9 @@ float WorldObject::GetSightRange(const WorldObject* target) const
     {
         if (ToPlayer())
         {
-            if (target && target->isActiveObject() && !target->ToPlayer())
+            if (target && target->IsVisibilityOverridden() && !target->ToPlayer())
+                return *target->m_visibilityDistanceOverride;
+            else if (target && target->isActiveObject() && !target->ToPlayer())
                 return MAX_VISIBILITY_DISTANCE;
             else if (ToPlayer()->GetCinematicMgr()->IsOnCinematic())
                 return DEFAULT_VISIBILITY_INSTANCE;
@@ -2208,11 +2226,8 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
             if (obj->IsVisibleBySummonerOnly())
             {
                 if (Creature const* creature = obj->ToCreature())
-                {
-                    if (TempSummon const* tempSummon = creature->ToTempSummon())
-                        if (GetGUID() != tempSummon->GetSummonerGUID())
-                            return false;
-                }
+                    if (TempSummon::IsPersonalSummonOfAnotherPlayer(creature, GetGUID()))
+                        return false;
                 else if (GameObject const* gameObject = obj->ToGameObject())
                 {
                     if (GetGUID() != gameObject->GetOwnerGUID())

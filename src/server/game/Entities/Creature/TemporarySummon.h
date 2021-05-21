@@ -112,6 +112,7 @@ class TC_GAME_API TempSummon : public Creature
 
         void SetVisibleBySummonerOnly(bool visibleBySummonerOnly) { m_visibleBySummonerOnly = visibleBySummonerOnly; }
         bool IsVisibleBySummonerOnly() const { return m_visibleBySummonerOnly; }
+        static bool IsPersonalSummonOfAnotherPlayer(Creature const* summon, ObjectGuid playerToCheck);
 
         const SummonPropertiesEntry* const m_Properties;
     private:

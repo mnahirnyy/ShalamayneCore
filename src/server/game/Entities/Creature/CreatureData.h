@@ -28,6 +28,7 @@
 #include <cmath>
 
 struct ItemTemplate;
+enum class VisibilityDistanceType : uint8;
 
 enum CreatureDifficultyFlags
 {
@@ -564,6 +565,7 @@ struct CreatureAddon
     uint16 movementAnimKit;
     uint16 meleeAnimKit;
     std::vector<uint32> auras;
+    VisibilityDistanceType visibilityDistanceType;
 };
 
 // Vendors
@@ -645,5 +647,7 @@ struct TC_GAME_API TrainerSpellData
                                                             // req. for correct show non-prof. trainers like weaponmaster, allowed values 0 and 2.
     TrainerSpell const* Find(uint32 spell_id) const;
 };
+
+typedef std::unordered_map<uint32, float /*SparringHealthLimit*/> CreatureSparringTemplateMap;
 
 #endif // CreatureData_h__

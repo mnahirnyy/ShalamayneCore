@@ -82,6 +82,7 @@ GameObject::GameObject() : WorldObject(false), MapObject(),
     m_spawnId = UI64LIT(0);
 
     m_groupLootTimer = 0;
+    m_lootGenerationTime = 0;
 
     ResetLootMode(); // restore default loot mode
     m_stationaryPosition.Relocate(0.0f, 0.0f, 0.0f, 0.0f);
@@ -404,6 +405,18 @@ bool GameObject::Create(uint32 entry, Map* map, Position const& pos, QuaternionD
                 delete linkedGo;
         }
     }
+
+    // Check if GameObject is Infinite
+    if (goInfo->IsInfiniteGameObject())
+        SetVisibilityDistanceOverride(VisibilityDistanceType::Infinite);
+
+    // Check if GameObject is Gigantic
+    if (goInfo->IsGiganticGameObject())
+        SetVisibilityDistanceOverride(VisibilityDistanceType::Gigantic);
+
+    // Check if GameObject is Large
+    if (goInfo->IsLargeGameObject())
+        SetVisibilityDistanceOverride(VisibilityDistanceType::Large);
 
     return true;
 }
