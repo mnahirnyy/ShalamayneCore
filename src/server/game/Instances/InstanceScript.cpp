@@ -400,13 +400,19 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
         if (bossInfo->state == TO_BE_DECIDED) // loading
         {
             bossInfo->state = state;
-            //TC_LOG_ERROR("misc", "Inialize boss %u state as %u.", id, (uint32)state);
+            TC_LOG_DEBUG("scripts", "InstanceScript: Initialize boss %u state as %s (map %u, %u).", id, GetBossStateName(state), instance->GetId(), instance->GetInstanceId());
             return false;
         }
         else
         {
             if (bossInfo->state == state)
                 return false;
+
+            if (bossInfo->state == DONE)
+            {
+                TC_LOG_ERROR("map", "InstanceScript: Tried to set instance boss %u state from %s back to %s for map %u, instance id %u. Blocked!", id, GetBossStateName(bossInfo->state), GetBossStateName(state), instance->GetId(), instance->GetInstanceId());
+                return false;
+            }
 
             if (state == DONE)
                 for (GuidSet::iterator i = bossInfo->minion.begin(); i != bossInfo->minion.end(); ++i)

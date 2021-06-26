@@ -2678,10 +2678,16 @@ void BonusData::Initialize(ItemTemplate const* proto)
         ItemStatType[i] = proto->GetItemStatType(i);
 
     for (uint32 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
+    {
         ItemStatValue[i] = proto->GetItemStatValue(i);
+        // TC_LOG_ERROR("worldserver.items", "ItemStatValue '%u'", ItemStatValue[i]);
+    }   
 
     for (uint32 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
+    {
         ItemStatAllocation[i] = proto->GetItemStatAllocation(i);
+        // TC_LOG_ERROR("worldserver.items", "ItemStatAllocation '%u'", ItemStatAllocation[i]);
+    }   
 
     for (uint32 i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
         ItemStatSocketCostMultiplier[i] = proto->GetItemStatSocketCostMultiplier(i);

@@ -34,6 +34,7 @@
 #include "WorldSession.h"
 #include "PhasingHandler.h"
 #include "CombatAI.h"
+#include "Log.h"
 
 enum eQuests
 {
@@ -61,6 +62,7 @@ enum eQuests
 enum eSpells
 {
     SPELL_FEL_INFUSION          = 133508,
+    SPELL_CANCEL_FEL_BAR        = 133510,
     SPELL_UNLOCKING_ALTRUIS     = 184012,
     SPELL_UNLOCKING_KAYN        = 177803,
     SPELL_PRISON_EXPLOSION      = 232248,
@@ -250,9 +252,9 @@ public:
         {
             if (killer->GetTypeId() == TYPEID_PLAYER)
             {
-                killer->ToPlayer()->SetPower(POWER_ALTERNATE_POWER, killer->GetPower(POWER_ALTERNATE_POWER) + 10);
+                killer->ToPlayer()->SetPower(POWER_ALTERNATE_POWER, killer->GetPower(POWER_ALTERNATE_POWER) + 8);
 
-                for (uint8 i = 0; i < 10; ++i)
+                for (uint8 i = 0; i < 8; ++i)
                     killer->ToPlayer()->KilledMonsterCredit(89297, ObjectGuid::Empty);
             }
         }
@@ -283,9 +285,9 @@ public:
 
     void OnQuestStatusChange(Player* player, Quest const* /*quest*/, QuestStatus /*oldStatus*/, QuestStatus newStatus) override
     {
-        if (newStatus == QUEST_STATUS_NONE)
+        if (newStatus == QUEST_STATUS_NONE || newStatus == QUEST_STATE_COMPLETE)
         {
-            player->RemoveAurasDueToSpell(SPELL_FEL_INFUSION);
+            player->CastSpell(player, SPELL_CANCEL_FEL_BAR, true);
             PhasingHandler::OnConditionChange(player);
         }
     }
@@ -308,7 +310,7 @@ public:
     bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) override
     {
         if (quest->GetQuestId() == QUEST_FEL_INFUSION)
-            player->RemoveAurasDueToSpell(SPELL_FEL_INFUSION);
+            player->CastSpell(player, SPELL_CANCEL_FEL_BAR, true);
 
         return true;
     }
@@ -1509,7 +1511,7 @@ class PlayerScript_follower_choice : public PlayerScript
 public:
     PlayerScript_follower_choice() : PlayerScript("PlayerScript_follower_choice") {}
 
-    void OnCompleteQuestChoice(Player* player, uint32 choiceID, uint32 responseID)
+    void OnPlayerChoiceResponse(Player* player, uint32 choiceID, uint32 responseID) override
     {
         if (choiceID != PLAYER_CHOICE_DH_FOLLOWER_SELECTION)
             return;
@@ -2428,4 +2430,4 @@ void AddSC_zone_vault_of_wardens()
     new npc_kayn_sunfury_freed_99631();
     new npc_vault_of_the_wardens_vampiric_felbat();
     new npc_maiev_shadowsong_welcome();
-}
+ }

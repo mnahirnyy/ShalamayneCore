@@ -916,7 +916,7 @@ class npc_orb_carrier : public CreatureScript
                 ASSERT(creature->GetVehicleKit());
             }
 
-            void UpdateAI(uint32 /*diff*/) override
+            void UpdateAI(uint32 diff) override
             {
                 /// According to sniffs this spell is cast every 1 or 2 seconds.
                 /// However, refreshing it looks bad, so just cast the spell if
@@ -924,12 +924,7 @@ class npc_orb_carrier : public CreatureScript
                 if (!me->HasUnitState(UNIT_STATE_CASTING))
                     me->CastSpell((Unit*)nullptr, SPELL_TRACK_ROTATION, false);
 
-                /// Workaround: This is here because even though the above spell has SPELL_ATTR1_CHANNEL_TRACK_TARGET,
-                /// we are having two creatures involded here. This attribute is handled clientside, meaning the client
-                /// sends orientation update itself. Here, no packet is sent, and the creature does not rotate. By
-                /// forcing the carrier to always be facing the rotation focus, we ensure everything works as it should.
-                if (Creature* rotationFocus = ObjectAccessor::GetCreature(*me, _instance->GetGuidData(DATA_ORB_ROTATION_FOCUS)))
-                    me->SetFacingToObject(rotationFocus); // setInFront
+                scheduler.Update(diff);
             }
 
             void DoAction(int32 action) override
@@ -975,6 +970,7 @@ class npc_orb_carrier : public CreatureScript
             }
         private:
             InstanceScript* _instance;
+            TaskScheduler scheduler;
 
             void TriggerCutter(Unit* caster, Unit* target)
             {

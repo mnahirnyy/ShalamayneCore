@@ -721,8 +721,8 @@ bool Player::Create(ObjectGuid::LowType guidlow, WorldPackets::Character::Charac
                 }
             }
         }
-        // all item positions resolved
     }
+    // all item positions resolved
 
     if (ChrSpecializationEntry const* defaultSpec = sDB2Manager.GetDefaultChrSpecializationForClass(getClass()))
     {
@@ -942,7 +942,7 @@ void Player::HandleDrowning(uint32 time_diff)
     }
 
     // In dark water
-    if (m_MirrorTimerFlags & UNDERWARER_INDARKWATER)
+    if (m_MirrorTimerFlags & UNDERWATER_INDARKWATER)
     {
         // Fatigue timer not activated - activate it
         if (m_MirrorTimer[FATIGUE_TIMER] == DISABLED_MIRROR_TIMER)
@@ -965,7 +965,7 @@ void Player::HandleDrowning(uint32 time_diff)
                 else if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))       // Teleport ghost to graveyard
                     RepopAtGraveyard();
             }
-            else if (!(m_MirrorTimerFlagsLast & UNDERWARER_INDARKWATER))
+            else if (!(m_MirrorTimerFlagsLast & UNDERWATER_INDARKWATER))
                 SendMirrorTimer(FATIGUE_TIMER, getMaxTimer(FATIGUE_TIMER), m_MirrorTimer[FATIGUE_TIMER], -1);
         }
     }
@@ -975,7 +975,7 @@ void Player::HandleDrowning(uint32 time_diff)
         m_MirrorTimer[FATIGUE_TIMER]+=10*time_diff;
         if (m_MirrorTimer[FATIGUE_TIMER] >= DarkWaterTime || !IsAlive())
             StopMirrorTimer(FATIGUE_TIMER);
-        else if (m_MirrorTimerFlagsLast & UNDERWARER_INDARKWATER)
+        else if (m_MirrorTimerFlagsLast & UNDERWATER_INDARKWATER)
             SendMirrorTimer(FATIGUE_TIMER, DarkWaterTime, m_MirrorTimer[FATIGUE_TIMER], 10);
     }
 
@@ -1085,18 +1085,6 @@ void Player::Update(uint32 p_time)
 
         // It will be recalculate at mailbox open (for unReadMails important non-0 until mailbox open, it also will be recalculated)
         m_nextMailDelivereTime = 0;
-    }
-
-    // If this is set during update SetSpellModTakingSpell call is missing somewhere in the code
-    // Having this would prevent more aura charges to be dropped, so let's crash
-    //ASSERT (!m_spellModTakingSpell);
-    if (m_spellModTakingSpell)
-    {
-        //TC_LOG_FATAL("entities.player", "Player has m_pad %u during update!", m_pad);
-        //if (m_spellModTakingSpell)
-        TC_LOG_FATAL("spells", "Player::Update: Player '%s' (%s) has m_spellModTakingSpell (SpellID: %u) during update!",
-            GetName().c_str(), GetGUID().ToString().c_str(), m_spellModTakingSpell->m_spellInfo->Id);
-        m_spellModTakingSpell = nullptr;
     }
 
     // Update cinematic location, if 500ms have passed and we're doing a cinematic now.
@@ -1579,7 +1567,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
         m_teleport_options = options;
         m_teleport_option_param = optionParam;
-        SetFallInformation(0, z);
+        SetFallInformation(0, GetPositionZ());
 
         // code for finish transfer called in WorldSession::HandleMovementOpcodes()
         // at client packet CMSG_MOVE_TELEPORT_ACK
@@ -1699,7 +1687,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
             m_teleport_options = options;
-            SetFallInformation(0, z);
+            SetFallInformation(0, GetPositionZ());
             // if the player is saved before worldportack (at logout for example)
             // this will be used instead of the current location in SaveToDB
 
@@ -1915,7 +1903,10 @@ void Player::RemoveFromWorld()
         StopCastingCharm();
         StopCastingBindSight();
         UnsummonPetTemporaryIfAny();
-
+        ClearComboPoints();
+        ObjectGuid lootGuid = GetLootGUID();
+        if (!lootGuid.IsEmpty())
+            m_session->DoLootRelease(lootGuid);
         if (Area* zone = GetZone())
         {
             sOutdoorPvPMgr->HandlePlayerLeaveZone(this, zone);
@@ -2297,8 +2288,8 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid const& guid, uint64 npcflag
     if (creature->GetReactionTo(this) <= REP_UNFRIENDLY)
         return nullptr;
 
-    // not too far
-    if (!IsWithinDistInMap(creature, INTERACTION_DISTANCE))
+    // not too far, taken from CGGameUI::SetInteractTarget
+    if (!creature->IsWithinDistInMap(this, creature->GetCombatReach() + 4.0f))
         return nullptr;
 
     return creature;
@@ -2306,33 +2297,36 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid const& guid, uint64 npcflag
 
 GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid const& guid) const
 {
-    if (GameObject* go = GetMap()->GetGameObject(guid))
-    {
-        if (go->IsWithinDistInMap(this, go->GetInteractionDistance()))
-            return go;
+    if (!guid)
+        return nullptr;
 
-        TC_LOG_DEBUG("maps", "Player::GetGameObjectIfCanInteractWith: GameObject '%s' (%s) is too far away from player '%s' (%s) to be used by him (Distance: %f, maximal %f is allowed)",
-            go->GetGOInfo()->name.c_str(), go->GetGUID().ToString().c_str(), GetName().c_str(), GetGUID().ToString().c_str(), go->GetDistance(this), go->GetInteractionDistance());
-    }
+    if (!IsInWorld())
+        return nullptr;
 
-    return nullptr;
+    if (IsInFlight())
+        return nullptr;
+
+    // exist
+    GameObject* go = ObjectAccessor::GetGameObject(*this, guid);
+    if (!go)
+        return nullptr;
+
+    if (!go->IsWithinDistInMap(this, go->GetInteractionDistance()))
+        return nullptr;
+
+    return go;
 }
 
 GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid const& guid, GameobjectTypes type) const
 {
-    if (GameObject* go = GetMap()->GetGameObject(guid))
-    {
-        if (go->GetGoType() == type)
-        {
-            if (go->IsWithinDistInMap(this, go->GetInteractionDistance()))
-                return go;
+    GameObject* go = GetGameObjectIfCanInteractWith(guid);
+    if (!go)
+        return nullptr;
 
-            TC_LOG_DEBUG("maps", "Player::GetGameObjectIfCanInteractWith: GameObject '%s' (%s) is too far away from player '%s' (%s) to be used by him (Distance: %f, maximal %f is allowed)",
-                go->GetGOInfo()->name.c_str(), go->GetGUID().ToString().c_str(), GetName().c_str(), GetGUID().ToString().c_str(), go->GetDistance(this), go->GetInteractionDistance());
-        }
-    }
+    if (go->GetGoType() != type)
+        return nullptr;
 
-    return nullptr;
+    return go;
 }
 
 bool Player::IsUnderWater() const
@@ -2341,9 +2335,9 @@ bool Player::IsUnderWater() const
         GetPositionZ() < (GetMap()->GetWaterLevel(GetPhaseShift(), GetPositionX(), GetPositionY()) - 2);
 }
 
-void Player::SetInWater(bool apply)
+void Player::SetInWater(bool inWater)
 {
-    if (m_isInWater == apply)
+    if (m_isInWater == inWater)
         return;
 
     //define player in water by opcodes
@@ -2351,10 +2345,10 @@ void Player::SetInWater(bool apply)
     //which can't swim and move guid back into ThreatList when
     //on surface.
     /// @todo exist also swimming mobs, and function must be symmetric to enter/leave water
-    m_isInWater = apply;
+    m_isInWater = inWater;
 
     // remove auras that need water/land
-    RemoveAurasWithInterruptFlags(apply ? AURA_INTERRUPT_FLAG_NOT_ABOVEWATER : AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
+    RemoveAurasWithInterruptFlags(inWater ? AURA_INTERRUPT_FLAG_NOT_ABOVEWATER : AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
 
     getHostileRefManager().updateThreatTables();
 }
@@ -2491,7 +2485,6 @@ bool Player::IsInSameRaidWith(Player const* p) const
 }
 
 ///- If the player is invited, remove him. If the group if then only 1 person, disband the group.
-/// @todo Shouldn't we also check if there is no other invitees before disbanding the group?
 void Player::UninviteFromGroup()
 {
     Group* group = GetGroupInvite();
@@ -2528,8 +2521,8 @@ void Player::SetXP(uint32 xp)
 
     int32 playerLevelDelta = 0;
 
-    // If XP < 25%, player should see scaling creature with -1 level except for level max
-    if (getLevel() < MAX_LEVEL && xp < (GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 4))
+    // If XP < 50%, player should see scaling creature with -1 level except for level max
+    if (getLevel() < MAX_LEVEL && xp < (GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 2))
         playerLevelDelta = -1;
 
     SetInt32Value(PLAYER_FIELD_SCALING_PLAYER_LEVEL_DELTA, playerLevelDelta);
@@ -3420,7 +3413,7 @@ bool Player::IsNeedCastPassiveSpellAtLearn(SpellInfo const* spellInfo) const
 
     // Check EquippedItemClass
     // passive spells which apply aura and have an item requirement are to be added in Player::ApplyItemDependentAuras
-    if (spellInfo->IsPassive() && spellInfo->EquippedItemClass >= 0)
+    if (spellInfo->EquippedItemClass >= 0)
     {
         for (SpellEffectInfo const* effectInfo : spellInfo->GetEffectsForDifficulty(DIFFICULTY_NONE))
             if (effectInfo && effectInfo->IsAura())
@@ -3611,7 +3604,7 @@ void Player::RemoveSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
                 }
 
                 // now re-learn if need re-activate
-                if (cur_active && !prev_itr->second->active && learn_low_rank)
+                if (!prev_itr->second->active && learn_low_rank)
                 {
                     if (AddSpell(prev_id, true, false, prev_itr->second->dependent, prev_itr->second->disabled))
                     {
@@ -3777,9 +3770,6 @@ void Player::ResetPvpTalents()
         if (!talentInfo)
             continue;
 
-        if (talentInfo->ClassID && talentInfo->ClassID != getClass())
-            continue;
-
         RemovePvpTalent(talentInfo);
     }
 
@@ -3842,16 +3832,16 @@ void Player::DestroyForPlayer(Player* target) const
 {
     Unit::DestroyForPlayer(target);
 
-    for (uint8 i = 0; i < INVENTORY_SLOT_BAG_END; ++i)
-    {
-        if (m_items[i] == nullptr)
-            continue;
-
-        m_items[i]->DestroyForPlayer(target);
-    }
-
     if (target == this)
     {
+        for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
+        {
+            if (m_items[i] == nullptr)
+                continue;
+
+            m_items[i]->DestroyForPlayer(target);
+        }
+
         for (uint8 i = INVENTORY_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
         {
             if (m_items[i] == nullptr)
@@ -4366,11 +4356,9 @@ void Player::BuildPlayerRepop()
     packet.PlayerGUID = GetGUID();
     GetSession()->SendPacket(packet.Write());
 
-    // if (getRace() == RACE_NIGHTELF)
     // If the player has the Wisp racial then cast the Wisp aura on them
-    if (HasSpell(20585)) {
+    if (HasSpell(20585))
         CastSpell(this, 20584, true);
-    }   
     CastSpell(this, 8326, true);
 
     // there must be SMSG.FORCE_RUN_SPEED_CHANGE, SMSG.FORCE_SWIM_SPEED_CHANGE, SMSG.MOVE_SET_WATER_WALK
@@ -5356,6 +5344,9 @@ void Player::UpdateRating(CombatRating cr)
         case CR_MASTERY:
             UpdateMastery();
             break;
+        case CR_PVP_POWER:
+        case CR_CLEAVE:
+            break;
         case CR_VERSATILITY_DAMAGE_DONE:
             UpdateVersatilityDamageDone();
             break;
@@ -5363,8 +5354,6 @@ void Player::UpdateRating(CombatRating cr)
             UpdateHealingDonePercentMod();
             break;
         case CR_VERSATILITY_DAMAGE_TAKEN:
-        case CR_PVP_POWER:
-        case CR_CLEAVE:
         case CR_UNUSED_12:
             break;
     }
@@ -5372,7 +5361,7 @@ void Player::UpdateRating(CombatRating cr)
 
 void Player::UpdateAllRatings()
 {
-    for (int cr = 0; cr < MAX_COMBAT_RATING; ++cr)
+    for (uint8 cr = 0; cr < MAX_COMBAT_RATING; ++cr)
         UpdateRating(CombatRating(cr));
 }
 
@@ -6289,7 +6278,7 @@ void Player::CheckAreaExploreAndOutdoor()
                 uint32 XP;
                 if (diff < -5)
                 {
-                    XP = uint32(sObjectMgr->GetBaseXP(getLevel()+5)*sWorld->getRate(RATE_XP_EXPLORE));
+                    XP = uint32(sObjectMgr->GetBaseXP(getLevel() + 5) * sWorld->getRate(RATE_XP_EXPLORE));
                 }
                 else if (diff > 5)
                 {
@@ -7677,6 +7666,7 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply, bool updateItemA
         return;
 
     TC_LOG_DEBUG("entities.player.items", "Player::_ApplyItemMods: Applying mods for item %s", item->GetGUID().ToString().c_str());
+    TC_LOG_ERROR("server.worldserver", "Player::_ApplyItemMods: Applying mods for item %s", item->GetGUID().ToString().c_str());
 
     if (item->GetSocketColor(0))                              //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
         CorrectMetaGemEnchants(slot, apply);
@@ -7734,6 +7724,7 @@ void Player::_ApplyItemBonuses(Item* item, uint8 slot, bool apply)
             continue;
 
         int32 val = item->GetItemStatValue(i, this);
+        TC_LOG_ERROR("worldserver.items", "GetItemStatValue '%u'", val);
         if (val == 0)
             continue;
 
@@ -8507,7 +8498,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, Objec
         spell->m_CastItem = item;
         spell->m_misc.Raw.Data[0] = misc[0];
         spell->m_misc.Raw.Data[1] = misc[1];
-        spell->prepare(&targets);
+        spell->prepare(&targets); 
         return;
     }
 
@@ -8578,7 +8569,7 @@ void Player::_RemoveAllItemMods()
         {
             if (m_items[i]->IsBroken() || !CanUseAttackType(Player::GetAttackBySlot(i, m_items[i]->GetTemplate()->GetInventoryType())))
                 continue;
-
+            TC_LOG_ERROR("server.worldserver", "Player::_RemoveAllItemMods: Applying bonuses for item %s", m_items[i]->GetGUID().ToString().c_str());
             ApplyItemDependentAuras(m_items[i], false);
             _ApplyItemBonuses(m_items[i], i, false);
         }
@@ -8597,7 +8588,7 @@ void Player::_ApplyAllItemMods()
         {
             if (m_items[i]->IsBroken() || !CanUseAttackType(Player::GetAttackBySlot(i, m_items[i]->GetTemplate()->GetInventoryType())))
                 continue;
-
+            TC_LOG_ERROR("server.worldserver", "Player::_ApplyAllItemMods: Applying bonuses for item %s", m_items[i]->GetEntry());
             ApplyItemDependentAuras(m_items[i], true);
             _ApplyItemBonuses(m_items[i], i, true);
         }
@@ -18025,8 +18016,7 @@ void Player::_LoadEquipmentSets(PreparedQueryResult result)
             continue;
 
         _equipmentSets[eqSet.Data.Guid] = eqSet;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 }
 
 void Player::_LoadTransmogOutfits(PreparedQueryResult result)
@@ -22058,12 +22048,11 @@ void Player::UpdateAfkReport(time_t currTime)
 
 void Player::UpdateContestedPvP(uint32 diff)
 {
-    if (!m_contestedPvPTimer||IsInCombat())
+    if (!m_contestedPvPTimer || IsInCombat())
         return;
+
     if (m_contestedPvPTimer <= diff)
-    {
         ResetContestedPvP();
-    }
     else
         m_contestedPvPTimer -= diff;
 }
@@ -22737,10 +22726,10 @@ void Player::ApplyModToSpell(SpellModifier* mod, Spell* spell)
 
 void Player::SetSpellModTakingSpell(Spell* spell, bool apply)
 {
-    if (!spell || (m_spellModTakingSpell && m_spellModTakingSpell != spell))
+    if (apply && m_spellModTakingSpell != nullptr)
         return;
 
-    if (apply && spell->getState() == SPELL_STATE_FINISHED)
+    if (!apply && (!m_spellModTakingSpell || m_spellModTakingSpell != spell))
         return;
 
     m_spellModTakingSpell = apply ? spell : nullptr;
@@ -24423,8 +24412,8 @@ bool Player::HasEnoughMoney(int64 amount) const
 
 void Player::SetMoney(uint64 value)
 {
-    SetUInt64Value(PLAYER_FIELD_COINAGE, value);
     MoneyChanged(value);
+	SetUInt64Value(PLAYER_FIELD_COINAGE, value);
     UpdateCriteria(CRITERIA_TYPE_HIGHEST_GOLD_VALUE_OWNED);
 }
 
@@ -24988,8 +24977,13 @@ void Player::LearnQuestRewardedSpells()
 {
     // learn spells received from quest completing
     for (RewardedQuestSet::const_iterator itr = m_RewardedQuests.begin(); itr != m_RewardedQuests.end(); ++itr)
-        if (Quest const* quest = sObjectMgr->GetQuestTemplate(*itr))
-            LearnQuestRewardedSpells(quest);
+    {
+        Quest const* quest = sObjectMgr->GetQuestTemplate(*itr);
+        if (!quest)
+            continue;
+
+        LearnQuestRewardedSpells(quest);
+    }
 }
 
 void Player::LearnSkillRewardedSpells(uint32 skillId, uint32 skillValue)
@@ -25628,16 +25622,27 @@ bool Player::HasItemFitToSpellRequirements(SpellInfo const* spellInfo, Item cons
         {
             if (!spellInfo->HasAttribute(SPELL_ATTR8_ARMOR_SPECIALIZATION))
             {
+                // most used check: shield only
+                if (spellInfo->EquippedItemSubClassMask & (1 << ITEM_SUBCLASS_ARMOR_SHIELD))
+                {
+                    if (Item* item = GetUseableItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                        if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo))
+                            return true;
+
+                    // special check to filter things like Shield Wall, the aura is not permanent and must stay even without required item
+                    if (!spellInfo->IsPassive())
+                    {
+                        for (SpellEffectInfo const* effect : spellInfo->GetEffectsForDifficulty(DIFFICULTY_NONE))
+                            if (effect && effect->IsAura())
+                                return true;
+                    }
+                }
+
                 // tabard not have dependent spells
                 for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_MAINHAND; ++i)
                     if (Item* item = GetUseableItemByPos(INVENTORY_SLOT_BAG_0, i))
                         if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo))
                             return true;
-
-                // shields can be equipped to offhand slot
-                if (Item* item = GetUseableItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
-                    if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo))
-                        return true;
             }
             else
             {
@@ -25651,7 +25656,6 @@ bool Player::HasItemFitToSpellRequirements(SpellInfo const* spellInfo, Item cons
 
                 return true;
             }
-
             break;
         }
         default:
@@ -25675,7 +25679,7 @@ bool Player::CanNoReagentCast(SpellInfo const* spellInfo) const
     noReagentMask[1] = GetUInt32Value(PLAYER_NO_REAGENT_COST_1 + 1);
     noReagentMask[2] = GetUInt32Value(PLAYER_NO_REAGENT_COST_1 + 2);
     noReagentMask[3] = GetUInt32Value(PLAYER_NO_REAGENT_COST_1 + 3);
-    if (spellInfo->SpellFamilyFlags  & noReagentMask)
+    if (spellInfo->SpellFamilyFlags & noReagentMask)
         return true;
 
     return false;
@@ -25864,7 +25868,7 @@ bool Player::IsAtRecruitAFriendDistance(WorldObject const* pOther) const
 
 void Player::ResurrectUsingRequestData()
 {
-    /// Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
+    // Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
     TeleportTo(_resurrectionData->Location);
 
     if (IsBeingTeleported())
@@ -26201,7 +26205,7 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     ZLiquidStatus res = m->getLiquidStatus(GetPhaseShift(), x, y, z, MAP_ALL_LIQUIDS, &liquid_status);
     if (!res)
     {
-        m_MirrorTimerFlags &= ~(UNDERWATER_INWATER | UNDERWATER_INLAVA | UNDERWATER_INSLIME | UNDERWARER_INDARKWATER);
+        m_MirrorTimerFlags &= ~(UNDERWATER_INWATER | UNDERWATER_INLAVA | UNDERWATER_INSLIME | UNDERWATER_INDARKWATER);
         if (_lastLiquid && _lastLiquid->SpellID)
             RemoveAurasDueToSpell(_lastLiquid->SpellID);
 
@@ -26246,9 +26250,9 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
 
     // Allow travel in dark water on taxi or transport
     if ((liquid_status.type_flags & MAP_LIQUID_TYPE_DARK_WATER) && !IsInFlight() && !GetTransport())
-        m_MirrorTimerFlags |= UNDERWARER_INDARKWATER;
+        m_MirrorTimerFlags |= UNDERWATER_INDARKWATER;
     else
-        m_MirrorTimerFlags &= ~UNDERWARER_INDARKWATER;
+        m_MirrorTimerFlags &= ~UNDERWATER_INDARKWATER;
 
     // in lava check, anywhere in lava level
     if (liquid_status.type_flags & MAP_LIQUID_TYPE_MAGMA)
@@ -26604,8 +26608,8 @@ void Player::AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore cons
         Item* pItem = StoreNewItem(dest, lootItem->itemid, true, lootItem->randomPropertyId, GuidSet(), lootItem->context, lootItem->BonusListIDs);
         SendNewItem(pItem, lootItem->count, false, false, broadcast);
 
-        if (toastMethod != TOAST_METHOD_NONE)
-        {
+        //if (toastMethod == TOAST_METHOD_NONE)
+        //{
             WorldPackets::Loot::DisplayToast displayToast;
             displayToast.EntityId = lootItem->itemid;
             displayToast.ToastType = TOAST_ITEM;
@@ -26613,8 +26617,9 @@ void Player::AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore cons
             displayToast.RandomPropertiesID = pItem->GetItemRandomPropertyId();
             displayToast.ToastMethod = toastMethod;
             displayToast.bonusListIDs = pItem->GetDynamicValues(ITEM_DYNAMIC_FIELD_BONUSLIST_IDS);
-            SendDirectMessage(displayToast.Write());
-        }
+            this->SendDirectMessage(displayToast.Write());
+            // GetSession()->SendPacket(displayToast.Write());
+        //}
     }
 }
 
@@ -29961,6 +29966,7 @@ void Player::SendDisplayToast(uint32 entry, uint32 questId, uint32 count, Displa
 
         displayToast.ToastMethod = method;
         displayToast.bonusListIDs = itembonus;
-        SendDirectMessage(displayToast.Write());
+        this->SendDirectMessage(displayToast.Write());
+        // GetSession()->SendPacket(displayToast.Write());
     }
 }

@@ -2455,8 +2455,7 @@ class PlayerScript_mardum_spec_choice : public PlayerScript
 public:
     PlayerScript_mardum_spec_choice() : PlayerScript("PlayerScript_mardum_spec_choice") {}
 
-    // OnPlayerChoiceResponse
-    void OnCompleteQuestChoice(Player* player, uint32 choiceID, uint32 responseID)
+    void OnPlayerChoiceResponse(Player* player, uint32 choiceID, uint32 responseID) override
     {
         if (choiceID != PLAYER_CHOICE_DH_SPEC_SELECTION)
             return;

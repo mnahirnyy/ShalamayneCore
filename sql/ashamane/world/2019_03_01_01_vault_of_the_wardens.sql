@@ -213,8 +213,8 @@ SET @MIRANA := 99451;
 UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@MIRANA;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@MIRANA AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@MIRANA,0,0,0,0,0,100,0,0,0,3400,4700,11,195783,64,0,0,0,0,2,0,0,0,0,0,0,0,"Mirana - In Combat - Cast 'Fan of Blades'"),
-(@MIRANA,0,1,0,0,0,100,0,5000,8000,12000,15000,11,191026,0,0,0,0,0,2,0,0,0,0,0,0,0,"Mirana - In Combat - Cast 'Throwing Blade'");
+(@MIRANA,0,0,0,0,0,100,0,0,0,3400,4700,11,189609,64,0,0,0,0,2,0,0,0,0,0,0,0,"Mirana - In Combat - Cast 'Fan of Blades'"),
+(@MIRANA,0,1,0,0,0,100,0,5000,8000,12000,15000,11,191029,0,0,0,0,0,2,0,0,0,0,0,0,0,"Mirana - In Combat - Cast 'Throwing Blade'");
 
 -- Drelanin Whisperwind SAI
 SET @DRELANIN := 96847;
@@ -223,7 +223,7 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`=@DRELANIN AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (@DRELANIN,0,0,0,10,0,100,1,1,15,0,0,1,0,10000,0,0,0,0,18,15,0,0,0,0,0,0,"Drelanin - Within 1-15 Range Out of Combat LoS - Say Line 0 (No Repeat)"),
 (@DRELANIN,0,1,0,0,0,100,0,5000,8000,18000,22000,11,189469,0,0,0,0,0,2,0,0,0,0,0,0,0,"Drelanin - In Combat - Cast 'Turn Kick'"),
-(@DRELANIN,0,2,0,0,0,100,0,2000,5000,12000,15000,11,195783,0,0,0,0,0,2,0,0,0,0,0,0,0,"Drelanin - In Combat - Cast 'Fan of Blades'");
+(@DRELANIN,0,2,0,0,0,100,0,2000,5000,12000,15000,11,189609,0,0,0,0,0,2,0,0,0,0,0,0,0,"Drelanin - In Combat - Cast 'Fan of Blades'");
 
 DELETE FROM `creature_text` WHERE `CreatureID` = @DRELANIN;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
@@ -257,7 +257,7 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 SET @CYANA := 96672;
 DELETE FROM `creature_text` WHERE `CreatureID` = @CYANA;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
-(@CYANA,0,0,'That was too close for my liking. $n, the demon\'s power is yours.',12,0,100,0,0,57357,0,0,'Cyana to Player');
+(@CYANA,0,0,'That was too close for my liking. $p, the demon\'s power is yours.',12,0,100,0,0,57357,0,0,'Cyana to Player');
 
 -- Kayn near Ashgolm SAI
 SET @KAYN_1 := 102393;
