@@ -214,36 +214,6 @@ void CreatureAI::EnterEvadeMode(EvadeReason why)
         AttackStart(attacker);
 }*/
 
-void CreatureAI::SetGazeOn(Unit* target)
-{
-    if (me->IsValidAttackTarget(target))
-    {
-        if (!me->IsFocusing(nullptr, true))
-            AttackStart(target);
-        me->SetReactState(REACT_PASSIVE);
-    }
-}
-
-bool CreatureAI::UpdateVictimWithGaze()
-{
-    if (!me->IsInCombat())
-        return false;
-
-    if (me->HasReactState(REACT_PASSIVE))
-    {
-        if (me->GetVictim())
-            return true;
-        else
-            me->SetReactState(REACT_AGGRESSIVE);
-    }
-
-    if (Unit* victim = me->SelectVictim())
-        if (!me->IsFocusing(nullptr, true))
-            AttackStart(victim);
-
-    return me->GetVictim() != nullptr;
-}
-
 bool CreatureAI::UpdateVictim()
 {
     if (!me->IsInCombat())
