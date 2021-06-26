@@ -205,7 +205,7 @@ INSERT INTO `creature_summon_groups` (`summonerId`,`summonerType`,`groupId`,`ent
 (33890,0,2,33990,1922.55,54.68001,241.1263,0.1919862,3,60000);
 
 -- ==================
--- Core/Scripts: fix wrong uses of SetHitDamage hook.
+-- Ymiron: Dark Slash (it was wrongly damaging half of total health, it's supposed to be half of CURRENT health!)
 -- ==================
 DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_gen_50pct_count_pct_from_max_hp' AND `spell_id`=48292;
 DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_dark_slash';
