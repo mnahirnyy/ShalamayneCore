@@ -203,3 +203,11 @@ INSERT INTO `creature_summon_groups` (`summonerId`,`summonerType`,`groupId`,`ent
 (33890,0,2,33990,1917.492,91.10191,239.7496,0.5235988,3,60000), -- Stormwind Keep
 (33890,0,2,33990,1918.132,73.82926,241.7929,2.600541,3,60000),
 (33890,0,2,33990,1922.55,54.68001,241.1263,0.1919862,3,60000);
+
+-- ==================
+-- Core/Scripts: fix wrong uses of SetHitDamage hook.
+-- ==================
+DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_gen_50pct_count_pct_from_max_hp' AND `spell_id`=48292;
+DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_dark_slash';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(48292, 'spell_dark_slash');
