@@ -495,7 +495,7 @@ class TC_GAME_API Spell
 
         typedef std::unordered_set<Aura*> UsedSpellMods;
 
-        Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID = ObjectGuid::Empty, bool skipCheck = false);
+        Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID = ObjectGuid::Empty);
         ~Spell();
 
         void InitExplicitTargets(SpellCastTargets const& targets);
@@ -906,7 +906,6 @@ class TC_GAME_API Spell
         // and in same time need aura data and after aura deleting.
         SpellInfo const* m_triggeredByAuraSpell;
 
-        bool m_skipCheck;
         uint32 m_auraScaleMask;
         std::unique_ptr<PathGenerator> m_preGeneratedPath;
 
