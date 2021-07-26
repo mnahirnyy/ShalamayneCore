@@ -2228,6 +2228,9 @@ void Creature::CallForHelp(float radius)
 
 bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /*= true*/) const
 {
+    if (IsInEvadeMode())
+        return false;
+
     // is it true?
     if (!HasReactState(REACT_AGGRESSIVE))
         return false;
@@ -2272,7 +2275,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
 
 // use this function to avoid having hostile creatures attack
 // friendlies and other mobs they shouldn't attack
-bool Creature::_IsTargetAcceptable(Unit const* target) const
+bool Creature::_IsTargetAcceptable(const Unit* target) const
 {
     ASSERT(target);
 
@@ -2291,16 +2294,12 @@ bool Creature::_IsTargetAcceptable(Unit const* target) const
             return false;
     }
 
-    Unit const* targetVictim = target->getAttackerForHelper();
+    const Unit* myVictim = getAttackerForHelper();
+    const Unit* targetVictim = target->getAttackerForHelper();
 
     // if I'm already fighting target, or I'm hostile towards the target, the target is acceptable
-    if (GetVictim() == target || IsHostileTo(target))
+    if (myVictim == target || targetVictim == this || IsHostileTo(target))
         return true;
-
-    // a player is targeting me, but I'm not hostile towards it, and not currently attacking it, the target is not acceptable
-    // (players may set their victim from a distance, and doesn't mean we should attack)
-    if (target->GetTypeId() == TYPEID_PLAYER && targetVictim == this)
-        return false;
 
     // if the target's victim is friendly, and the target is neutral, the target is acceptable
     if (targetVictim && IsFriendlyTo(targetVictim))
@@ -2788,7 +2787,7 @@ uint32 Creature::GetPetAutoSpellOnPos(uint8 pos) const
 
 float Creature::GetPetChaseDistance() const
 {
-    float range = 0.f;
+    float range = MELEE_RANGE;
 
     for (uint8 i = 0; i < GetPetAutoSpellSize(); ++i)
     {
@@ -2797,13 +2796,11 @@ float Creature::GetPetChaseDistance() const
             continue;
 
         if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellID))
-        {   
-            if (spellInfo->GetRecoveryTime() == 0 && // No cooldown
-                spellInfo->RangeEntry->ID != 1 /*Self*/ &&
-                spellInfo->RangeEntry->ID != 2 /*Combat Range*/ &&
-                spellInfo->GetMaxRange() > range
-            )
-                range = spellInfo->GetMaxRange();
+        {
+            if (spellInfo->GetRecoveryTime() == 0 &&  // No cooldown
+                    spellInfo->RangeEntry->ID != 1 /*Self*/ && spellInfo->RangeEntry->ID != 2 /*Combat Range*/ &&
+                        spellInfo->GetMinRange() > range)
+                range = spellInfo->GetMinRange();
         }
     }
 
@@ -2894,10 +2891,6 @@ void Creature::UpdateMovementFlags()
     if (m_playerMovingMe)
         return;
 
-    // Creatures with CREATURE_FLAG_EXTRA_NO_MOVE_FLAGS_UPDATE should control MovementFlags in your own scripts
-    if (GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_NO_MOVE_FLAGS_UPDATE)
-        return;
-
     // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
     float ground = GetMap()->GetHeight(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZMinusOffset());
 
@@ -2958,14 +2951,8 @@ void Creature::FocusTarget(Spell const* focusSpell, WorldObject const* target)
     if (m_focusSpell)
         return;
 
-    // some spells shouldn't track targets
-    if (focusSpell->IsFocusDisabled())
-        return;
-
-    SpellInfo const* spellInfo = focusSpell->GetSpellInfo();
-
     // don't use spell focus for vehicle spells
-    if (spellInfo->HasAura(DIFFICULTY_NONE, SPELL_AURA_CONTROL_VEHICLE))
+    if (focusSpell->GetSpellInfo()->HasAura(DIFFICULTY_NONE, SPELL_AURA_CONTROL_VEHICLE))
         return;
 
     if ((!target || target == this) && !focusSpell->GetCastTime()) // instant cast, untargeted (or self-targeted) spell doesn't need any facing updates
@@ -2988,14 +2975,14 @@ void Creature::FocusTarget(Spell const* focusSpell, WorldObject const* target)
 
         if ( // here we determine if the (relatively expensive) forced update is worth it, or whether we can afford to wait until the scheduled update tick
             ( // only require instant update for spells that actually have a visual
-                spellInfo->GetSpellVisual()
+                focusSpell->GetSpellInfo()->GetSpellVisual()
             ) && (
                 !focusSpell->GetCastTime() || // if the spell is instant cast
-                spellInfo->HasAttribute(SPELL_ATTR5_DONT_TURN_DURING_CAST) // client gets confused if we attempt to turn at the regularly scheduled update packet
+                !focusSpell->GetSpellInfo()->CasterCanTurnDuringCast() // client gets confused if we attempt to turn at the regularly scheduled update packet
             )
         )
         {
-            std::vector<Player*> playersNearby;
+            std::list<Player*> playersNearby;
             GetPlayerListInGrid(playersNearby, GetVisibilityRange());
             for (Player* player : playersNearby)
             {
@@ -3006,7 +2993,7 @@ void Creature::FocusTarget(Spell const* focusSpell, WorldObject const* target)
         }
     }
 
-    bool const canTurnDuringCast = !spellInfo->HasAttribute(SPELL_ATTR5_DONT_TURN_DURING_CAST);
+    bool canTurnDuringCast = focusSpell->GetSpellInfo()->CasterCanTurnDuringCast();
     // Face the target - we need to do this before the unit state is modified for no-turn spells
     if (target)
         SetFacingToObject(target);
@@ -3265,9 +3252,4 @@ void Creature::ReLoad(bool skipDB)
         AI()->EnterEvadeMode();
 
     TC_LOG_DEBUG("sql.sql", "Creature SpawnID (" SI64FMTD ") reloaded.", GetSpawnId());
-}
-
-float Creature::GetSparringHealthLimit() const
-{
-    return sObjectMgr->GetSparringHealthLimitFor(GetEntry());
 }

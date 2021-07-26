@@ -1643,8 +1643,7 @@ bool SpellInfo::IsBreakingStealth() const
 bool SpellInfo::IsRangedWeaponSpell() const
 {
     return (SpellFamilyName == SPELLFAMILY_HUNTER && !(SpellFamilyFlags[1] & 0x10000000)) // for 53352, cannot find better way
-        || (EquippedItemSubClassMask & ITEM_SUBCLASS_MASK_WEAPON_RANGED)
-        || (Attributes & SPELL_ATTR0_REQ_AMMO);
+        || (EquippedItemSubClassMask > 0 && EquippedItemSubClassMask & ITEM_SUBCLASS_MASK_WEAPON_RANGED);
 }
 
 bool SpellInfo::IsAutoRepeatRangedSpell() const
@@ -3407,31 +3406,6 @@ void SpellInfo::_LoadImmunityInfo()
             loadImmunityInfoFn(const_cast<SpellEffectInfo*>(effect));
         }
     }
-
-    if (HasAttribute(SPELL_ATTR5_USABLE_WHILE_STUNNED))
-    {
-        switch (Id)
-        {
-        case 22812: // Barkskin
-            _allowedMechanicMask |=
-                (1 << MECHANIC_STUN) |
-                (1 << MECHANIC_FREEZE) |
-                (1 << MECHANIC_KNOCKOUT) |
-                (1 << MECHANIC_SLEEP);
-            break;
-        case 49039: // Lichborne, don't allow normal stuns
-            break;
-        default:
-            _allowedMechanicMask |= (1 << MECHANIC_STUN);
-            break;
-        }
-    }
-
-    if (HasAttribute(SPELL_ATTR5_USABLE_WHILE_CONFUSED))
-        _allowedMechanicMask |= (1 << MECHANIC_DISORIENTED);
-
-    if (HasAttribute(SPELL_ATTR5_USABLE_WHILE_FEARED))
-        _allowedMechanicMask |= (1 << MECHANIC_FEAR);
 }
 
 void SpellInfo::ApplyAllSpellImmunitiesTo(Unit* target, SpellEffectInfo const* effect, bool apply) const
@@ -3758,10 +3732,10 @@ uint32 SpellInfo::GetRecoveryTime() const
     return RecoveryTime > CategoryRecoveryTime ? RecoveryTime : CategoryRecoveryTime;
 }
 
-std::vector<SpellPowerCost> SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, Spell* spell) const
+std::vector<SpellPowerCost> SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask) const
 {
     std::vector<SpellPowerCost> costs;
-    auto collector = [this, caster, schoolMask, spell, &costs](std::vector<SpellPowerEntry const*> const& powers)
+    auto collector = [this, caster, schoolMask, &costs](std::vector<SpellPowerEntry const*> const& powers)
     {
         costs.reserve(powers.size());
         int32 healthCost = 0;
@@ -3877,9 +3851,9 @@ std::vector<SpellPowerCost> SpellInfo::CalcPowerCost(Unit const* caster, SpellSc
             if (Player* modOwner = caster->GetSpellModOwner())
             {
                 if (power->OrderIndex == 0)
-                    modOwner->ApplySpellMod(Id, SPELLMOD_COST, powerCost, spell);
+                    modOwner->ApplySpellMod(Id, SPELLMOD_COST, powerCost);
                 else if (power->OrderIndex == 1)
-                    modOwner->ApplySpellMod(Id, SPELLMOD_SPELL_COST2, powerCost, spell);
+                    modOwner->ApplySpellMod(Id, SPELLMOD_SPELL_COST2, powerCost);
             }
 
             if (!caster->IsControlledByPlayer() && G3D::fuzzyEq(power->PowerCostPct, 0.0f) && SpellLevel)

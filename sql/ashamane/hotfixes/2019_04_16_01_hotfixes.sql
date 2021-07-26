@@ -45,3 +45,20 @@ DELETE FROM `conversation_line` WHERE `ID` BETWEEN 13019 AND 13020;
 INSERT INTO `conversation_line` (`ID`, `BroadcastTextID`, `SpellVisualKitID`, `AdditionalDuration`, `NextConversationLineID`, `AnimKitID`, `SpeechType`, `StartAnimation`, `EndAnimation`, `VerifiedBuild`) VALUES
 (13019, 147322, 0, 0, 13020, 0, 0, 60, 60, 26972),
 (13020, 147323, 0, 500, 0, 0, 0, 60, 60, 26972);
+
+DELETE FROM `broadcast_text` WHERE `ID` BETWEEN 143461 AND 143463;
+INSERT INTO `broadcast_text` (`ID`, `Text`, `Text1`, `EmoteID1`, `EmoteID2`, `EmoteID3`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmotesID`, `LanguageID`, `Flags`, `ConditionID`, `SoundEntriesID1`, `SoundEntriesID2`, `VerifiedBuild`) VALUES
+(143461, 'Ahahaha... so the desperate Warden has turned to her enemies? Give up, demon hunter! If you hope to escape the Vault, you will have to face ME.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 57315, 0, 27404),
+(143462, 'Your persistence is admirable, but my demons have infiltrated every floor of the Vault. Only death awaits you.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 57316, 0, 27404),
+(143463, 'Your allies have fallen. My army will crush you before you can see the light of day!', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 57317, 0, 27404);
+
+DELETE FROM `broadcast_text_locale` WHERE `ID` BETWEEN 143462 AND 143463;
+INSERT INTO `broadcast_text_locale` (`ID`, `locale`, `Text_lang`, `Text1_lang`, `VerifiedBuild`) VALUES
+(143462, 'ruRU', 'Ваша настойчивость похвальна, но мои демоны захватили все уровни Казематов. Впереди вас ждет только смерть.', 'Ваша настойчивость похвальна, но мои демоны захватили все уровни Казематов. Впереди вас ждет только смерть.', 26972),
+(143463, 'ruRU', 'Ваши союзники погибли. Мы сокрушим вас. Вам не видать солнечного света!', 'Ваши союзники погибли. Мы сокрушим вас. Вам не видать солнечного света!', 26972);
+
+DELETE FROM `conversation_line` WHERE `ID` BETWEEN 13016 AND 13018;
+INSERT INTO `conversation_line` (`ID`, `BroadcastTextID`, `SpellVisualKitID`, `AdditionalDuration`, `NextConversationLineID`, `AnimKitID`, `SpeechType`, `StartAnimation`, `EndAnimation`, `VerifiedBuild`) VALUES
+(13016, 143461, 0, 500, 0, 0, 0, 60, 60, 26972),
+(13017, 143462, 0, 500, 0, 0, 0, 60, 60, 26972),
+(13018, 143463, 0, 500, 0, 0, 0, 60, 60, 26972);

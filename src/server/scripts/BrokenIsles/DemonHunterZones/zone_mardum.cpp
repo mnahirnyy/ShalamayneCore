@@ -763,35 +763,34 @@ enum SPELLS
     CONVERSATION_CAPTAINS = 569,
 };
 
-class PlayerScript_event_warning : public PlayerScript
-{
-
-public:
-    PlayerScript_event_warning() : PlayerScript("PlayerScript_event_warning") { }
-
-    void OnUpdateArea(Player* player, Area* newArea, Area* oldArea) override
-    {
-        if (player->getClass() == CLASS_DEMON_HUNTER &&
-            player->GetZoneId() == 7705 &&
-            player->GetQuestStatus(QUEST_SHIVARRA_FORCES) == QUEST_STATUS_COMPLETE &&
-            newArea->GetId() == 7705 && oldArea->GetId() == 7742
-        ) { 
-            Conversation* conversation = new Conversation;
-            if (!conversation->CreateConversation(747, player, player->GetPosition(), { player->GetGUID() }))
-                delete conversation;
-        }
-
-        if (player->getClass() == CLASS_DEMON_HUNTER &&
-            player->GetZoneId() == 7705 &&
-            player->GetQuestStatus(QUEST_THEIR_NUMBERS_ARE_LEGION) == QUEST_STATUS_INCOMPLETE &&
-            newArea->GetId() == 7713 && oldArea->GetId() == 7712
-        ) {
-            Conversation* conversation = new Conversation;
-            if (!conversation->CreateConversation(569, player, player->GetPosition(), { player->GetGUID() }))
-                delete conversation;
-        }
-    }
-};
+//class PlayerScript_event_warning : public PlayerScript
+//{
+//
+//public:
+//    PlayerScript_event_warning() : PlayerScript("PlayerScript_event_warning") { }
+//
+//    void OnUpdateArea(Player* player, Area* newArea, Area* oldArea) override
+//    {
+//        if (player->GetZoneId() != 7705 || player->getClass() != CLASS_DEMON_HUNTER)
+//            return;
+//
+//        switch (newArea->GetId())
+//        {
+//            case 7705:
+//                if (oldArea->GetId() != 7742 || player->GetQuestStatus(QUEST_SHIVARRA_FORCES) != QUEST_STATUS_COMPLETE)
+//                    return;
+//                Conversation::CreateConversation(CONVERSATION_BOMBARDMENT_WARNING, player, player->GetPosition(), { player->GetGUID() });
+//                break;
+//            case 7713:
+//                if (oldArea->GetId() == 7712 || player->GetQuestStatus(QUEST_THEIR_NUMBERS_ARE_LEGION) != QUEST_STATUS_INCOMPLETE)
+//                    return;
+//                Conversation::CreateConversation(CONVERSATION_CAPTAINS, player, player->GetPosition(), { player->GetGUID() });
+//                break;
+//            default:
+//                break;
+//        }
+//    }
+//};
 
 class go_meeting_with_queen_ritual : public GameObjectScript
 {
@@ -1969,7 +1968,7 @@ public:
 
     enum eStheno
     {
-        ABILITY_BUBBLE_SHIELD = 224717,
+        ABILITY_BUBBLE_SHIELD = 200884, // 224717,
         ABILITY_HEALING_WAVE = 197744,
         SAY_ON_LOS = 0,
         EVENT_SHIELD = 1,
@@ -2771,7 +2770,7 @@ public:
             std::list<Creature*> summonedSwarm;
             me->GetCreatureListWithEntryInGrid(summonedSwarm, NPC_TYRANNA_SPAWN, me->GetVisibilityRange());
             for (std::list<Creature*>::const_iterator itr = summonedSwarm.begin(); itr != summonedSwarm.end(); ++itr)
-                (*itr)->ToCreature()->DespawnOrUnsummon(0);
+                (*itr)->ToCreature()->DespawnOrUnsummon();
 
             if (Creature* creature = me->FindNearestCreature(NPC_KAYN_TYRANNA, me->GetVisibilityRange(), true))
                 creature->AI()->SetData(DATA_TYRANNA_DEATH, DATA_TYRANNA_DEATH);
@@ -2782,7 +2781,7 @@ public:
             if (Creature* creature = me->FindNearestCreature(NPC_ALLARI_TYRANNA, me->GetVisibilityRange(), true))
                 creature->AI()->SetData(DATA_TYRANNA_DEATH, DATA_TYRANNA_DEATH);
 
-            me->DespawnOrUnsummon(300000, Seconds(30));
+            me->DespawnOrUnsummon(30000, Seconds(20));
         }
 
         void SummomNearTarget(uint8 count, uint32 entry, Position targetPos, uint32 duration)
@@ -3013,7 +3012,7 @@ void AddSC_zone_mardum()
     new spell_destroying_soulharvester();
     new npc_mardum_devastator();
     new npc_mardum_announcer();
-    new PlayerScript_event_warning();
+    // new PlayerScript_event_warning();
     new npc_general_volroth();
     new npc_count_nefarious();
     new go_well_of_souls();

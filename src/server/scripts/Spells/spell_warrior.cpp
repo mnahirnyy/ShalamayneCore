@@ -166,7 +166,6 @@ enum WarriorSpells
     SPELL_WARRIOR_WHIRLWIND_OFFHAND                 = 44949,
     SPELL_WARRIOR_WRECKING_BALL_EFFECT              = 215570,
     SPELL_WARRIOR_COMMANDING_SHOUT                  = 97463,
-    SPELL_ART_CORRUPTED_BLOOD_OF_ZAKAJZ_DAMAGE      = 209569,
 
     NPC_WARRIOR_RAVAGER                             = 76168,
 };
@@ -2934,52 +2933,6 @@ struct npc_warr_ravager : public ScriptedAI
     }
 };
 
-// 209567 - Corrupted Blood of Zakajz
-// 7.3.5
-class spell_warr_corrupted_blood_of_zakajz : public SpellScriptLoader
-{
-public:
-    spell_warr_corrupted_blood_of_zakajz() : SpellScriptLoader("spell_warr_corrupted_blood_of_zakajz") { }
-
-    class spell_warr_corrupted_blood_of_zakajz_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_warr_corrupted_blood_of_zakajz_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            return ValidateSpellInfo({ SPELL_ART_CORRUPTED_BLOOD_OF_ZAKAJZ_DAMAGE });
-        }
-
-        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-        {
-            Unit* caster = GetCaster();
-            Unit* target = eventInfo.GetActionTarget();
-            if (!caster || !target || !eventInfo.GetDamageInfo())
-                return;
-
-            uint32 damage = CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), aurEff->GetAmount()) / 3;
-            if (!target->HasAura(SPELL_ART_CORRUPTED_BLOOD_OF_ZAKAJZ_DAMAGE))
-                caster->CastCustomSpell(SPELL_ART_CORRUPTED_BLOOD_OF_ZAKAJZ_DAMAGE, SPELLVALUE_BASE_POINT0, damage, target, TRIGGERED_FULL_MASK);
-            else if (AuraEffect* bloodOfZakajz = target->GetAuraEffect(SPELL_ART_CORRUPTED_BLOOD_OF_ZAKAJZ_DAMAGE, EFFECT_0, caster->GetGUID()))
-            {
-                uint32 oldamount = bloodOfZakajz->GetAmount();
-
-                caster->CastCustomSpell(SPELL_ART_CORRUPTED_BLOOD_OF_ZAKAJZ_DAMAGE, SPELLVALUE_BASE_POINT0, uint32(oldamount + damage), target, TRIGGERED_FULL_MASK);
-            }
-        }
-
-        void Register() override
-        {
-            OnEffectProc += AuraEffectProcFn(spell_warr_corrupted_blood_of_zakajz_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
-    {
-        return new spell_warr_corrupted_blood_of_zakajz_AuraScript();
-    }
-};
-
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_berzerker_rage();
@@ -3051,7 +3004,6 @@ void AddSC_warrior_spell_scripts()
     RegisterSpellScript(spell_warr_ravager_damage);
     RegisterSpellScript(spell_warr_execute);
     RegisterAuraScript(aura_warr_war_machine);
-    new spell_warr_corrupted_blood_of_zakajz();
 
     RegisterCreatureAI(npc_warr_ravager);
 }

@@ -51,8 +51,6 @@ UPDATE `creature_template` SET `ScriptName` = 'npc_altruis_cell' WHERE `entry` =
 UPDATE `creature_template` SET `ScriptName` = 'npc_korvas_bloodthorn' WHERE `entry` = 97644;
 UPDATE `creature_template` SET `ScriptName` = 'npc_khadgar' WHERE `entry` = 97978;
 UPDATE `creature_template` SET `ScriptName` = 'npc_maiev_shadowsong' WHERE `entry` = 92718;
-UPDATE `creature_template` SET `ScriptName` = 'npc_sledge' WHERE `entry` = 92990;
-UPDATE `creature_template` SET `ScriptName` = 'npc_crusher' WHERE `entry` = 97632;
 UPDATE `creature_template` SET `ScriptName` = 'npc_immolanth' WHERE `entry` = 96682;
 UPDATE `creature_template` SET `ScriptName` = 'npc_vow_ashgolm' WHERE `entry` = 96681;
 UPDATE `creature_template` SET `ScriptName` = 'npc_bastillax' WHERE `entry` = 96783;
@@ -273,7 +271,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 DELETE FROM `creature_text` WHERE `CreatureID` = @ALLARI_1;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
-(@ALLARI_1,0,0,'The elevator will be here shortly. The others are waiting for you above.',12,0,100,0,0,57356,0,0,'Allari the Souleater to Player');
+(@ALLARI_1,1,0,'The elevator will be here shortly. The others are waiting for you above.',12,0,100,0,0,57356,0,0,'Allari the Souleater to Player');
 
 SET @KORVAS_2 := 97644;
 UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@KORVAS_2;

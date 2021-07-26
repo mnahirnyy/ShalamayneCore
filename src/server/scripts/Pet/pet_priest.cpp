@@ -24,8 +24,6 @@
 #include "PassiveAI.h"
 #include "PetAI.h"
 #include "ScriptedCreature.h"
-#include "Player.h"
-#include "SpellMgr.h"
 
 enum PriestSpells
 {
@@ -85,68 +83,8 @@ class npc_pet_pri_shadowfiend : public CreatureScript
         }
 };
 
-enum PsyfiendSpells
-{
-    SPELL_PSYFIEND_BASE  = 211522,
-    SPELL_PSYFLAY_DAMAGE = 199845
-};
-
-// 101398 - Psyfiend
-// 7.3.5
-class npc_pri_psyfiend : public CreatureScript
-{
-public:
-    npc_pri_psyfiend() : CreatureScript("npc_pri_psyfiend") { }
-
-    struct npc_pri_psyfiend_voidAI : public ScriptedAI
-    {
-        npc_pri_psyfiend_voidAI(Creature* creature) : ScriptedAI(creature) { }
-
-        void IsSummonedBy(Unit* /*summoner*/) override
-        {
-            me->SetReactState(REACT_PASSIVE);
-            me->SetControlled(true, UNIT_STATE_ROOT);
-        }
-
-        void KilledUnit(Unit* /*victim*/) override
-        {
-            canCast = true;
-        }
-
-        void UpdateAI(uint32 diff) override
-        {
-            if (canSetHealth)
-            {
-                me->SetMaxHealth(sSpellMgr->GetSpellInfo(SPELL_PSYFIEND_BASE)->GetEffect(EFFECT_0)->BasePoints);
-                canSetHealth = false;
-            }
-
-            if (canCast)
-                if (me->GetOwner() && me->GetOwner()->ToPlayer())
-                {
-                    if (Unit* unit = me->GetOwner()->ToPlayer()->GetSelectedUnit())
-                        if (unit->IsPlayer())
-                        {
-                            me->CastCustomSpell(SPELL_PSYFLAY_DAMAGE, SPELLVALUE_BASE_POINT0, unit->CountPctFromMaxHealth(sSpellMgr->GetSpellInfo(SPELL_PSYFLAY_DAMAGE)->GetEffect(EFFECT_0)->BasePoints), me, TRIGGERED_FULL_MASK);
-                            canCast = false;
-                        }
-                }
-        }
-
-    private:
-        bool canSetHealth = true;
-        bool canCast = true;
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_pri_psyfiend_voidAI(creature);
-    }
-};
-
 void AddSC_priest_pet_scripts()
 {
     new npc_pet_pri_lightwell();
     new npc_pet_pri_shadowfiend();
-    new npc_pri_psyfiend();
 }

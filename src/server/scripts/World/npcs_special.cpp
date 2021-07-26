@@ -339,6 +339,22 @@ public:
     {
         return new npc_chicken_cluckAI(creature);
     }
+
+    bool OnQuestAccept(Player* /*player*/, Creature* creature, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_CLUCK)
+            ENSURE_AI(npc_chicken_cluck::npc_chicken_cluckAI, creature->AI())->Reset();
+
+        return true;
+    }
+
+    bool OnQuestReward(Player* /*player*/, Creature* creature, Quest const* quest, uint32 /*opt*/) override
+    {
+        if (quest->GetQuestId() == QUEST_CLUCK)
+            ENSURE_AI(npc_chicken_cluck::npc_chicken_cluckAI, creature->AI())->Reset();
+
+        return true;
+    }
 };
 
 /*######

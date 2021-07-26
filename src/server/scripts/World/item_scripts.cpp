@@ -38,10 +38,6 @@
 #include "Spell.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
-#include "LootMgr.h"
-#include "ObjectMgr.h"
-#include "Formulas.h"
-#include "SharedDefines.h"
 
  /*#####
  # item_only_for_flight
@@ -199,23 +195,23 @@ public:
 
 enum PileFakeFur
 {
-    GO_CARIBOU_TRAP_1 = 187982,
-    GO_CARIBOU_TRAP_2 = 187995,
-    GO_CARIBOU_TRAP_3 = 187996,
-    GO_CARIBOU_TRAP_4 = 187997,
-    GO_CARIBOU_TRAP_5 = 187998,
-    GO_CARIBOU_TRAP_6 = 187999,
-    GO_CARIBOU_TRAP_7 = 188000,
-    GO_CARIBOU_TRAP_8 = 188001,
-    GO_CARIBOU_TRAP_9 = 188002,
-    GO_CARIBOU_TRAP_10 = 188003,
-    GO_CARIBOU_TRAP_11 = 188004,
-    GO_CARIBOU_TRAP_12 = 188005,
-    GO_CARIBOU_TRAP_13 = 188006,
-    GO_CARIBOU_TRAP_14 = 188007,
-    GO_CARIBOU_TRAP_15 = 188008,
-    GO_HIGH_QUALITY_FUR = 187983,
-    NPC_NESINGWARY_TRAPPER = 25835
+    GO_CARIBOU_TRAP_1                                      = 187982,
+    GO_CARIBOU_TRAP_2                                      = 187995,
+    GO_CARIBOU_TRAP_3                                      = 187996,
+    GO_CARIBOU_TRAP_4                                      = 187997,
+    GO_CARIBOU_TRAP_5                                      = 187998,
+    GO_CARIBOU_TRAP_6                                      = 187999,
+    GO_CARIBOU_TRAP_7                                      = 188000,
+    GO_CARIBOU_TRAP_8                                      = 188001,
+    GO_CARIBOU_TRAP_9                                      = 188002,
+    GO_CARIBOU_TRAP_10                                     = 188003,
+    GO_CARIBOU_TRAP_11                                     = 188004,
+    GO_CARIBOU_TRAP_12                                     = 188005,
+    GO_CARIBOU_TRAP_13                                     = 188006,
+    GO_CARIBOU_TRAP_14                                     = 188007,
+    GO_CARIBOU_TRAP_15                                     = 188008,
+    GO_HIGH_QUALITY_FUR                                    = 187983,
+    NPC_NESINGWARY_TRAPPER                                 = 25835
 };
 
 #define CaribouTrapsNum 15
@@ -266,9 +262,9 @@ public:
 
 enum PetrovClusterBombs
 {
-    SPELL_PETROV_BOMB = 42406,
-    AREA_ID_SHATTERED_STRAITS = 4064,
-    ZONE_ID_HOWLING = 495
+    SPELL_PETROV_BOMB           = 42406,
+    AREA_ID_SHATTERED_STRAITS   = 4064,
+    ZONE_ID_HOWLING             = 495
 };
 
 class item_petrov_cluster_bombs : public ItemScript
@@ -299,30 +295,30 @@ public:
 ######*/
 enum HelpThemselves
 {
-    QUEST_CANNOT_HELP_THEMSELVES = 11876,
-    NPC_TRAPPED_MAMMOTH_CALF = 25850,
-    GO_MAMMOTH_TRAP_1 = 188022,
-    GO_MAMMOTH_TRAP_2 = 188024,
-    GO_MAMMOTH_TRAP_3 = 188025,
-    GO_MAMMOTH_TRAP_4 = 188026,
-    GO_MAMMOTH_TRAP_5 = 188027,
-    GO_MAMMOTH_TRAP_6 = 188028,
-    GO_MAMMOTH_TRAP_7 = 188029,
-    GO_MAMMOTH_TRAP_8 = 188030,
-    GO_MAMMOTH_TRAP_9 = 188031,
-    GO_MAMMOTH_TRAP_10 = 188032,
-    GO_MAMMOTH_TRAP_11 = 188033,
-    GO_MAMMOTH_TRAP_12 = 188034,
-    GO_MAMMOTH_TRAP_13 = 188035,
-    GO_MAMMOTH_TRAP_14 = 188036,
-    GO_MAMMOTH_TRAP_15 = 188037,
-    GO_MAMMOTH_TRAP_16 = 188038,
-    GO_MAMMOTH_TRAP_17 = 188039,
-    GO_MAMMOTH_TRAP_18 = 188040,
-    GO_MAMMOTH_TRAP_19 = 188041,
-    GO_MAMMOTH_TRAP_20 = 188042,
-    GO_MAMMOTH_TRAP_21 = 188043,
-    GO_MAMMOTH_TRAP_22 = 188044,
+    QUEST_CANNOT_HELP_THEMSELVES                  =  11876,
+    NPC_TRAPPED_MAMMOTH_CALF                      =  25850,
+    GO_MAMMOTH_TRAP_1                             = 188022,
+    GO_MAMMOTH_TRAP_2                             = 188024,
+    GO_MAMMOTH_TRAP_3                             = 188025,
+    GO_MAMMOTH_TRAP_4                             = 188026,
+    GO_MAMMOTH_TRAP_5                             = 188027,
+    GO_MAMMOTH_TRAP_6                             = 188028,
+    GO_MAMMOTH_TRAP_7                             = 188029,
+    GO_MAMMOTH_TRAP_8                             = 188030,
+    GO_MAMMOTH_TRAP_9                             = 188031,
+    GO_MAMMOTH_TRAP_10                            = 188032,
+    GO_MAMMOTH_TRAP_11                            = 188033,
+    GO_MAMMOTH_TRAP_12                            = 188034,
+    GO_MAMMOTH_TRAP_13                            = 188035,
+    GO_MAMMOTH_TRAP_14                            = 188036,
+    GO_MAMMOTH_TRAP_15                            = 188037,
+    GO_MAMMOTH_TRAP_16                            = 188038,
+    GO_MAMMOTH_TRAP_17                            = 188039,
+    GO_MAMMOTH_TRAP_18                            = 188040,
+    GO_MAMMOTH_TRAP_19                            = 188041,
+    GO_MAMMOTH_TRAP_20                            = 188042,
+    GO_MAMMOTH_TRAP_21                            = 188043,
+    GO_MAMMOTH_TRAP_22                            = 188044,
 };
 
 #define MammothTrapsNum 22
@@ -367,8 +363,8 @@ public:
 
 enum TheEmissary
 {
-    QUEST_THE_EMISSARY = 11626,
-    NPC_LEVIROTH = 26452
+    QUEST_THE_EMISSARY      =   11626,
+    NPC_LEVIROTH            =   26452
 };
 
 class item_trident_of_nazjan : public ItemScript
@@ -394,8 +390,8 @@ public:
 
 enum CapturedFrog
 {
-    QUEST_THE_PERFECT_SPIES = 25444,
-    NPC_VANIRAS_SENTRY_TOTEM = 40187
+    QUEST_THE_PERFECT_SPIES      = 25444,
+    NPC_VANIRAS_SENTRY_TOTEM     = 40187
 };
 
 class item_captured_frog : public ItemScript
@@ -458,586 +454,6 @@ public:
     }
 };
 
-// Leggings of the foregone 240719
-// 7.3.5
-class loot_item_leggings_of_the_foregone : public ItemScript
-{
-public:
-    loot_item_leggings_of_the_foregone() : ItemScript("loot_item_leggings_of_the_foregone") { }
-
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/, ObjectGuid castId) override
-    {
-        uint32 itemId = item->GetEntry();
-
-        std::vector<uint32> items;
-
-        items.push_back(147173);
-        items.push_back(147125);
-        items.push_back(147148);
-        items.push_back(147137);
-        items.push_back(147161);
-        items.push_back(147166);
-        items.push_back(147184);
-        items.push_back(147131);
-        items.push_back(147191);
-        items.push_back(147143);
-        items.push_back(147179);
-        items.push_back(147155);
-
-        // Process items
-        Trinity::Containers::RandomShuffle(items);
-        for (auto itemId : items)
-        {
-            // Safe! Item rewards always have an item template
-            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId);
-
-            bool allowRace = proto->GetAllowableRace() && (proto->GetAllowableRace() & player->getRaceMask());
-            bool allowSpec = !proto->HasSpec() || proto->IsUsableByLootSpecialization(player, false);
-            if (!allowRace || !allowSpec)
-                continue;
-
-            // Generate bonuses for selected item
-            uint32 itemLevel = ITEM_LEVEL_LEGION_T20;
-            uint32 epicbonus = BONUS_ITEM_T20_EPIC;
-            for (uint32 bonusListID : item->GetDynamicValues(ITEM_DYNAMIC_FIELD_BONUSLIST_IDS))
-            {
-                if (bonusListID == BONUS_CACHE_HEROIC)
-                {
-                    itemLevel = 915;
-                    epicbonus = BONUS_ITEM_T20_HEROIC;
-                }
-                if (bonusListID == BONUS_CACHE_MYTHIC)
-                {
-                    itemLevel = 930;
-                    epicbonus = BONUS_ITEM_T20_MYTHIC;
-                }
-
-            }
-
-            std::vector<int32> bonusLists;
-
-            int32 diff = itemLevel - ITEM_LEVEL_LEGION_T20;
-
-            bonusLists.push_back(epicbonus);
-
-            bonusLists.push_back(int32(BONUS_ITEM_T20_LEVEL_START + diff));
-
-            ItemPosCountVec dest;
-            bool mailed = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, 1) != EQUIP_ERR_OK;
-            player->SendDisplayToast(itemId, 0, 1, DISPLAY_TOAST_METHOD_CURRENCY_OR_ITEM, TOAST_TYPE_ITEM, false, mailed, bonusLists);
-            if (mailed)
-                player->SendItemRetrievalMail(itemId, 1, GenerateItemRandomPropertyId(itemId), bonusLists);
-            else
-                player->StoreNewItem(dest, itemId, true, GenerateItemRandomPropertyId(itemId), GuidSet(), 0, bonusLists);
-
-            break;
-        }
-
-        player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
-
-        return true;
-    }
-};
-
-// gloves of the-foregone 240719
-// 7.3.5
-class loot_item_gloves_of_the_foregone : public ItemScript
-{
-public:
-    loot_item_gloves_of_the_foregone() : ItemScript("loot_item_gloves_of_the_foregone") { }
-
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/, ObjectGuid castId) override
-    {
-        uint32 itemId = item->GetEntry();
-
-        std::vector<uint32> items;
-
-        items.push_back(147171);
-        items.push_back(147123);
-        items.push_back(147146);
-        items.push_back(147135);
-
-        items.push_back(147159);
-        items.push_back(147164);
-        items.push_back(147182);
-        items.push_back(147129);
-        items.push_back(147189);
-        items.push_back(147141);
-        items.push_back(147177);
-        items.push_back(147153);
-
-        // Process items
-        Trinity::Containers::RandomShuffle(items);
-        for (auto itemId : items)
-        {
-            // Safe! Item rewards always have an item template
-            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId);
-
-            bool allowRace = proto->GetAllowableRace() && (proto->GetAllowableRace() & player->getRaceMask());
-            bool allowSpec = !proto->HasSpec() || proto->IsUsableByLootSpecialization(player, false);
-            if (!allowRace || !allowSpec)
-                continue;
-
-            // Generate bonuses for selected item
-            uint32 itemLevel = ITEM_LEVEL_LEGION_T20;
-            uint32 epicbonus = BONUS_ITEM_T20_EPIC;
-            for (uint32 bonusListID : item->GetDynamicValues(ITEM_DYNAMIC_FIELD_BONUSLIST_IDS))
-            {
-                if (bonusListID == BONUS_CACHE_HEROIC)
-                {
-                    itemLevel = 915;
-                    epicbonus = BONUS_ITEM_T20_HEROIC;
-                }
-                if (bonusListID == BONUS_CACHE_MYTHIC)
-                {
-                    itemLevel = 930;
-                    epicbonus = BONUS_ITEM_T20_MYTHIC;
-                }
-
-            }
-
-            std::vector<int32> bonusLists;
-
-            int32 diff = itemLevel - ITEM_LEVEL_LEGION_T20;
-
-            bonusLists.push_back(epicbonus);
-
-            bonusLists.push_back(int32(BONUS_ITEM_T20_LEVEL_START + diff));
-
-            ItemPosCountVec dest;
-            bool mailed = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, 1) != EQUIP_ERR_OK;
-            player->SendDisplayToast(itemId, 0, 1, DISPLAY_TOAST_METHOD_CURRENCY_OR_ITEM, TOAST_TYPE_ITEM, false, mailed, bonusLists);
-            if (mailed)
-                player->SendItemRetrievalMail(itemId, 1, GenerateItemRandomPropertyId(itemId), bonusLists);
-            else
-                player->StoreNewItem(dest, itemId, true, GenerateItemRandomPropertyId(itemId), GuidSet(), 0, bonusLists);
-
-            break;
-        }
-        player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
-
-        return true;
-    }
-};
-
-// Satchel of Battlefield Spoils - 143606,143607
-// 7.3.5 147446
-class item_satchel_of_battlefield_spoils : public ItemScript
-{
-public:
-    item_satchel_of_battlefield_spoils() : ItemScript("item_satchel_of_battlefield_spoils") { }
-
-    bool OnOpen(Player* player, Item* item) override
-    {
-        ItemTemplate const* proto = item->GetTemplate();
-        LootTemplate const* lootTemplate = LootTemplates_Item.GetLootFor(proto->GetId());
-        if (!lootTemplate)
-            return true;
-
-        uint32 itemID = 0;
-        std::unordered_map<uint32, std::vector<int32>> lootTable;
-        std::unordered_map<uint32, std::vector<int32>> items;
-        lootTemplate->FillAutoAssignationLoot(lootTable);
-
-        for (auto loot : lootTable)
-        {
-            ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(loot.first);
-            if (!itemTemplate)
-                continue;
-
-            if ((itemTemplate->GetAllowableClass() && !(itemTemplate->GetAllowableClass() & player->getClassMask())) ||
-                (itemTemplate->GetAllowableRace() && !(itemTemplate->GetAllowableRace() & player->getRaceMask())))
-                continue;
-
-            if (itemTemplate->IsUsableByLootSpecialization(player, false) || !itemTemplate->HasSpec())
-                items[loot.first] = loot.second;
-        }
-
-        if (items.empty())
-            return true;
-
-        auto items_random = std::next(std::begin(items), urand(0u, items.size() - 1));
-        itemID = items_random->first;
-        std::vector<int32> bonuses = items_random->second;
-
-        if (!itemID)
-            return true;
-
-        uint32 ilvl = player->GetAverageItemLevelEquipped();
-        uint32 bonus = 0;
-
-        if (ItemTemplate const* item = sObjectMgr->GetItemTemplate(itemID))
-        {
-            uint32 MaxIlvl = 905; // for BG, Skirmish
-
-            if (item->GetSubClass() == ITEM_SUBCLASS_ARMOR_RELIC)
-                MaxIlvl = 870;
-
-            uint32 startIlvl = 810;
-            uint32 MultipleIlvl = Trinity::GetNumberMultipleOfFive(ilvl); // returns a number that is multiple by five, example: 811 = 810. 813 = 815
-            uint32 differenceMaxStartIlvl = MaxIlvl - startIlvl;
-            uint32 modificatorIlvl = 0;
-            bonus = (ilvl >= MaxIlvl ? differenceMaxStartIlvl : (ilvl >= startIlvl + modificatorIlvl ? (MultipleIlvl + 5 - startIlvl) : modificatorIlvl));
-            if (bonus > differenceMaxStartIlvl)
-                bonus = differenceMaxStartIlvl;
-
-
-            if (item->GetSubClass() == ITEM_SUBCLASS_ARMOR_RELIC)
-            {
-                bonuses.push_back(3427);
-                bonuses.push_back(1602 + bonus);
-            }
-            else
-            {
-                bonuses.push_back(3460);
-                bonuses.push_back(1442 + bonus);
-            }
-        }
-
-        ItemPosCountVec dest;
-        InventoryResult msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemID, 1);
-        if (msg != EQUIP_ERR_OK)
-        {
-            player->SendItemRetrievalMail(itemID, 1, GenerateItemRandomPropertyId(itemID), bonuses);
-            player->SendDisplayToast(itemID, 0, 1, DISPLAY_TOAST_METHOD_LOOT, TOAST_TYPE_ITEM, false, true, bonuses);
-            player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
-            return true;
-        }
-
-        Item* newItem = player->StoreNewItem(dest, itemID, true, GenerateItemRandomPropertyId(itemID), GuidSet(), 0, bonuses);
-        if (!newItem)
-        {
-            player->SendItemRetrievalMail(itemID, 1, GenerateItemRandomPropertyId(itemID), bonuses);
-            player->SendDisplayToast(itemID, 0, 1, DISPLAY_TOAST_METHOD_LOOT, TOAST_TYPE_ITEM, false, true, bonuses);
-            player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
-            return true;
-        }
-
-        player->SendDisplayToast(itemID, 0, 1, DISPLAY_TOAST_METHOD_LOOT, TOAST_TYPE_ITEM, false, true, bonuses);
-        player->SendNewItem(newItem, 1, true, false);
-        player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
-
-        return true;
-    }
-};
-
-// item 143579 Cloak of the Foreseen
-// item 143577
-// item 143578
-// 7.3.5
-class loot_item_cloak_of_the_foreseen : public ItemScript
-{
-public:
-    loot_item_cloak_of_the_foreseen() : ItemScript("loot_item_cloak_of_the_foreseen") { }
-
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/, ObjectGuid castId) override
-    {
-        uint32 itemId = item->GetEntry();
-
-        std::vector<uint32> items;
-
-        items.push_back(138374);
-        items.push_back(138368);
-        items.push_back(138367);
-        items.push_back(138372);
-        items.push_back(138373);
-        items.push_back(138369);
-        items.push_back(138370);
-        items.push_back(138375);
-        items.push_back(138365);
-        items.push_back(138366);
-        items.push_back(138371);
-        items.push_back(138364);
-
-        // Process items
-        Trinity::Containers::RandomShuffle(items);
-        for (auto itemId : items)
-        {
-
-            // Safe! Item rewards always have an item template
-            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId);
-            bool allowRace = proto->GetAllowableRace() && (proto->GetAllowableRace() & player->getRaceMask());
-            bool allowSpec = !proto->HasSpec() || proto->IsUsableByLootSpecialization(player, false);
-            if (!allowRace || !allowSpec)
-                continue;
-
-            // Generate bonuses for selected item
-            uint32 itemLevel = ITEM_LEVEL_LEGION_T19;
-            uint32 epicbonus = BONUS_ITEM_T20_EPIC;
-            for (uint32 bonusListID : item->GetDynamicValues(ITEM_DYNAMIC_FIELD_BONUSLIST_IDS))
-            {
-                if (bonusListID == BONUS_CACHE_HEROIC)
-                {
-                    itemLevel = 895;
-                    epicbonus = BONUS_ITEM_T19_HEROIC;
-                }
-                if (bonusListID == BONUS_CACHE_MYTHIC)
-                {
-                    itemLevel = 905;
-                    epicbonus = BONUS_ITEM_T19_MYTHIC;
-                }
-
-            }
-
-            std::vector<int32> bonusLists;
-
-            int32 diff = itemLevel - ITEM_LEVEL_LEGION_T19;
-            bonusLists.push_back(epicbonus);
-
-            bonusLists.push_back(int32(BONUS_ITEM_T19_LEVEL_START + diff));
-
-            ItemPosCountVec dest;
-            bool mailed = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, 1) != EQUIP_ERR_OK;
-            player->SendDisplayToast(itemId, 0, 1, DISPLAY_TOAST_METHOD_CURRENCY_OR_ITEM, TOAST_TYPE_ITEM, false, mailed, bonusLists);
-            if (mailed)
-                player->SendItemRetrievalMail(itemId, 1, GenerateItemRandomPropertyId(itemId), bonusLists);
-            else
-                player->StoreNewItem(dest, itemId, true, GenerateItemRandomPropertyId(itemId), GuidSet(), 0, bonusLists);
-
-            break;
-        }
-        player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
-
-        return true;
-    }
-};
-
-// item 143576 Shoulders-of-the-foreseen
-// item 143566
-// item 143570
-// 7.3.5
-class loot_item_shoulders_of_the_foreseen : public ItemScript
-{
-public:
-    loot_item_shoulders_of_the_foreseen() : ItemScript("loot_item_shoulders_of_the_foreseen") { }
-
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/, ObjectGuid castId) override
-    {
-        uint32 itemId = item->GetEntry();
-
-        std::vector<uint32> items;
-
-        items.push_back(138347);
-        items.push_back(138337);
-        items.push_back(138363);
-        items.push_back(138348);
-        items.push_back(138323);
-        items.push_back(138362);
-        items.push_back(138322);
-        items.push_back(138380);
-        items.push_back(138321);
-        items.push_back(138361);
-        items.push_back(138336);
-        items.push_back(138338);
-
-
-        // Process items
-        Trinity::Containers::RandomShuffle(items);
-        for (auto itemId : items)
-        {
-            // Safe! Item rewards always have an item template
-            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId);
-
-            bool allowRace = proto->GetAllowableRace() && (proto->GetAllowableRace() & player->getRaceMask());
-            bool allowSpec = !proto->HasSpec() || proto->IsUsableByLootSpecialization(player, false);
-            if (!allowRace || !allowSpec)
-                continue;
-
-            // Generate bonuses for selected item
-            uint32 itemLevel = ITEM_LEVEL_LEGION_T19;
-            uint32 epicbonus = BONUS_ITEM_T20_EPIC;
-            for (uint32 bonusListID : item->GetDynamicValues(ITEM_DYNAMIC_FIELD_BONUSLIST_IDS))
-            {
-                if (bonusListID == BONUS_CACHE_HEROIC)
-                {
-                    itemLevel = 895;
-                    epicbonus = BONUS_ITEM_T19_HEROIC;
-                }
-                if (bonusListID == BONUS_CACHE_MYTHIC)
-                {
-                    itemLevel = 905;
-                    epicbonus = BONUS_ITEM_T19_MYTHIC;
-                }
-
-            }
-
-            std::vector<int32> bonusLists;
-
-            int32 diff = itemLevel - ITEM_LEVEL_LEGION_T19;
-            bonusLists.push_back(epicbonus);
-
-            bonusLists.push_back(int32(BONUS_ITEM_T19_LEVEL_START + diff));
-
-            ItemPosCountVec dest;
-            bool mailed = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, 1) != EQUIP_ERR_OK;
-            player->SendDisplayToast(itemId, 0, 1, DISPLAY_TOAST_METHOD_CURRENCY_OR_ITEM, TOAST_TYPE_ITEM, false, mailed, bonusLists);
-            if (mailed)
-                player->SendItemRetrievalMail(itemId, 1, GenerateItemRandomPropertyId(itemId), bonusLists);
-            else
-                player->StoreNewItem(dest, itemId, true, GenerateItemRandomPropertyId(itemId), GuidSet(), 0, bonusLists);
-
-            break;
-        }
-        player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
-
-        return true;
-    }
-};
-
-// Chest of the Foregone 240716
-// 7.3.5
-class loot_item_chest_of_the_foregone : public ItemScript
-{
-public:
-    loot_item_chest_of_the_foregone() : ItemScript("loot_item_chest_of_the_foregone") { }
-
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/, ObjectGuid castId) override
-    {
-        uint32 itemId = item->GetEntry();
-
-        std::vector<uint32> items;
-
-        //147316 - 147169, 147121, 147149, 147133
-        //147317 - 147157, 147167, 147185, 147127
-        //147318 - 147187, 147139, 147175, 147151
-        items.push_back(147169);
-        items.push_back(147121);
-        items.push_back(147149);
-        items.push_back(147133);
-        items.push_back(147157);
-        items.push_back(147167);
-        items.push_back(147185);
-        items.push_back(147127);
-        items.push_back(147187);
-        items.push_back(147139);
-        items.push_back(147175);
-        items.push_back(147151);
-
-        // Process items
-        Trinity::Containers::RandomShuffle(items);
-        for (auto itemId : items)
-        {
-            // Safe! Item rewards always have an item template
-            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId);
-
-            bool allowRace = proto->GetAllowableRace() && (proto->GetAllowableRace() & player->getRaceMask());
-            bool allowSpec = !proto->HasSpec() || proto->IsUsableByLootSpecialization(player, false);
-            if (!allowRace || !allowSpec)
-                continue;
-
-            // Generate bonuses for selected item
-            uint32 itemLevel = ITEM_LEVEL_LEGION_T20;
-            uint32 epicbonus = BONUS_ITEM_T20_EPIC;
-            for (uint32 bonusListID : item->GetDynamicValues(ITEM_DYNAMIC_FIELD_BONUSLIST_IDS))
-            {
-                if (bonusListID == BONUS_CACHE_HEROIC)
-                {
-                    itemLevel = 915;
-                    epicbonus = BONUS_ITEM_T20_HEROIC;
-                }
-                if (bonusListID == BONUS_CACHE_MYTHIC)
-                {
-                    itemLevel = 930;
-                    epicbonus = BONUS_ITEM_T20_MYTHIC;
-                }
-
-            }
-
-            std::vector<int32> bonusLists;
-
-            int32 diff = itemLevel - ITEM_LEVEL_LEGION_T20;
-
-            bonusLists.push_back(epicbonus);
-
-            bonusLists.push_back(int32(BONUS_ITEM_T20_LEVEL_START + diff));
-
-            ItemPosCountVec dest;
-            bool mailed = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, 1) != EQUIP_ERR_OK;
-            player->SendDisplayToast(itemId, 0, 1, DISPLAY_TOAST_METHOD_CURRENCY_OR_ITEM, TOAST_TYPE_ITEM, false, mailed, bonusLists);
-            if (mailed)
-                player->SendItemRetrievalMail(itemId, 1, GenerateItemRandomPropertyId(itemId), bonusLists);
-            else
-                player->StoreNewItem(dest, itemId, true, GenerateItemRandomPropertyId(itemId), GuidSet(), 0, bonusLists);
-
-            break;
-        }
-        player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
-
-        return true;
-    }
-};
-
-// unsullied_plate_helmet 153155
-// 7.3.5
-class loot_item_unsullied_plate_helmet : public ItemScript
-{
-public:
-    loot_item_unsullied_plate_helmet() : ItemScript("loot_item_unsullied_plate_helmet") { }
-
-    bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/, ObjectGuid castId) override
-    {
-        uint32 itemId = item->GetEntry();
-
-        std::vector<uint32> itemstwo;
-
-        itemstwo.push_back(152747);
-
-        // Process items
-        Trinity::Containers::RandomShuffle(itemstwo);
-        for (auto itemId : itemstwo)
-        {
-            // Safe! Item rewards always have an item template
-            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId);
-
-            bool allowRace = proto->GetAllowableRace() && (proto->GetAllowableRace() & player->getRaceMask());
-            bool allowSpec = !proto->HasSpec() || proto->IsUsableByLootSpecialization(player, false);
-            if (!allowRace || !allowSpec)
-                continue;
-
-            // Generate bonuses for selected item
-            uint32 itemLevel = ITEM_LEVEL_LEGION_T20;
-            uint32 epicbonus = BONUS_ITEM_T20_EPIC;
-            for (uint32 bonusListIDTwo : item->GetDynamicValues(ITEM_DYNAMIC_FIELD_BONUSLIST_IDS))
-            {
-                if (bonusListIDTwo == BONUS_CACHE_HEROIC)
-                {
-                    itemLevel = 915;
-                    epicbonus = BONUS_ITEM_T20_HEROIC;
-                }
-                if (bonusListIDTwo == BONUS_CACHE_MYTHIC)
-                {
-                    itemLevel = 930;
-                    epicbonus = BONUS_ITEM_T20_MYTHIC;
-                }
-
-            }
-
-            std::vector<int32> bonusListsTwo;
-
-            int32 diff = itemLevel - ITEM_LEVEL_LEGION_T20;
-            /*if (int32 forgedDiff = Item::GenerateForgedBonus(itemLevel, bonusListsTwo, true))
-                diff += forgedDiff;*/
-
-            bonusListsTwo.push_back(epicbonus);
-
-            bonusListsTwo.push_back(int32(BONUS_ITEM_T20_LEVEL_START + diff));
-
-            ItemPosCountVec dest;
-            bool mailed = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, 1) != EQUIP_ERR_OK;
-            player->SendDisplayToast(itemId, 0, 1, DISPLAY_TOAST_METHOD_CURRENCY_OR_ITEM, TOAST_TYPE_ITEM, false, mailed, bonusListsTwo);
-            if (mailed)
-                player->SendItemRetrievalMail(itemId, 1, GenerateItemRandomPropertyId(itemId), bonusListsTwo);
-            else
-                player->StoreNewItem(dest, itemId, true, GenerateItemRandomPropertyId(itemId), GuidSet(), 0, bonusListsTwo);
-
-            break;
-        }
-        player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
-
-        return true;
-    }
-};
-
 void AddSC_item_scripts()
 {
     new item_only_for_flight();
@@ -1051,13 +467,6 @@ void AddSC_item_scripts()
     new item_dehta_trap_smasher();
     new item_trident_of_nazjan();
     new item_captured_frog();
-    new item_satchel_of_battlefield_spoils();
     new item_primal_egg();
     new item_pulsating_sac();
-    new loot_item_leggings_of_the_foregone();
-    new loot_item_gloves_of_the_foregone();
-    new loot_item_cloak_of_the_foreseen();
-    new loot_item_shoulders_of_the_foreseen();
-    new loot_item_chest_of_the_foregone();
-    new loot_item_unsullied_plate_helmet();
 }

@@ -2070,6 +2070,22 @@ void Player::Regenerate(Powers power)
     int32 minPower = powerType->MinPower;
     int32 maxPower = GetMaxPower(power);
 
+    if (addvalue < 0.0f)
+    {
+        if (curValue <= minPower)
+            return;
+    }
+    else if (addvalue > 0.0f)
+    {
+        if (curValue >= maxPower)
+            return;
+    }
+    else
+        return;
+
+    addvalue += m_powerFraction[powerIndex];
+    int32 integerValue = int32(std::fabs(addvalue));
+
     if (powerType->CenterPower)
     {
         if (curValue > powerType->CenterPower)
@@ -2085,22 +2101,6 @@ void Player::Regenerate(Powers power)
         else
             return;
     }
-
-    addvalue += m_powerFraction[powerIndex];
-    int32 integerValue = int32(std::fabs(addvalue));
-
-    if (addvalue < 0.0f)
-    {
-        if (curValue <= minPower)
-            return;
-    }
-    else if (addvalue > 0.0f)
-    {
-        if (curValue >= maxPower)
-            return;
-    }
-    else
-        return;
 
     if (addvalue < 0.0f)
     {
@@ -3413,7 +3413,7 @@ bool Player::IsNeedCastPassiveSpellAtLearn(SpellInfo const* spellInfo) const
 
     // Check EquippedItemClass
     // passive spells which apply aura and have an item requirement are to be added in Player::ApplyItemDependentAuras
-    if (spellInfo->EquippedItemClass >= 0)
+    if (spellInfo->IsPassive() && spellInfo->EquippedItemClass >= 0)
     {
         for (SpellEffectInfo const* effectInfo : spellInfo->GetEffectsForDifficulty(DIFFICULTY_NONE))
             if (effectInfo && effectInfo->IsAura())
@@ -3604,7 +3604,7 @@ void Player::RemoveSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
                 }
 
                 // now re-learn if need re-activate
-                if (!prev_itr->second->active && learn_low_rank)
+                if (cur_active && !prev_itr->second->active && learn_low_rank)
                 {
                     if (AddSpell(prev_id, true, false, prev_itr->second->dependent, prev_itr->second->disabled))
                     {
@@ -3832,16 +3832,16 @@ void Player::DestroyForPlayer(Player* target) const
 {
     Unit::DestroyForPlayer(target);
 
+    for (uint8 i = 0; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (m_items[i] == nullptr)
+            continue;
+
+        m_items[i]->DestroyForPlayer(target);
+    }
+
     if (target == this)
     {
-        for (uint8 i = 0; i < EQUIPMENT_SLOT_END; ++i)
-        {
-            if (m_items[i] == nullptr)
-                continue;
-
-            m_items[i]->DestroyForPlayer(target);
-        }
-
         for (uint8 i = INVENTORY_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
         {
             if (m_items[i] == nullptr)
@@ -5344,9 +5344,6 @@ void Player::UpdateRating(CombatRating cr)
         case CR_MASTERY:
             UpdateMastery();
             break;
-        case CR_PVP_POWER:
-        case CR_CLEAVE:
-            break;
         case CR_VERSATILITY_DAMAGE_DONE:
             UpdateVersatilityDamageDone();
             break;
@@ -5354,6 +5351,8 @@ void Player::UpdateRating(CombatRating cr)
             UpdateHealingDonePercentMod();
             break;
         case CR_VERSATILITY_DAMAGE_TAKEN:
+        case CR_PVP_POWER:
+        case CR_CLEAVE:
         case CR_UNUSED_12:
             break;
     }
@@ -7007,7 +7006,7 @@ bool Player::IsQuestObjectiveProgressComplete(Quest const* quest) const
     return false;
 }
 
-void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bool ignoreMultipliers/* = false*/)
+void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bool ignoreMultipliers/* = false*/, bool sendToast/* = false*/)
 {
     if (!count)
         return;
@@ -7120,6 +7119,9 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
         packet.Flags = itr->second.Flags;
 
         GetSession()->SendPacket(packet.Write());
+
+        if (sendToast)
+            SendDisplayToast(id, 0, count, DisplayToastMethod::DISPLAY_TOAST_METHOD_CURRENCY_OR_GOLD, ToastTypes::TOAST_TYPE_CURRENCY, false, false, {});
     }
 }
 
@@ -7342,8 +7344,8 @@ void Player::UpdateArea(uint32 newAreaId)
     pvpInfo.IsInFFAPvPArea = areaEntry && (areaEntry->Flags[0] & AREA_FLAG_ARENA);
     UpdatePvPState(true);
 
-    PhasingHandler::OnAreaChange(this);
     UpdateAreaDependentAuras();
+    PhasingHandler::OnAreaChange(this);
 
     if (IsAreaThatActivatesPvpTalents(areaEntry))
         EnablePvpRules();
@@ -9039,12 +9041,12 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type, bool aeLooting/* = fa
         // add 'this' player as one of the players that are looting 'loot'
         loot->AddLooter(GetGUID());
         m_AELootView[loot->GetGUID()] = guid;
+
+        if (loot_type == LOOT_CORPSE && !guid.IsItem())
+            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
     }
     else
         SendLootError(loot->GetGUID(), guid, LOOT_ERROR_DIDNT_KILL);
-
-    if (loot_type == LOOT_CORPSE && !guid.IsItem())
-        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
 }
 
 void Player::SendLootError(ObjectGuid const& lootObj, ObjectGuid const& owner, LootError error) const
@@ -15861,6 +15863,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
     uint32 quest_id = quest->GetQuestId();
     QuestStatus oldStatus = GetQuestStatus(quest_id);
+    Item* rewardItem = nullptr;
 
     for (QuestObjective const& obj : quest->GetObjectives())
     {
@@ -15903,6 +15906,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
                     std::vector<int32> bonusListIDs = sDB2Manager.GetItemBonusTreeVector(reward, 0);
 
                     Item* item = StoreNewItem(dest, reward, true, GenerateItemRandomPropertyId(reward), GuidSet(), 0, bonusListIDs);
+                    SendDisplayToast(reward, quest_id, quest->RewardChoiceItemCount[reward], DisplayToastMethod::DISPLAT_TOAST_METHOD_TASK_LOOT, ToastTypes::TOAST_TYPE_ITEM, false, false, bonusListIDs);
                     SendNewItem(item, quest->RewardChoiceItemCount[i], true, false);
                 }
             }
@@ -15925,6 +15929,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
                     std::vector<int32> bonusListIDs = sDB2Manager.GetItemBonusTreeVector(itemId, 0);
 
                     Item* item = StoreNewItem(dest, itemId, true, GenerateItemRandomPropertyId(itemId), GuidSet(), 0, bonusListIDs);
+                    SendDisplayToast(itemId, quest_id, quest->RewardItemCount[i], DisplayToastMethod::DISPLAT_TOAST_METHOD_TASK_LOOT, ToastTypes::TOAST_TYPE_ITEM, false, false, bonusListIDs);
                     SendNewItem(item, quest->RewardItemCount[i], true, false);
                 }
                 else if (quest->IsDFQuest())
@@ -15934,8 +15939,10 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     }
 
     for (uint8 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
-        if (quest->RewardCurrencyId[i])
+        if (quest->RewardCurrencyId[i]) {
             ModifyCurrency(quest->RewardCurrencyId[i], quest->RewardCurrencyCount[i]);
+            SendDisplayToast(quest->RewardCurrencyId[i], 0, quest->RewardCurrencyCount[i], DisplayToastMethod::DISPLAT_TOAST_METHOD_TASK_LOOT, ToastTypes::TOAST_TYPE_CURRENCY, false, false, {});
+        }
 
     if (uint32 skill = quest->GetRewardSkillId())
         UpdateSkillPro(skill, 1000, quest->GetRewardSkillPoints());
@@ -15962,6 +15969,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
         if (moneyRew > 0)
             UpdateCriteria(CRITERIA_TYPE_MONEY_FROM_QUEST_REWARD, uint32(moneyRew));
+        SendDisplayToast(0, quest_id, moneyRew, DisplayToastMethod::DISPLAT_TOAST_METHOD_TASK_LOOT, ToastTypes::TOAST_TYPE_CURRENCY, false, false, {});
     }
 
     if (quest->IsWorldQuest())
@@ -22726,10 +22734,10 @@ void Player::ApplyModToSpell(SpellModifier* mod, Spell* spell)
 
 void Player::SetSpellModTakingSpell(Spell* spell, bool apply)
 {
-    if (apply && m_spellModTakingSpell != nullptr)
+    if (!spell || (m_spellModTakingSpell && m_spellModTakingSpell != spell))
         return;
 
-    if (!apply && (!m_spellModTakingSpell || m_spellModTakingSpell != spell))
+    if (apply && spell->getState() == SPELL_STATE_FINISHED)
         return;
 
     m_spellModTakingSpell = apply ? spell : nullptr;
@@ -23263,7 +23271,7 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
                 continue;
 
             if (iece->CurrencyID[i])
-                ModifyCurrency(iece->CurrencyID[i], -int32(iece->CurrencyCount[i] * stacks), true, true);
+                ModifyCurrency(iece->CurrencyID[i], -int32(iece->CurrencyCount[i] * stacks), true, true, true);
         }
     }
 
@@ -23448,7 +23456,7 @@ bool Player::BuyCurrencyFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorSlot,
             if (iece->Flags & (ITEM_EXT_COST_CURRENCY_REQ_IS_SEASON_EARNED_1 << i))
                 continue;
 
-            ModifyCurrency(iece->CurrencyID[i], -int32(iece->CurrencyCount[i]) * stacks, false, true);
+            ModifyCurrency(iece->CurrencyID[i], -int32(iece->CurrencyCount[i]) * stacks, false, true, true);
         }
     }
 
@@ -24412,8 +24420,8 @@ bool Player::HasEnoughMoney(int64 amount) const
 
 void Player::SetMoney(uint64 value)
 {
+    SetUInt64Value(PLAYER_FIELD_COINAGE, value);
     MoneyChanged(value);
-	SetUInt64Value(PLAYER_FIELD_COINAGE, value);
     UpdateCriteria(CRITERIA_TYPE_HIGHEST_GOLD_VALUE_OWNED);
 }
 
@@ -26608,18 +26616,18 @@ void Player::AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore cons
         Item* pItem = StoreNewItem(dest, lootItem->itemid, true, lootItem->randomPropertyId, GuidSet(), lootItem->context, lootItem->BonusListIDs);
         SendNewItem(pItem, lootItem->count, false, false, broadcast);
 
-        //if (toastMethod == TOAST_METHOD_NONE)
-        //{
-            WorldPackets::Loot::DisplayToast displayToast;
+        if (toastMethod != TOAST_METHOD_NONE)
+        {
+            SendDisplayToast(lootItem->itemid, 0, lootItem->count, DisplayToastMethod::DISPLAT_TOAST_METHOD_TASK_LOOT, ToastTypes::TOAST_TYPE_ITEM, false, false, lootItem->BonusListIDs);
+            /*WorldPackets::Loot::DisplayToast displayToast;
             displayToast.EntityId = lootItem->itemid;
             displayToast.ToastType = TOAST_ITEM;
             displayToast.Quantity = lootItem->count;
             displayToast.RandomPropertiesID = pItem->GetItemRandomPropertyId();
             displayToast.ToastMethod = toastMethod;
             displayToast.bonusListIDs = pItem->GetDynamicValues(ITEM_DYNAMIC_FIELD_BONUSLIST_IDS);
-            this->SendDirectMessage(displayToast.Write());
-            // GetSession()->SendPacket(displayToast.Write());
-        //}
+            SendDirectMessage(displayToast.Write());*/
+        }
     }
 }
 
@@ -26664,6 +26672,9 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, AELootResult* aeResult/* 
 
     ItemPosCountVec dest;
     InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item->itemid, item->count);
+    TC_LOG_ERROR("server.worldserver", "*** StoreLootItem *** Player %s(%lu) looted item %u count %u",
+        GetName().c_str(), GetGUID().GetCounter(),
+        item->itemid, item->count);
     if (msg == EQUIP_ERR_OK)
     {
         Item* newitem = StoreNewItem(dest, item->itemid, true, item->randomPropertyId, item->GetAllowedLooters(), item->context, item->BonusListIDs);
@@ -26699,7 +26710,6 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, AELootResult* aeResult/* 
             item->is_looted = true;
 
         --loot->unlootedCount;
-
         if (sObjectMgr->GetItemTemplate(item->itemid))
         {
             if (newitem->GetQuality() > ITEM_QUALITY_EPIC || (newitem->GetQuality() == ITEM_QUALITY_EPIC && newitem->GetItemLevel(this) >= MinNewsItemLevel))
@@ -26707,10 +26717,14 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, AELootResult* aeResult/* 
                 if (Guild* guild = GetGuild())
                     guild->AddGuildNews(GUILD_NEWS_ITEM_LOOTED, GetGUID(), 0, item->itemid);
 
-                TC_LOG_INFO("metric", "%s(%lu) looted item %u count %u",
+                TC_LOG_ERROR("server.worldserver", "%s(%lu) looted item %u count %u",
                     GetName().c_str(), GetGUID().GetCounter(),
                     item->itemid, item->count);
             }
+            if (newitem->GetQuality() >= uint32(ITEM_QUALITY_UNCOMMON))
+                SendDisplayToast(item->itemid, 0, item->count, DisplayToastMethod::DISPLAY_TOAST_METHOD_CURRENCY_OR_ITEM, ToastTypes::TOAST_TYPE_ITEM, false, false, item->BonusListIDs);
+            else if (newitem->GetQuality() >= uint32(ITEM_QUALITY_LEGENDARY))
+                SendDisplayToast(item->itemid, 0, item->count, DisplayToastMethod::DISPLAY_TOAST_METHOD_CURRENCY_OR_ITEM, ToastTypes::TOAST_TYPE_ITEM, false, false, item->BonusListIDs);
         }
 
         // if aeLooting then we must delay sending out item so that it appears properly stacked in chat
@@ -28348,7 +28362,7 @@ void Player::RefundItem(Item* item)
         uint32 count = iece->CurrencyCount[i];
         uint32 currencyid = iece->CurrencyID[i];
         if (count && currencyid)
-            ModifyCurrency(currencyid, count, true, true);
+            ModifyCurrency(currencyid, count, true, true, true);
     }
 
     // Grant back money
@@ -29966,7 +29980,6 @@ void Player::SendDisplayToast(uint32 entry, uint32 questId, uint32 count, Displa
 
         displayToast.ToastMethod = method;
         displayToast.bonusListIDs = itembonus;
-        this->SendDirectMessage(displayToast.Write());
-        // GetSession()->SendPacket(displayToast.Write());
+        SendDirectMessage(displayToast.Write());
     }
 }

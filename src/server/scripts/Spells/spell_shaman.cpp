@@ -58,8 +58,6 @@ enum ShamanSpells
     SPELL_SHAMAN_CRASHING_STORM_DUMMY                       = 192246,
     SPELL_SHAMAN_CRASHING_STORM_AT                          = 210797,
     SPELL_SHAMAN_CRASHING_STORM_DAMAGE                      = 210801,
-    SPELL_SHAMAN_CARESS_OF_THE_TIDEMOTHER                   = 207354,
-    SPELL_SHAMAN_CARESS_OF_THE_TIDEMOTHER_AURA              = 209950,
     SPELL_SHAMAN_DOOM_WINDS                                 = 204945,
     SPELL_SHAMAN_EARTHBIND_FOR_EARTHGRAB_TOTEM              = 116947,
     SPELL_SHAMAN_EARTHEN_RAGE_DAMAGE                        = 170379,
@@ -184,8 +182,6 @@ enum ShamanSpells
     SPELL_SHAMAN_WINDFURY_ATTACK_OFF_HAND                   = 33750,
     SPELL_SHAMAN_WINDFURY_WEAPON_PASSIVE                    = 33757,
     SPELL_SHAMAN_WIND_RUSH_TOTEM                            = 192077,
-    SPELL_SHAMAN_HAILSTORM_BASE				    = 210853,
-    SPELL_SHAMAN_HAILSTORM_DAMAGE			    = 210854,
 };
 
 enum TotemSpells
@@ -232,44 +228,6 @@ enum ShamanNpcs
 {
     NPC_RAINFALL                                            = 73400,
     NPC_HEALING_RAIN                                        = 73400, // Same as Rainfall at 7.3.5
-};
-
-// 196834 - Frostbrand
-// 7.1.5
-class spell_sha_hailstorm : public SpellScriptLoader
-{
-public:
-	spell_sha_hailstorm() : SpellScriptLoader("spell_sha_hailstorm") { }
-
-	class spell_sha_hailstorm_AuraScript : public AuraScript
-	{
-		PrepareAuraScript(spell_sha_hailstorm_AuraScript);
-
-		bool Validate(SpellInfo const* /*spellInfo*/) override
-		{
-			return ValidateSpellInfo
-			({
-				SPELL_SHAMAN_HAILSTORM_BASE,
-				SPELL_SHAMAN_HAILSTORM_DAMAGE
-			});
-		}
-
-		void HandleProc(ProcEventInfo& eventInfo)
-		{
-			if (GetCaster() && GetCaster()->HasAura(SPELL_SHAMAN_HAILSTORM_BASE))
-				GetCaster()->CastSpell(GetCaster(), SPELL_SHAMAN_HAILSTORM_DAMAGE, true);
-		}
-
-		void Register() override
-		{
-			OnProc += AuraProcFn(spell_sha_hailstorm_AuraScript::HandleProc);
-		}
-	};
-
-	AuraScript* GetAuraScript() const override
-	{
-		return new spell_sha_hailstorm_AuraScript();
-	}
 };
 
 // Feral Lunge - 196884
@@ -973,38 +931,34 @@ class spell_sha_glyph_of_healing_wave : public SpellScriptLoader
 // 5394 - Healing Stream Totem
 class spell_sha_healing_stream_totem : public SpellScriptLoader
 {
-public:
-    spell_sha_healing_stream_totem() : SpellScriptLoader("spell_sha_healing_stream_totem") { }
+    public:
+        spell_sha_healing_stream_totem() : SpellScriptLoader("spell_sha_healing_stream_totem") { }
 
-    class spell_sha_healing_stream_totem_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_sha_healing_stream_totem_SpellScript);
-
-        void HandleAfterCast() {
-
-            Unit* caster = GetCaster();
-            if (!caster)
-                return;
-
-            if (caster->HasAura(SPELL_SHAMAN_CARESS_OF_THE_TIDEMOTHER)) {
-                AuraEffect* auraeffx = caster->GetAura(SPELL_SHAMAN_CARESS_OF_THE_TIDEMOTHER)->GetEffect(EFFECT_0);
-                int32 amount = auraeffx->GetAmount();
-                CustomSpellValues values;
-                values.AddSpellMod(SPELLVALUE_BASE_POINT0, amount);
-                caster->CastCustomSpell(SPELL_SHAMAN_CARESS_OF_THE_TIDEMOTHER_AURA, values, caster, TRIGGERED_FULL_MASK);
-            }
-        }
-
-        void Register() override
+        class spell_sha_healing_stream_totem_AuraScript : public AuraScript
         {
-            AfterCast += SpellCastFn(spell_sha_healing_stream_totem_SpellScript::HandleAfterCast);
-        }
+            PrepareAuraScript(spell_sha_healing_stream_totem_AuraScript);
 
-    };
-    SpellScript* GetSpellScript() const override
-    {
-        return new spell_sha_healing_stream_totem_SpellScript();
-    }
+            bool Validate(SpellInfo const* /*spellInfo*/) override
+            {
+                return sSpellMgr->GetSpellInfo(SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL) != nullptr;
+            }
+
+            void HandleDummy(AuraEffect const* aurEff)
+            {
+                if (Creature* waterTotem = GetTarget()->GetMap()->GetCreature(GetTarget()->m_SummonSlot[3]))
+                    waterTotem->CastSpell((Unit*)nullptr, SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL, TRIGGERED_FULL_MASK, nullptr, aurEff, GetTarget()->GetGUID());
+            }
+
+            void Register() override
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_sha_healing_stream_totem_AuraScript::HandleDummy, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const override
+        {
+            return new spell_sha_healing_stream_totem_AuraScript();
+        }
 };
 
 //192077 - Wind Rush Totem

@@ -164,8 +164,8 @@ enum PriestSpells
     SPELL_PRIEST_SPIRIT_OF_REDEMPTION_UNTRANS_HERO  = 25100,
     SPELL_PRIEST_SPIRIT_SHELL_ABSORPTION            = 114908,
     SPELL_PRIEST_SPIRIT_SHELL_AURA                  = 109964,
-    SPELL_PRIEST_STRENGTH_OF_SOUL                   = 197535,
-    SPELL_PRIEST_STRENGTH_OF_SOUL_AURA              = 197548,
+    SPELL_PRIEST_STRENGTH_OF_SOUL                   = 89488,
+    SPELL_PRIEST_STRENGTH_OF_SOUL_AURA              = 89488,
     SPELL_PRIEST_STRENGTH_OF_SOUL_REDUCE_TIME       = 89490,
     SPELL_PRIEST_SURGE_OF_DARKNESS                  = 87160,
     SPELL_PRIEST_SURGE_OF_LIGHT                     = 114255,
@@ -177,7 +177,6 @@ enum PriestSpells
     SPELL_PRIEST_VAMPIRIC_EMBRACE_TRIGGER           = 15290,
     SPELL_PRIEST_VAMPIRIC_TOUCH                     = 34914,
     SPELL_PRIEST_VAMPIRIC_TOUCH_DISPEL              = 201146, // Fear
-	SPELL_PRIEST_SURGE_OF_LIGHT_VISUAL              = 128654,
     SPELL_PRIEST_VOIDFORM                           = 228264,
     SPELL_PRIEST_VOIDFORM_BUFFS                     = 194249,
     SPELL_PRIEST_VOIDFORM_TENTACLES                 = 210196,
@@ -188,9 +187,7 @@ enum PriestSpells
     SPELL_PRIEST_VOID_SHIFT                         = 108968,
     SPELL_PRIEST_VOID_TENDRILS_SUMMON               = 127665,
     SPELL_PRIEST_VOID_TENDRILS_TRIGGER              = 127665,
-    SPELL_PRIEST_VOID_TORRENT_PREVENT_REGEN         = 262173,
     SPELL_PRIEST_WEAKENED_SOUL                      = 6788,
-	SPELL_PRIEST_PSYFLAY_BASE                       = 211522,
 };
 
 enum PriestSpellIcons
@@ -1883,7 +1880,7 @@ public:
                     if (Guardian* pet = _player->GetGuardianPet())
                     {
                         pet->InitCharmInfo();
-                        pet->SetReactState(REACT_AGGRESSIVE);
+                        pet->SetReactState(REACT_DEFENSIVE);
                         pet->ToCreature()->AI()->AttackStart(target);
                     }
                 }
@@ -2738,234 +2735,6 @@ struct at_pri_divine_star : AreaTriggerAI
     }
 };
 
-// 238063
-// 7.3.5
-class spell_pri_leniences_reward : public SpellScriptLoader
-{
-public:
-    spell_pri_leniences_reward() : SpellScriptLoader("spell_pri_leniences_reward") { }
-
-    class spell_pri_leniences_reward_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_pri_leniences_reward_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            return ValidateSpellInfo({ SPELL_PRIEST_GUARDIAN_SPIRIT_HEAL });
-        }
-
-        void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
-        {
-            amount /= 100;
-        }
-
-        void Register() override
-        {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pri_leniences_reward_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_ADD_FLAT_MODIFIER);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
-    {
-        return new spell_pri_leniences_reward_AuraScript();
-    }
-};
-
-// 199845 - Psyflay Area
-// 7.3.5
-class spell_pri_psyflay_area : public SpellScriptLoader
-{
-public:
-    spell_pri_psyflay_area() : SpellScriptLoader("spell_pri_psyflay_area") { }
-
-    class spell_pri_psyflay_area_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_pri_psyflay_area_SpellScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            return ValidateSpellInfo({ SPELL_PRIEST_PSYFLAY_BASE });
-        }
-
-        void FilterTargets(std::list<WorldObject*>& targets)
-        {
-            if (Unit* caster = GetCaster())
-            {
-                Unit* owner = caster->GetOwner();
-                if (!owner)
-                    return;
-
-                targets.remove_if([owner](WorldObject* object)
-                {
-                    if (!object->ToUnit())
-                        return true;
-                    if (object->ToUnit()->HasAura(SPELL_PRIEST_PSYFLAY_BASE))
-                        return false;
-                    if (owner->ToPlayer() && owner->ToPlayer()->GetSelectedUnit())
-                        if (owner->ToPlayer()->GetSelectedUnit() == object)
-                            return false;
-                    return true;
-                });
-            }
-        }
-
-        void Register() override
-        {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_psyflay_area_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_psyflay_area_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pri_psyflay_area_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const override
-    {
-        return new spell_pri_psyflay_area_SpellScript();
-    }
-};
-
-// Surge of Light - 114255
-class spell_pri_surge_of_light : public SpellScriptLoader
-{
-    public:
-        spell_pri_surge_of_light() : SpellScriptLoader("spell_pri_surge_of_light") { }
-
-        class spell_pri_surge_of_light_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_pri_surge_of_light_SpellScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) override
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_SURGE_OF_LIGHT))
-                    return false;
-                return true;
-            }
-
-            int32 m_duration = 0;
-
-            /*void HandleOnPrepare()
-            {
-                if (Unit* pl_caster = GetCaster())
-                if (Aura* pl_SurgeOfLight = pl_caster->GetAura(SPELL_PRIEST_SURGE_OF_LIGHT))
-                    m_duration = pl_SurgeOfLight->GetDuration();
-            }*/ // no implement FIX ME
-
-            void HandleOnCast()
-            {
-                if (Unit* pl_caster = GetCaster())
-                if (Aura* pl_SurgeOfLight = pl_caster->GetAura(SPELL_PRIEST_SURGE_OF_LIGHT))
-                {
-                    pl_SurgeOfLight->SetDuration(m_duration);
-                    if (pl_SurgeOfLight->GetStackAmount() > 1)
-                        pl_SurgeOfLight->SetStackAmount(1);
-                }
-            }
-
-            void Register() override
-            {
-                // OnPrepare += SpellOnPrepareFn(spell_pri_surge_of_light_SpellScript::HandleOnPrepare); no implement FIX ME
-                OnCast += SpellCastFn(spell_pri_surge_of_light_SpellScript::HandleOnCast);
-            }
-        };
-
-        SpellScript* GetSpellScript() const override
-        {
-            return new spell_pri_surge_of_light_SpellScript();
-        }
-
-        class spell_pri_surge_of_light_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pri_surge_of_light_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) override
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_SURGE_OF_LIGHT_VISUAL))
-                    return false;
-                return true;
-            }
-
-            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                Unit* pl_caster = GetCaster();
-                if (!pl_caster->HasAura(SPELL_PRIEST_SURGE_OF_LIGHT_VISUAL))
-                    pl_caster->CastSpell(pl_caster, SPELL_PRIEST_SURGE_OF_LIGHT_VISUAL, true);
-            }
-
-            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                Unit* pl_caster = GetCaster();
-                if (pl_caster->HasAura(SPELL_PRIEST_SURGE_OF_LIGHT_VISUAL))
-                    pl_caster->RemoveAura(SPELL_PRIEST_SURGE_OF_LIGHT_VISUAL);
-            }
-
-            void Register() override
-            {
-                OnEffectApply += AuraEffectRemoveFn(spell_pri_surge_of_light_AuraScript::OnApply, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL);
-                OnEffectRemove += AuraEffectRemoveFn(spell_pri_surge_of_light_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL);
-            }
-        };
-
-        AuraScript* GetAuraScript() const override
-        {
-            return new spell_pri_surge_of_light_AuraScript();
-        }
-};
-
-// Surge of Light (aura)
-class spell_pri_surge_of_light_aura : public SpellScriptLoader
-{
-    public:
-        spell_pri_surge_of_light_aura() : SpellScriptLoader("spell_pri_surge_of_light_aura") { }
-
-        class spell_pri_surge_of_light_aura_AuraScript : public AuraScript
-        {
-            PrepareAuraScript(spell_pri_surge_of_light_aura_AuraScript);
-
-            bool Validate(SpellInfo const* /*spellInfo*/) override
-            {
-                if (!sSpellMgr->GetSpellInfo(SPELL_PRIEST_SURGE_OF_LIGHT))
-                    return false;
-                return true;
-            }
-
-            void OnProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
-            {
-                PreventDefaultAction();
-
-                if (!eventInfo.GetHealInfo() || !eventInfo.GetHealInfo()->GetHeal() || !eventInfo.GetActor())
-                    return;
-
-                if (Player* pl_player = eventInfo.GetActor()->ToPlayer())
-                {
-                    if (pl_player->GetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID) == TALENT_SPEC_PRIEST_SHADOW)
-                        return;
-
-                    if (roll_chance_i(GetSpellInfo()->GetEffect(EFFECT_0)->BasePoints))
-                    {
-                        if (Aura* pl_SurgeOfLight = pl_player->GetAura(SPELL_PRIEST_SURGE_OF_LIGHT))
-                        {
-                            if (pl_SurgeOfLight->GetStackAmount() == 2)
-                                pl_SurgeOfLight->SetDuration(pl_SurgeOfLight->GetMaxDuration());
-                            else
-                                pl_player->CastSpell(pl_player, SPELL_PRIEST_SURGE_OF_LIGHT, true);
-                        }
-                        else
-                            pl_player->CastSpell(pl_player, SPELL_PRIEST_SURGE_OF_LIGHT, true);
-                    }
-                }
-            }
-
-            void Register() override
-            {
-                OnEffectProc += AuraEffectProcFn(spell_pri_surge_of_light_aura_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
-            }
-        };
-
-        AuraScript* GetAuraScript() const override
-        {
-            return new spell_pri_surge_of_light_aura_AuraScript();
-        }
-};
-
 void AddSC_priest_spell_scripts()
 {
     RegisterAreaTriggerAI(at_pri_angelic_feather);
@@ -3008,8 +2777,6 @@ void AddSC_priest_spell_scripts()
     new spell_pri_renew();
     RegisterSpellScript(spell_pri_shadow_word_death);
     new spell_pri_shadowfiend();
-	new spell_pri_surge_of_light();
-	new spell_pri_surge_of_light_aura();
     new spell_pri_shadowform();
     new spell_pri_spirit_shell();
     new spell_pri_strength_of_soul();
@@ -3036,6 +2803,4 @@ void AddSC_priest_spell_scripts()
     RegisterAuraScript(spell_pri_mind_bomb);
 
     RegisterSpellAndAuraScriptPair(spell_pri_power_word_shield, spell_pri_power_word_shield_AuraScript);
-	new spell_pri_leniences_reward();
-    new spell_pri_psyflay_area();
 }

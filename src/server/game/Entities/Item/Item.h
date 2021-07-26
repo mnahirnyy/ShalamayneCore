@@ -322,6 +322,7 @@ class TC_GAME_API Item : public Object
         ItemModifiedAppearanceEntry const* GetItemModifiedAppearance() const;
         float GetRepairCostMultiplier() const { return _bonusData.RepairCostMultiplier; }
         uint32 GetScalingStatDistribution() const { return _bonusData.ScalingStatDistribution; }
+        uint32 GetDisplayToastMethod(uint8 value = 0) const { return _bonusData.ScalingStatDistribution; }
         ItemDisenchantLootEntry const* GetDisenchantLoot(Player const* owner) const;
         static ItemDisenchantLootEntry const* GetDisenchantLoot(ItemTemplate const* itemTemplate, uint32 quality, uint32 itemLevel);
         void SetFixedLevel(uint8 level);

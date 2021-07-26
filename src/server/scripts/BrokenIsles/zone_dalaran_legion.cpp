@@ -957,6 +957,9 @@ public:
         void Reset() override
         {
             me->SetWalk(false);
+            me->SetRespawnDelay(0);
+            me->SetRespawnTime(0);
+            me->SetCorpseDelay(0);
             Initialize();
             _events.Reset();
         }
@@ -1038,7 +1041,9 @@ public:
                         _phase = PHASE_NONE;
                         break;
                     case PHASE_DESPAWN:
-                        me->Respawn(false);
+                        me->DespawnOrUnsummon();
+                        me->setDeathState(JUST_DIED);
+                        me->Respawn();
                         break;
                     default:
                         break;

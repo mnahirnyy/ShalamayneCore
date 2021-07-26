@@ -567,9 +567,6 @@ enum SMART_ACTION
     SMART_ACTION_PLAY_ANIMKIT                       = 128,    // id, type (0 = oneShot, 1 = aiAnim, 2 = meleeAnim, 3 = movementAnim, 4 = spellVisualKit)
     SMART_ACTION_SCENE_PLAY                         = 129,    // sceneId
     SMART_ACTION_SCENE_CANCEL                       = 130,    // sceneId
-    // 131 - 135 : 3.3.5 reserved
-    SMART_ACTION_PLAY_CINEMATIC                     = 135,    // reserved for future uses
-    SMART_ACTION_END                                = 136,
     
     // Ashamane' specific actions
     SMART_ACTION_PLAY_SPELL_VISUAL_KIT              = 200,    // id, type, duration.
@@ -588,6 +585,8 @@ enum SMART_ACTION
     SMART_ACTION_ADD_FLYING_MOVEMENT_FLAG           = 213,    // Variation
     SMART_ACTION_REMOVE_FLYING_MOVEMENT_FLAG        = 214,    // Variation
     SMART_ACTION_CAST_SPELL_OFFSET                  = 215,    // SpellId, triggered if value = 1.
+
+    SMART_ACTION_END
 };
 
 struct SmartAction

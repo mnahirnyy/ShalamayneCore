@@ -70,8 +70,6 @@ enum MageSpells
     SPELL_MAGE_BRAIN_FREEZE_IMPROVED             = 231584,
     SPELL_MAGE_JOUSTER                           = 214626,
     SPELL_MAGE_CHAIN_REACTION                    = 195419,
-    SPELL_MAGE_TOUCH_OF_THE_MAGI_AURA            = 210824,
-    SPELL_MAGE_TOUCH_OF_THE_MAGI_EXPLODE         = 210833,
     SPELL_MAGE_CHILLED_TO_THE_CORE               = 195448,
     SPELL_MAGE_GLARITY_OF_THOUGHT                = 195351,
     SPELL_MAGE_ICE_NOVA                          = 157997,
@@ -116,15 +114,6 @@ enum MageSpells
     SPELL_MAGE_HEATING_UP                        = 48107,
     SPELL_MAGE_HOT_STREAK                        = 48108,
     SPELL_MAGE_ENHANCED_PYROTECHNICS_AURA        = 157644,
-	SPELL_MAGE_NETHER_TEMPEST					 = 114923,
-    SPELL_MAGE_NETHER_TEMPEST_AOE_DAMAGE		 = 114954,
-    SPELL_MAGE_NETHER_TEMPEST_VISUAL			 = 114956,
-	SPELL_MAGE_INCANTERS_FLOW_TRIGGER			 = 1463,
-    SPELL_MAGE_ARCANE_CHARGE					 = 36032,
-	SPELL_MAGE_EROSION_TIMER					 = 210154,
-    SPELL_MAGE_EROSION_AURASTATE				 = 210134,
-    SPELL_MAGE_DISPLACEMENT						 = 195676,
-    SPELL_MAGE_DISPLACEMENT_BEACON				 = 212799,
 
     SPELL_MAGE_INCANTERS_FLOW_BUFF               = 116267,
     SPELL_MAGE_RUNE_OF_POWER_BUFF                = 116014,
@@ -154,6 +143,7 @@ enum MageSpells
     SPELL_MAGE_FIRE_MAGE_PASSIVE                 = 137019,
     SPELL_MAGE_FIRE_ON                           = 205029,
     SPELL_MAGE_FIRESTARTER                       = 205026,
+    SPELL_MAGE_CAUTERIZE                         = 87023,
     SPELL_MAGE_MIRROR_IMAGE_LEFT                 = 58834,
     SPELL_MAGE_MIRROR_IMAGE_RIGHT                = 58833,
     SPELL_MAGE_MIRROR_IMAGE_FRONT                = 58831,
@@ -172,20 +162,7 @@ enum MageSpells
     SPELL_MAGE_FLAME_PATCH_AOE_DMG               = 205472,
     SPELL_MAGE_CINDERSTORM                       = 198929,
     SPELL_MAGE_CINDERSTORM_DMG                   = 198928,
-    SPELL_MAGE_IGNITE_DOT                        = 12654,
-    SPELL_MAGE_CAUTERIZE_DAMAGE                  = 87023,
-    SPELL_MAGE_CAUTERIZE_DEBUFF                  = 87024,
-    SPELL_MAGE_CAUTERIZE_BLAZING_SPEED           = 108843,
-	SPELL_MAGE_PYRETIC_INCANTATION_BUFF          = 194329,
-	SPELL_MAGE_HOT_STREAK_AURASTATE				 = 48108,
-	SPELL_MAGE_CONFLAGRATION 					 = 205023,
-	SPELL_MAGE_CONFLAGRATION_FLARE_UP			 = 205345,
-	SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED 	 = 44413,
-	SPELL_MAGE_FROST_WARDING_TRIGGERED			 = 57776,
-    SPELL_MAGE_FROST_WARDING_R1					 = 11189,
-    SPELL_MAGE_FOCUS_MAGIC_PROC					 = 54648,
-    SPELL_MAGE_INCANTERS_ABSORBTION_R1			 = 44394,
-	
+    SPELL_MAGE_IGNITE_DOT                        = 12654
 };
 
 enum TemporalDisplacementSpells
@@ -1454,49 +1431,6 @@ class spell_mage_chilled_to_the_core : public AuraScript
     }
 };
 
-// 210824 - Touch of the Magi (Aura)
-class spell_mage_touch_of_the_magi_aura : public AuraScript
-{
-    PrepareAuraScript(spell_mage_touch_of_the_magi_aura);
-
-    bool Validate(SpellInfo const* /*spellInfo*/) override
-    {
-        return ValidateSpellInfo({ SPELL_MAGE_TOUCH_OF_THE_MAGI_EXPLODE });
-    }
-
-    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-    {
-        DamageInfo* damageInfo = eventInfo.GetDamageInfo();
-        if (damageInfo)
-        {
-            if (damageInfo->GetAttacker() == GetCaster() && damageInfo->GetVictim() == GetTarget())
-            {
-                uint32 extra = CalculatePct(damageInfo->GetDamage(), 25);
-                if (AuraEffect* magi = GetEffect(EFFECT_0)) {
-                    if (extra > 0)
-                        magi->ChangeAmount(aurEff->GetAmount() + extra);
-                }
-            }
-        }
-    }
-
-    void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
-    {
-        int32 amount = aurEff->GetAmount();
-        if (!amount || GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
-            return;
-
-        if (Unit* caster = GetCaster())
-            caster->CastCustomSpell(SPELL_MAGE_TOUCH_OF_THE_MAGI_EXPLODE, SPELLVALUE_BASE_POINT0, amount, GetTarget(), TRIGGERED_FULL_MASK);
-    }
-
-    void Register() override
-    {
-        OnEffectProc += AuraEffectProcFn(spell_mage_touch_of_the_magi_aura::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-        AfterEffectRemove += AuraEffectRemoveFn(spell_mage_touch_of_the_magi_aura::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
-    }
-};
-
 // Frostbolt - 228597
 class spell_mage_frostbolt : public SpellScript
 {
@@ -2138,6 +2072,83 @@ public:
     SpellScript* GetSpellScript() const override
     {
         return new spell_mage_mirror_image_summon_SpellScript();
+    }
+};
+
+// Cauterize - 86949
+class spell_mage_cauterize : public SpellScriptLoader
+{
+public:
+    spell_mage_cauterize() : SpellScriptLoader("spell_mage_cauterize") { }
+
+    class spell_mage_cauterize_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_mage_cauterize_AuraScript);
+
+        int32 healtPct;
+
+        bool Load() override
+        {
+            healtPct = GetSpellInfo()->GetEffect(EFFECT_1)->CalcValue(GetCaster());
+            return GetUnitOwner()->GetTypeId() == TYPEID_PLAYER;
+        }
+
+        void CalculateAmount(AuraEffect const* /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
+        {
+            amount = -1;
+        }
+
+        void Absorb(AuraEffect* /*auraEffect*/, DamageInfo& dmgInfo, uint32& absorbAmount)
+        {
+            Unit* target = GetTarget();
+
+            if (dmgInfo.GetDamage() < target->GetHealth())
+                return;
+
+            if (target->ToPlayer()->GetSpellHistory()->HasCooldown(SPELL_MAGE_CAUTERIZE))
+                return;
+
+            int bp1 = target->CountPctFromMaxHealth(healtPct);
+            target->CastCustomSpell(target, SPELL_MAGE_CAUTERIZE, NULL, &bp1, NULL, true);
+            target->CastSpell(target, GetSpellInfo()->GetEffect(EFFECT_2)->TriggerSpell, true);
+            target->GetSpellHistory()->AddCooldown(SPELL_MAGE_CAUTERIZE, 0, std::chrono::minutes(2));
+
+            absorbAmount = dmgInfo.GetDamage();
+        }
+
+        void Register() override
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_cauterize_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_mage_cauterize_AuraScript::Absorb, EFFECT_0);
+        }
+    };
+
+    class spell_mage_cauterize_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_cauterize_SpellScript);
+
+        void PreventTrigger(SpellEffIndex effIndex)
+        {
+            PreventHitEffect(effIndex);
+        }
+
+        void Register() override
+        {
+            OnEffectHit += SpellEffectFn(spell_mage_cauterize_SpellScript::PreventTrigger, EFFECT_2, SPELL_EFFECT_TRIGGER_SPELL);
+            OnEffectHitTarget += SpellEffectFn(spell_mage_cauterize_SpellScript::PreventTrigger, EFFECT_2, SPELL_EFFECT_TRIGGER_SPELL);
+            OnEffectLaunch += SpellEffectFn(spell_mage_cauterize_SpellScript::PreventTrigger, EFFECT_2, SPELL_EFFECT_TRIGGER_SPELL);
+            OnEffectLaunchTarget += SpellEffectFn(spell_mage_cauterize_SpellScript::PreventTrigger, EFFECT_2, SPELL_EFFECT_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_mage_cauterize_AuraScript();
+    }
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_mage_cauterize_SpellScript();
     }
 };
 
@@ -2831,502 +2842,6 @@ class spell_mage_cinderstorm : public SpellScript
     }
 };
 
-class spell_mage_pyretic_incantation : public AuraScript
-{
-    PrepareAuraScript(spell_mage_pyretic_incantation);
-
-    bool CheckProc(ProcEventInfo& eventInfo)
-    {
-        return (eventInfo.GetHitMask() & PROC_HIT_CRITICAL);
-    }
-
-    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
-    {
-        Unit* caster = GetCaster();
-        if (!caster)
-            return;
-
-        caster->CastSpell(caster, SPELL_MAGE_PYRETIC_INCANTATION_BUFF, true);
-    }
-
-    void Register() override
-    {
-        DoCheckProc += AuraCheckProcFn(spell_mage_pyretic_incantation::CheckProc);
-        OnEffectProc += AuraEffectProcFn(spell_mage_pyretic_incantation::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-    }
-};
-
-// 86949 - Cauterize
-/// Update 7.3.5
-class spell_mage_cauterize : public AuraScript
-{
-    PrepareAuraScript(spell_mage_cauterize);
-
-public:
-	spell_mage_cauterize()
-    {
-        absorbPct = 0;
-    }
-
-    bool Validate(SpellInfo const* /*spellInfo*/) override
-    {
-        if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_CAUTERIZE_DAMAGE))
-            return false;
-        return true;
-    }
-
-    bool Load() override
-    {
-        absorbPct = GetSpellInfo()->GetEffect(EFFECT_1)->CalcValue(GetCaster());
-        return true;
-    }
-
-    void CalculateAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
-    {
-        // Set absorbtion amount to unlimited
-        amount = -1;
-    }
-
-    void Absorb(AuraEffect* aurEff, DamageInfo& dmgInfo, uint32& absorbAmount)
-    {
-        Unit* target = GetTarget();
-        if (!target || target->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        if (target->HasAura(SPELL_MAGE_CAUTERIZE_DEBUFF))
-        {
-            PreventDefaultAction();
-            return;
-        }
-
-        int32 remainingHealth = target->GetHealth() - dmgInfo.GetDamage();
-        int32 cauterizeHeal = target->CountPctFromMaxHealth(GetSpellInfo()->GetEffect(EFFECT_1)->CalcValue(target));
-
-        if (remainingHealth <= 0)
-        {
-            target->CastSpell(target, SPELL_MAGE_CAUTERIZE_BLAZING_SPEED, true);
-            absorbAmount = dmgInfo.GetDamage();
-            target->CastCustomSpell(target, SPELL_MAGE_CAUTERIZE_DAMAGE, NULL, &cauterizeHeal, NULL, true, NULL, aurEff);
-            target->CastSpell(target, SPELL_MAGE_CAUTERIZE_DEBUFF, true);
-        }
-        else
-            absorbAmount = 0;
-    }
-
-private:
-    uint32 absorbPct;
-
-    void Register() override
-    {
-        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_cauterize::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-        OnEffectAbsorb += AuraEffectAbsorbFn(spell_mage_cauterize::Absorb, EFFECT_0);
-    }
-};
-
-// 195283 - Hot Streak
-/// 7.1.5
-class spell_mage_hot_streak : public SpellScriptLoader
-{
-public:
-    spell_mage_hot_streak() : SpellScriptLoader("spell_mage_hot_streak") { }
-
-    class spell_mage_hot_streak_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_mage_hot_streak_AuraScript);
-
-        int8 count;
-
-        void OnProc(AuraEffect const* /*p_AurEff*/, ProcEventInfo& eventInfo)
-        {
-            if (Unit* caster = GetCaster())
-            {
-                if ((eventInfo.GetHitMask() & PROC_HIT_CRITICAL) && !eventInfo.GetSpellInfo()->HasAreaAuraEffect())
-                {
-                    count++;
-                    if (count == 2)
-                    {
-                        caster->CastSpell(caster, SPELL_MAGE_HOT_STREAK_AURASTATE, true);
-                        count = 0;
-                    }
-                }
-                else
-                    count = 0;
-            }
-        }
-
-        void Register()
-        {
-            OnEffectProc += AuraEffectProcFn(spell_mage_hot_streak_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-	
-	AuraScript* GetAuraScript() const
-    {
-        return new spell_mage_hot_streak_AuraScript();
-    }
-};
-
-// 226757 Conflagration DOT
-// 7.1.5
-class spell_mage_conflagration_dot : public SpellScriptLoader
-{
-public:
-    spell_mage_conflagration_dot() : SpellScriptLoader("spell_mage_conflagration_dot") { }
-
-    class spell_mage_conflagration_dot_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_mage_conflagration_dot_AuraScript);
-
-        void OnPeriodic(AuraEffect const* aurEff)
-        {
-            if (Unit* caster = GetCaster())
-                if (Unit* target = GetTarget())
-                    if (AuraEffect* conflagration = caster->GetAuraEffect(SPELL_MAGE_CONFLAGRATION, EFFECT_0))
-                        if (roll_chance_i(conflagration->GetAmount()))
-                            caster->CastSpell(target, SPELL_MAGE_CONFLAGRATION_FLARE_UP, true);
-        }
-
-        void Register()
-        {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_mage_conflagration_dot_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_mage_conflagration_dot_AuraScript();
-    }
-};
-
-// 116267 - Incanter's Flow buff
-/// 7.1.5
-class spell_mage_incanters_flow_buff : public SpellScriptLoader
-{
-public:
-    spell_mage_incanters_flow_buff() : SpellScriptLoader("spell_mage_incanters_flow_buff") { }
-
-    class spell_mage_incanters_flow_buff_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_mage_incanters_flow_buff_AuraScript);
-
-        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            if (Unit* caster = GetCaster())
-                if (caster->HasAura(SPELL_MAGE_INCANTERS_FLOW_TRIGGER))
-                    caster->ToPlayer()->GetSpellHistory()->AddCooldown(SPELL_MAGE_INCANTERS_FLOW_BUFF, 0, std::chrono::seconds(10));
-        }
-
-        void Register()
-        {
-            OnEffectRemove += AuraEffectRemoveFn(spell_mage_incanters_flow_buff_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_mage_incanters_flow_buff_AuraScript();
-    }
-};
-
-// Nether Tempest - 114923
-/// 7.1.5
-class spell_mage_nether_tempest : public SpellScriptLoader
-{
-public:
-    spell_mage_nether_tempest() : SpellScriptLoader("spell_mage_nether_tempest") { }
-
-    class spell_mage_nether_tempest_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_mage_nether_tempest_AuraScript);
-
-        void CalculateAmount(AuraEffect const*, int32& amount, bool&)
-        {
-            if (Unit* caster = GetCaster())
-            {
-                SpellInfo const* arcaneChargeInfo = sSpellMgr->GetSpellInfo(SPELL_MAGE_ARCANE_CHARGE);
-
-                if (caster->HasAura(SPELL_MAGE_ARCANE_CHARGE) && arcaneChargeInfo != nullptr)
-                    if (Aura* arcaneCharge = caster->GetAura(SPELL_MAGE_ARCANE_CHARGE))
-                        amount += CalculatePct(amount, arcaneChargeInfo->GetEffect(EFFECT_0)->BasePoints) * arcaneCharge->GetStackAmount();
-            }
-        }
-
-        void OnTick(AuraEffect const*)
-        {
-            if (Unit* caster = GetCaster())
-            {
-                if (Unit* target = GetTarget())
-                    caster->CastSpell(target, SPELL_MAGE_NETHER_TEMPEST_AOE_DAMAGE, true);
-            }
-        }
-
-        void Register()
-        {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_mage_nether_tempest_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_nether_tempest_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_mage_nether_tempest_AuraScript();
-    }
-};
-
-// Nether Tempest - 114954
-/// 7.1.5
-class spell_mage_nether_tempest_damage : public SpellScriptLoader
-{
-public:
-    spell_mage_nether_tempest_damage() : SpellScriptLoader("spell_mage_nether_tempest_damage") { }
-
-    class spell_mage_nether_tempest_damage_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_mage_nether_tempest_damage_SpellScript);
-
-        void FilterTargets(std::list<WorldObject*>& targets)
-        {
-            if (targets.empty())
-                return;
-
-            Unit* firstTarget = nullptr;
-            Unit* caster = GetCaster();
-            if (caster == nullptr)
-                return;
-
-            for (WorldObject* current : targets)
-            {
-                if (current->ToUnit() && current->ToUnit()->HasAura(SPELL_MAGE_NETHER_TEMPEST, caster->GetGUID()))
-                    firstTarget = current->ToUnit();
-            }
-
-            targets.remove_if([this, caster](WorldObject* p_Object) -> bool
-            {
-                if (p_Object == nullptr || p_Object->ToUnit() == nullptr)
-                    return true;
-
-                if (p_Object->ToUnit()->HasAura(SPELL_MAGE_NETHER_TEMPEST, caster->GetGUID()))
-                    return true;
-
-                return false;
-            });
-
-            if (firstTarget == nullptr)
-                return;
-
-            for (WorldObject* l_Unit : targets)
-            {
-                firstTarget->CastSpell(l_Unit->ToUnit(), SPELL_MAGE_NETHER_TEMPEST_VISUAL, true);
-            }
-        }
-
-        void HandleDamage()
-        {
-            if (Unit* caster = GetCaster())
-            {
-                SpellInfo const* arcaneChargeInfo = sSpellMgr->GetSpellInfo(SPELL_MAGE_ARCANE_CHARGE);
-
-                if (caster->HasAura(SPELL_MAGE_ARCANE_CHARGE) && arcaneChargeInfo != nullptr)
-                {
-                    if (Aura* arcaneCharge = caster->GetAura(SPELL_MAGE_ARCANE_CHARGE))
-                    {
-                        int32 damage = GetHitDamage();
-                        SetHitDamage(AddPct(damage, int32(arcaneChargeInfo->GetEffect(EFFECT_0)->BasePoints * arcaneCharge->GetStackAmount())));
-                    }
-                }
-            }
-        }
-
-        void Register()
-        {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_nether_tempest_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
-            OnHit += SpellHitFn(spell_mage_nether_tempest_damage_SpellScript::HandleDamage);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_mage_nether_tempest_damage_SpellScript();
-    }
-};
-
-// 205039 Erosion
-/// 7.1.5
-class spell_mage_erosion : public SpellScriptLoader
-{
-public:
-    spell_mage_erosion() : SpellScriptLoader("spell_mage_erosion") { }
-
-    class spell_mage_erosion_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_mage_erosion_AuraScript);
-
-        void OnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-        {
-            if (Unit* target = eventInfo.GetActionTarget())
-                if (Unit* caster = GetCaster())
-                {
-                    if (Aura* erosionTimer = target->GetAura(SPELL_MAGE_EROSION_TIMER, caster->GetGUID()))
-                        erosionTimer->RefreshDuration();
-                    else
-                        caster->AddAura(SPELL_MAGE_EROSION_TIMER, target);
-                }
-        }
-
-        void Register()
-        {
-            OnEffectProc += AuraEffectProcFn(spell_mage_erosion_AuraScript::OnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
-    {
-        return new spell_mage_erosion_AuraScript();
-    }
-};
-
-// 210154  - Erosion (timer)
-class spell_mage_erosion_timer : public SpellScriptLoader
-{
-public:
-    spell_mage_erosion_timer() : SpellScriptLoader("spell_mage_erosion_timer") { }
-
-    class spell_mage_erosion_timer_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_mage_erosion_timer_AuraScript);
-
-        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            if (Unit* caster = GetCaster())
-                if (Unit* target = GetTarget())
-                    if (Aura* erosionTimer = target->GetAura(SPELL_MAGE_EROSION_AURASTATE, caster->GetGUID()))
-                        erosionTimer->ModStackAmount(-1);
-        }
-
-        void Register() override
-        {
-            AfterEffectRemove += AuraEffectRemoveFn(spell_mage_erosion_timer_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
-    {
-        return new spell_mage_erosion_timer_AuraScript();
-    }
-};
-
-// 195676 Displacement
-/// 7.1.5
-class spell_mage_displacement : public SpellScriptLoader
-{
-public:
-    spell_mage_displacement() : SpellScriptLoader("spell_mage_displacement") { }
-
-    class spell_mage_displacement_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_mage_displacement_SpellScript);
-
-        void HandleDummy()
-        {
-            if (Unit* caster = GetCaster())
-                if (AreaTrigger* displacementBeaconAT = caster->GetAreaTrigger(SPELL_MAGE_DISPLACEMENT_BEACON))
-                {
-                    caster->NearTeleportTo(displacementBeaconAT->GetPosition());
-                    caster->RemoveAura(SPELL_MAGE_DISPLACEMENT_BEACON);
-                }
-        }
-
-        void Register() override
-        {
-            BeforeCast += SpellCastFn(spell_mage_displacement_SpellScript::HandleDummy);
-        }
-    };
-
-    SpellScript* GetSpellScript() const override
-    {
-        return new spell_mage_displacement_SpellScript();
-    }
-};
-
-// 11113 - Blast Wave
-class spell_mage_blast_wave : public SpellScriptLoader
-{
-public:
-    spell_mage_blast_wave() : SpellScriptLoader("spell_mage_blast_wave") { }
-
-    class spell_mage_blast_wave_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_mage_blast_wave_SpellScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_FLAMESTRIKE))
-                return false;
-            return true;
-        }
-
-        void CountTargets(std::list<WorldObject*>& targetList)
-        {
-            _targetCount = targetList.size();
-        }
-
-        void HandleImprovedFlamestrike()
-        {
-            if (_targetCount >= 2)
-                if (AuraEffect* aurEff = GetCaster()->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_MAGE, EFFECT_0))
-                    if (roll_chance_i(aurEff->GetAmount()))
-                    {
-                        float x, y, z;
-                        WorldLocation const* loc = GetExplTargetDest();
-                        if (!loc)
-                            return;
-
-                        loc->GetPosition(x, y, z);
-                        GetCaster()->CastSpell(x, y, z, SPELL_MAGE_FLAMESTRIKE, true);
-                    }
-        }
-
-        void Register() override
-        {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_blast_wave_SpellScript::CountTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
-            AfterCast += SpellCastFn(spell_mage_blast_wave_SpellScript::HandleImprovedFlamestrike);
-        }
-
-    private:
-        uint32 _targetCount = 0;
-    };
-
-    SpellScript* GetSpellScript() const override
-    {
-        return new spell_mage_blast_wave_SpellScript();
-    }
-};
-
-// Incanter's Absorbtion
-class spell_mage_incanters_absorbtion_base_AuraScript : public AuraScript
-{
-public:
-    bool Validate(SpellInfo const* /*spellInfo*/) override
-    {
-        if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED))
-            return false;
-        if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_INCANTERS_ABSORBTION_R1))
-            return false;
-        return true;
-    }
-
-    void Trigger(AuraEffect* aurEff, DamageInfo& /*dmgInfo*/, uint32& absorbAmount)
-    {
-        Unit* target = GetTarget();
-
-        if (AuraEffect* talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_MAGE_INCANTERS_ABSORBTION_R1, EFFECT_0))
-        {
-            int32 bp = CalculatePct(absorbAmount, talentAurEff->GetAmount());
-            target->CastCustomSpell(target, SPELL_MAGE_INCANTERS_ABSORBTION_TRIGGERED, &bp, NULL, NULL, true, NULL, aurEff);
-        }
-    }
-};
-
 void AddSC_mage_spell_scripts()
 {
     new playerscript_mage_arcane();
@@ -3338,16 +2853,8 @@ void AddSC_mage_spell_scripts()
     new spell_mage_fire_mage_passive();
     new spell_mage_fire_on();
     new spell_mage_mirror_image_summon();
+    new spell_mage_cauterize();
     new spell_mage_conjure_refreshment();
-	new spell_mage_hot_streak();
-	new spell_mage_conflagration_dot();
-	new spell_mage_incanters_flow_buff();
-	new spell_mage_nether_tempest();
-    new spell_mage_nether_tempest_damage();
-	new spell_mage_erosion();
-    new spell_mage_erosion_timer();
-	new spell_mage_displacement();
-    new spell_mage_blast_wave();
     RegisterAuraScript(spell_mage_ice_floes);
 
     //7.3.2.25549
@@ -3373,7 +2880,6 @@ void AddSC_mage_spell_scripts()
     RegisterSpellScript(spell_mage_arcane_barrage);
     RegisterSpellScript(spell_mage_arcane_missiles_damage);
     RegisterSpellScript(spell_mage_arcane_explosion);
-    RegisterAuraScript(spell_mage_touch_of_the_magi_aura);
 
     RegisterAuraScript(spell_mage_chrono_shift);
     RegisterAuraScript(spell_mage_arcane_missiles);
@@ -3396,9 +2902,7 @@ void AddSC_mage_spell_scripts()
     RegisterAuraScript(spell_mage_ice_block);
     RegisterAuraScript(spell_mage_chilled);
     RegisterAuraScript(spell_mage_ray_of_frost);
-	RegisterAuraScript(spell_mage_cauterize);
     RegisterAuraScript(spell_mage_ray_of_frost_buff);
-	RegisterAuraScript(spell_mage_pyretic_incantation);
     //7.3.2.25549 END
 
     RegisterAuraScript(spell_mage_blazing_soul);

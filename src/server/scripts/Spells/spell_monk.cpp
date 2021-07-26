@@ -25,7 +25,6 @@
 #include "SpellMgr.h"
 #include "SpellPackets.h"
 #include "SpellScript.h"
-#include "PlayerStorage.h"
 
 enum MonkSpells
 {
@@ -157,19 +156,6 @@ enum MonkSpells
     SPELL_MONK_ZEN_PILGRIMAGE_RETURN                    = 126895,
     SPELL_MONK_ZEN_PULSE_DAMAGE                         = 124081,
     SPELL_MONK_ZEN_PULSE_HEAL                           = 198487,
-	SPELL_MONK_POWER_STRIKES_ENERGIZE                   = 121283,
-	SPELL_MONK_MASTERY_COMBO_STRIKES                    = 115636,
-    SPELL_MONK_HIT_COMBO                                = 196740,
-    SPELL_MONK_HIT_COMBO_AURA                           = 196741,
-	SPELL_MONK_SPINNING_CRANE_KICK                      = 101546,
-    SPELL_MONK_SPINNING_CRANE_KICK_DAMAGE               = 107270,
-};
-
-enum MonkStorageEntries
-{
-	STORAGE_MONK_COMBO_STRIKES,
-	STORAGE_MONK_GIFT_OF_THE_OX,
-	STORAGE_MONK_TORNADO_KICKS
 };
 
 enum StormEarthAndFireSpells
@@ -1273,313 +1259,28 @@ public:
 // Paralysis - 115078
 // En attente
 
-// 115636 - Mastery: Combo Strikes (Melee spells)
-// Called by 100780, 185099, 123586, 100784
-// 7.1.5
-class spell_monk_mastery_combo_strikes : public SpellScriptLoader
-{
-public:
-    spell_monk_mastery_combo_strikes() : SpellScriptLoader("spell_monk_mastery_combo_strikes") { }
-
-    static void HandleHitCombo(Unit* caster, bool apply = true)
-    {
-        if (caster->HasAura(SPELL_MONK_HIT_COMBO) && caster->IsAlive())
-        {
-            if (apply)
-                caster->CastSpell(caster, SPELL_MONK_HIT_COMBO_AURA, true);
-            else
-                caster->RemoveAura(SPELL_MONK_HIT_COMBO_AURA);
-        }
-    }
-
-    static bool TryToHandleDamage(Player* caster, int32 spellId, int32& damage, bool repeated = false)
-    {
-        // Prevent useless operations
-        if (!caster || !damage)
-            return false;
-
-        AuraEffect const* comboStrikes = caster->GetAuraEffect(SPELL_MONK_MASTERY_COMBO_STRIKES, EFFECT_0);
-        if (!comboStrikes)
-            return false;
-
-        PlayerStorage* storage = caster->GetStorage();
-
-        // Don't handle first cast after login or death
-        if (!storage->IsEntryExists(STORAGE_MONK_COMBO_STRIKES))
-        {
-            storage->SetEntry(STORAGE_MONK_COMBO_STRIKES, spellId);
-            return false;
-        }
-
-        if (!repeated && storage->GetEntry(STORAGE_MONK_COMBO_STRIKES) == spellId)
-        {
-            HandleHitCombo(caster, false);
-            return false;
-        }
-
-        AddPct(damage, caster->GetFloatValue(PLAYER_MASTERY) * comboStrikes->GetSpellEffectInfo()->BonusCoefficient);
-        storage->SetEntry(STORAGE_MONK_COMBO_STRIKES, spellId);
-
-        if (!repeated)
-            HandleHitCombo(caster);
-
-        return true;
-    }
-
-    class spell_monk_mastery_combo_strikes_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_monk_mastery_combo_strikes_SpellScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            return ValidateSpellInfo
-            ({
-                SPELL_MONK_MASTERY_COMBO_STRIKES,
-                SPELL_MONK_HIT_COMBO,
-                SPELL_MONK_HIT_COMBO_AURA
-            });
-        }
-
-        bool Load()
-        {
-            return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER &&
-                GetCaster()->HasAura(SPELL_MONK_MASTERY_COMBO_STRIKES);
-        }
-
-        void HandleHit(SpellEffIndex /*effIndex*/)
-        {
-            Unit* caster = GetCaster();
-            if (!caster)
-                return;
-
-            int32 damage = GetHitDamage();
-            if (!TryToHandleDamage(caster->ToPlayer(), (int32)GetSpellInfo()->Id, damage, repeated))
-                return;
-
-            repeated = true;
-            SetHitDamage(damage);
-        }
-
-        void Register()
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_monk_mastery_combo_strikes_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-        }
-
-    private:
-        bool repeated = false;
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_monk_mastery_combo_strikes_SpellScript();
-    }
-};
-
-// 115636 - Mastery: Combo Strikes (Periodic auras)
-// Called by 113656, 101546, 152175
-// 7.1.5
-class spell_monk_mastery_combo_strikes_periodic_auras : public SpellScriptLoader
-{
-public:
-    spell_monk_mastery_combo_strikes_periodic_auras() : SpellScriptLoader("spell_monk_mastery_combo_strikes_periodic_auras") { }
-
-    class spell_monk_mastery_combo_strikes_periodic_auras_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_monk_mastery_combo_strikes_periodic_auras_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            return ValidateSpellInfo({ SPELL_MONK_MASTERY_COMBO_STRIKES });
-        }
-
-        bool Load()
-        {
-            return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER &&
-                GetCaster()->HasAura(SPELL_MONK_MASTERY_COMBO_STRIKES);
-        }
-
-        void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* caster = GetCaster();
-            if (!caster)
-                return;
-
-            PlayerStorage* storage = caster->ToPlayer()->GetStorage();
-            int32 spellId = (int32)GetSpellInfo()->Id;
-
-            if (storage->IsEntryExists(STORAGE_MONK_COMBO_STRIKES))
-            {
-                if (storage->GetEntry(STORAGE_MONK_COMBO_STRIKES) == spellId + 1)
-                {
-                    spell_monk_mastery_combo_strikes::HandleHitCombo(caster, false);
-                    return;
-                }
-
-                storage->SetEntry(STORAGE_MONK_COMBO_STRIKES, spellId);
-                spell_monk_mastery_combo_strikes::HandleHitCombo(caster);
-            }
-        }
-
-
-        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* caster = GetCaster();
-            if (!caster)
-                return;
-
-            PlayerStorage* storage = caster->ToPlayer()->GetStorage();
-            
-            // Prevent handling next cast
-            storage->SetEntry(STORAGE_MONK_COMBO_STRIKES, (int32)GetSpellInfo()->Id + 1);
-        }
-
-        void Register() override
-        {
-            switch (m_scriptSpellId)
-            {
-                case SPELL_MONK_SPINNING_CRANE_KICK:
-                    AfterEffectApply += AuraEffectApplyFn(spell_monk_mastery_combo_strikes_periodic_auras_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
-                    AfterEffectRemove += AuraEffectRemoveFn(spell_monk_mastery_combo_strikes_periodic_auras_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
-                    break;
-                default:
-                    AfterEffectApply += AuraEffectApplyFn(spell_monk_mastery_combo_strikes_periodic_auras_AuraScript::HandleApply, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
-                    AfterEffectRemove += AuraEffectRemoveFn(spell_monk_mastery_combo_strikes_periodic_auras_AuraScript::HandleRemove, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
-                    break;
-            }
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
-    {
-        return new spell_monk_mastery_combo_strikes_periodic_auras_AuraScript();
-    }
-};
-
-// 115636 - Mastery: Combo Strikes (Periodic triggers)
-// Called by 117418, 107270, 158221
-// 7.1.5
-class spell_monk_mastery_combo_strikes_periodic_triggers : public SpellScriptLoader
-{
-public:
-    spell_monk_mastery_combo_strikes_periodic_triggers() : SpellScriptLoader("spell_monk_mastery_combo_strikes_periodic_triggers") { }
-
-    class spell_monk_mastery_combo_strikes_periodic_triggers_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_monk_mastery_combo_strikes_periodic_triggers_SpellScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            return ValidateSpellInfo
-            ({
-                SPELL_MONK_MASTERY_COMBO_STRIKES,
-                SPELL_MONK_FISTS_OF_FURY_DAMAGE,
-                SPELL_MONK_FISTS_OF_FURY,
-                SPELL_MONK_SPINNING_CRANE_KICK_DAMAGE,
-                SPELL_MONK_SPINNING_CRANE_KICK,
-                SPELL_MONK_WHIRLING_DRAGON_PUNCH_DAMAGE,
-                SPELL_MONK_WHIRLING_DRAGON_PUNCH
-            });
-        }
-
-        bool Load()
-        {
-            return GetCaster() && GetCaster()->GetTypeId() == TYPEID_PLAYER &&
-                GetCaster()->HasAura(SPELL_MONK_MASTERY_COMBO_STRIKES);
-        }
-
-        void HandleHit(SpellEffIndex /*effIndex*/)
-        {
-            Unit* caster = GetCaster();
-            if (!caster)
-                return;
-
-            Player* player = caster->ToPlayer();
-            PlayerStorage* storage = player->GetStorage();
-            int32 spellHandleId;
-
-            if (GetSpellInfo()->Id == SPELL_MONK_FISTS_OF_FURY_DAMAGE)
-                spellHandleId = SPELL_MONK_FISTS_OF_FURY;
-            else if (GetSpellInfo()->Id == SPELL_MONK_SPINNING_CRANE_KICK_DAMAGE)
-                spellHandleId = SPELL_MONK_SPINNING_CRANE_KICK;
-            else if (GetSpellInfo()->Id == SPELL_MONK_WHIRLING_DRAGON_PUNCH_DAMAGE)
-                spellHandleId = SPELL_MONK_WHIRLING_DRAGON_PUNCH;
-
-            int32 damage = GetHitDamage();
-            spell_monk_mastery_combo_strikes::TryToHandleDamage(player, spellHandleId, damage, true);
-            
-            SetHitDamage(damage);
-        }
-
-        void Register()
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_monk_mastery_combo_strikes_periodic_triggers_SpellScript::HandleHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_monk_mastery_combo_strikes_periodic_triggers_SpellScript();
-    }
-};
-
 // Touch of Death - 115080
-class spell_monk_touch_of_death : public SpellScriptLoader
+class spell_monk_touch_of_death : public AuraScript
 {
-    public:
-    spell_monk_touch_of_death() : SpellScriptLoader("spell_monk_touch_of_death") { }
+    PrepareAuraScript(spell_monk_touch_of_death);
 
-    class spell_monk_touch_of_death_AuraScript : public AuraScript
+    void OnTick(AuraEffect const* /*aurEff*/)
     {
-        PrepareAuraScript(spell_monk_touch_of_death_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
+        if (Unit* caster = GetCaster())
         {
-            return ValidateSpellInfo
-            ({
-                SPELL_MONK_MASTERY_COMBO_STRIKES,
-                SPELL_MONK_TOUCH_OF_DEATH
-            });
+            uint32 damagePct = GetEffectInfo(EFFECT_1)->BasePoints;
+
+            // Damage reduced to Players, need to check reduction value
+            if (GetTarget()->IsPlayer())
+                damagePct /= 2;
+
+            caster->CastCustomSpell(SPELL_MONK_TOUCH_OF_DEATH_DAMAGE, SPELLVALUE_BASE_POINT0, CalculatePct(caster->GetMaxHealth(), damagePct), GetTarget());
         }
+    }
 
-            void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
-
-        {
-            Unit* caster = GetCaster();
-            Unit* owner = GetUnitOwner();
-            if (!caster)
-                return;
-
-            canBeRecalculated = false;
-
-            int32 pct = GetSpellInfo()->GetEffect(EFFECT_1)->BasePoints;
-            amount = caster->CountPctFromMaxHealth(owner->GetTypeId() == TYPEID_PLAYER ? (pct / 2) : pct);
-
-            // Combo Strikes
-            if (!caster->HasAura(SPELL_MONK_MASTERY_COMBO_STRIKES) || caster->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            //spell_monk_mastery_combo_strikes::TryToHandleDamage(caster->ToPlayer(), (int32)GetSpellInfo()->Id, amount); !!!nuzno merdznutj, uze delal
-        }
-
-    void OnTick(AuraEffect const* aurEff)
-        {
-            Unit* caster = GetCaster();
-            Unit* owner = GetUnitOwner();
-
-            if (caster && owner && caster->IsAlive())
-                caster->CastCustomSpell(SPELL_MONK_TOUCH_OF_DEATH, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), owner, true);
-        }
-
-        void Register()
-        {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_monk_touch_of_death_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_monk_touch_of_death_AuraScript::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const
+    void Register() override
     {
-        return new spell_monk_touch_of_death_AuraScript();
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_monk_touch_of_death::OnTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
     }
 };
 
@@ -4024,7 +3725,7 @@ void AddSC_monk_spell_scripts()
     new spell_monk_teachings_of_the_monastery();
     new spell_monk_tiger_lust();
     new spell_monk_tigereye_brew_stacks();
-    new spell_monk_touch_of_death();
+    RegisterAuraScript(spell_monk_touch_of_death);
     new spell_monk_touch_of_karma();
     RegisterSpellAndAuraScriptPair(spell_monk_transcendence, aura_monk_transcendence);
     RegisterSpellScript(spell_monk_transcendence_transfer);

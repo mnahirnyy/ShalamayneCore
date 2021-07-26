@@ -559,7 +559,7 @@ protected:
     Spell* m_Spell;
 };
 
-Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID) :
+Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID, bool skipCheck) :
 m_spellInfo(info), m_caster((info->HasAttribute(SPELL_ATTR6_CAST_BY_CHARMER) && caster->GetCharmerOrOwner()) ? caster->GetCharmerOrOwner() : caster),
 m_spellValue(new SpellValue(caster->GetMap()->GetDifficultyID(), m_spellInfo))
 {
@@ -2305,7 +2305,11 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
 
     // Calculate hit result
     if (m_originalCaster)
+    {
         targetInfo.missCondition = m_originalCaster->SpellHitResult(target, m_spellInfo, m_canReflect && !(m_spellInfo->IsPositive() && m_caster->IsFriendlyTo(target)));
+        if (m_skipCheck && targetInfo.missCondition != SPELL_MISS_IMMUNE)
+            targetInfo.missCondition = SPELL_MISS_NONE;
+    }
     else
         targetInfo.missCondition = SPELL_MISS_EVADE; //SPELL_MISS_NONE;
 
@@ -2522,7 +2526,11 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     else if (missInfo == SPELL_MISS_REFLECT)                // In case spell reflect from target, do all effect on caster (if hit)
     {
         if (target->reflectResult == SPELL_MISS_NONE)       // If reflected spell hit caster -> do all effect on him
+        {
             spellHitTarget = m_caster;
+            if (m_caster->GetTypeId() == TYPEID_UNIT)
+                m_caster->ToCreature()->LowerPlayerDamageReq(target->damage);
+        }
     }
 
     if (missInfo != SPELL_MISS_NONE)
@@ -2648,18 +2656,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             // Add bonuses and fill damageInfo struct
             caster->CalculateSpellDamageTaken(&damageInfo, m_damage, m_spellInfo, m_attackType, target->crit);
             caster->DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb);
-
-            if (Creature* target = damageInfo.target->ToCreature())
-            {
-                if (caster->GetTypeId() == TYPEID_UNIT && !caster->IsCharmedOwnedByPlayerOrPlayer())
-                {
-                    float sparringLimitPct = target->GetSparringHealthLimit();
-
-                    if (sparringLimitPct != 0.0f)
-                        if (target->GetHealthPct() <= sparringLimitPct)
-                            damageInfo.damage = 0;
-                }
-            }
 
             hitMask |= createProcHitMask(&damageInfo, missInfo);
             procVictim |= PROC_FLAG_TAKEN_DAMAGE;
@@ -3151,7 +3147,7 @@ bool Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
     m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
 
     //Prevent casting at cast another spell (ServerSide check)
-    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CAST_IN_PROGRESS) && m_caster->IsNonMeleeSpellCast(false, true, true, m_spellInfo->Id == 75) && !m_castId.IsEmpty())
+    if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CAST_IN_PROGRESS) && m_caster->IsNonMeleeSpellCast(false, true, true) && !m_castId.IsEmpty())
     {
         SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
         finish(false);
@@ -3168,9 +3164,13 @@ bool Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
 
     CallScriptOnPrepareHandlers();
 
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        m_caster->ToPlayer()->SetSpellModTakingSpell(this, true);
     // Fill cost data (do not use power for item casts)
-    if (m_CastItem)
-        m_powerCost = m_spellInfo->CalcPowerCost(m_caster, m_spellSchoolMask, this);
+    if (!m_CastItem)
+        m_powerCost = m_spellInfo->CalcPowerCost(m_caster, m_spellSchoolMask);
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
 
     // Set combo point requirement
     if ((_triggeredCastFlags & TRIGGERED_IGNORE_COMBO_POINTS) || m_CastItem || !m_caster->m_playerMovingMe)
@@ -3417,6 +3417,8 @@ void Spell::_cast(bool skipCheck)
             SendCastResult(castResult, &param1, &param2);
             SendInterrupted(0);
 
+            // cleanup after mod system
+            // triggered spell pointer can be not removed in some cases
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
 
@@ -3440,6 +3442,8 @@ void Spell::_cast(bool skipCheck)
                         SendCastResult(SPELL_FAILED_DONT_REPORT);
                         SendInterrupted(0);
 
+                        // cleanup after mod system
+                        // triggered spell pointer can be not removed in some cases
                         m_caster->ToPlayer()->SetSpellModTakingSpell(this, false);
 
                         finish(false);

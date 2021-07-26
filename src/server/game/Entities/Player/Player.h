@@ -1318,8 +1318,9 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
           * @param  count integer value for adding/removing curent currency
           * @param  printLog used on SMSG_SET_CURRENCY
           * @param  ignore gain multipliers
+          * @param  display toast
           */
-        void ModifyCurrency(uint32 id, int32 count, bool printLog = true, bool ignoreMultipliers = false);
+        void ModifyCurrency(uint32 id, int32 count, bool printLog = true, bool ignoreMultipliers = false, bool sendToast = false);
 
         void ApplyEquipCooldown(Item* pItem);
         void QuickEquipItem(uint16 pos, Item* pItem);
