@@ -2541,7 +2541,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spellInfo
     // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
     HitChance += int32(m_modSpellHitChance * 100.0f);
 
-    RoundToInterval(HitChance, 100, 10000);
+    RoundToInterval(HitChance, 0, 10000);
 
     int32 tmp = 10000 - HitChance;
 
@@ -3024,13 +3024,12 @@ void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool wi
 
         if (spell->getState() != SPELL_STATE_FINISHED)
             spell->cancel();
-        else {
-            m_currentSpells[spellType] = nullptr;
-            spell->SetReferencedFromCurrent(false);
-        }
 
         if (GetTypeId() == TYPEID_UNIT && IsAIEnabled)
             ToCreature()->AI()->OnSpellCastInterrupt(spell->GetSpellInfo());
+
+        m_currentSpells[spellType] = NULL;
+        spell->SetReferencedFromCurrent(false);
     }
 }
 
@@ -4620,28 +4619,29 @@ uint32 Unit::GetDiseasesByCaster(ObjectGuid casterGUID, bool remove)
     static const AuraType diseaseAuraTypes[] =
     {
         SPELL_AURA_PERIODIC_DAMAGE, // Frost Fever and Blood Plague
-        SPELL_AURA_LINKED           // Crypt Fever and Ebon Plague
+        SPELL_AURA_LINKED,          // Crypt Fever and Ebon Plague
+        SPELL_AURA_NONE
     };
 
     uint32 diseases = 0;
-    for (AuraType aType : diseaseAuraTypes)
+    for (AuraType const* itr = diseaseAuraTypes; *itr != SPELL_AURA_NONE; ++itr)
     {
-        for (auto itr = m_modAuras[aType].begin(); itr != m_modAuras[aType].end();)
+        for (AuraEffectList::iterator i = m_modAuras[*itr].begin(); i != m_modAuras[*itr].end();)
         {
             // Get auras with disease dispel type by caster
-            if ((*itr)->GetSpellInfo()->Dispel == DISPEL_DISEASE
-                && (*itr)->GetCasterGUID() == casterGUID)
+            if ((*i)->GetSpellInfo()->Dispel == DISPEL_DISEASE
+                && (*i)->GetCasterGUID() == casterGUID)
             {
                 ++diseases;
 
                 if (remove)
                 {
-                    RemoveAura((*itr)->GetId(), (*itr)->GetCasterGUID());
-                    itr = m_modAuras[aType].begin();
+                    RemoveAura((*i)->GetId(), (*i)->GetCasterGUID());
+                    i = m_modAuras[*itr].begin();
                     continue;
                 }
             }
-            ++itr;
+            ++i;
         }
     }
     return diseases;

@@ -338,8 +338,8 @@ void PetAI::OwnerAttackedBy(Unit* attacker)
     if (!attacker)
         return;
 
-    // Passive and assist pets don't do anything
-    if (me->HasReactState(REACT_PASSIVE) || me->HasReactState(REACT_ASSIST))
+    // Passive pets don't do anything
+    if (me->HasReactState(REACT_PASSIVE))
         return;
 
     // Prevent pet from disengaging from current target
@@ -360,7 +360,7 @@ void PetAI::OwnerAttacked(Unit* target)
         return;
 
     // Passive pets don't do anything
-    if (me->HasReactState(REACT_PASSIVE) || me->HasReactState(REACT_DEFENSIVE))
+    if (me->HasReactState(REACT_PASSIVE))
         return;
 
     // Prevent pet from disengaging from current target
@@ -379,7 +379,7 @@ Unit* PetAI::SelectNextTarget(bool allowAutoSelect) const
     // The parameter: allowAutoSelect lets us disable aggressive pet auto targeting for certain situations
 
     // Passive pets don't do next target selection
-    if (me->HasReactState(REACT_PASSIVE) || me->HasReactState(REACT_ASSIST))
+    if (me->HasReactState(REACT_PASSIVE))
         return NULL;
 
     // Check pet attackers first so we don't drag a bunch of targets to the owner
@@ -457,6 +457,12 @@ void PetAI::DoAttack(Unit* target, bool chase)
 
     if (me->Attack(target, true))
     {
+        // properly fix fake combat after pet is sent to attack
+        if (Unit* owner = me->GetOwner())
+            owner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+
         // Play sound to let the player know the pet is attacking something it picked on its own
         if (me->HasReactState(REACT_AGGRESSIVE) && !me->GetCharmInfo()->IsCommandAttack())
             me->SendPetAIReaction(me->GetGUID());
@@ -628,8 +634,8 @@ void PetAI::AttackedBy(Unit* attacker)
     if (!attacker)
         return;
 
-    // Passive and assist pets don't do anything
-    if (me->HasReactState(REACT_PASSIVE) || me->HasReactState(REACT_ASSIST))
+    // Passive pets don't do anything
+    if (me->HasReactState(REACT_PASSIVE))
         return;
 
     // Prevent pet from disengaging from current target

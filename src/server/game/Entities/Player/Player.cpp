@@ -647,51 +647,48 @@ bool Player::Create(ObjectGuid::LowType guidlow, WorldPackets::Character::Charac
         ab.SetActionAndType(action_itr->action, ActionButtonType(action_itr->type));
     }
 
-    if (createInfo->withStartOutfit)
+    // original items
+    if (CharStartOutfitEntry const* oEntry = sDB2Manager.GetCharStartOutfitEntry(createInfo->Race, createInfo->Class, createInfo->Sex))
     {
-        // original items
-        if (CharStartOutfitEntry const* oEntry = sDB2Manager.GetCharStartOutfitEntry(createInfo->Race, createInfo->Class, createInfo->Sex))
+        for (int j = 0; j < MAX_OUTFIT_ITEMS; ++j)
         {
-            for (int j = 0; j < MAX_OUTFIT_ITEMS; ++j)
+            if (oEntry->ItemID[j] <= 0)
+                continue;
+
+            uint32 itemId = oEntry->ItemID[j];
+
+            // just skip, reported in ObjectMgr::LoadItemTemplates
+            ItemTemplate const* iProto = sObjectMgr->GetItemTemplate(itemId);
+            if (!iProto)
+                continue;
+
+            // BuyCount by default
+            uint32 count = iProto->GetBuyCount();
+
+            // special amount for food/drink
+            if (iProto->GetClass() == ITEM_CLASS_CONSUMABLE && iProto->GetSubClass() == ITEM_SUBCLASS_FOOD_DRINK)
             {
-                if (oEntry->ItemID[j] <= 0)
-                    continue;
-
-                uint32 itemId = oEntry->ItemID[j];
-
-                // just skip, reported in ObjectMgr::LoadItemTemplates
-                ItemTemplate const* iProto = sObjectMgr->GetItemTemplate(itemId);
-                if (!iProto)
-                    continue;
-
-                // BuyCount by default
-                uint32 count = iProto->GetBuyCount();
-
-                // special amount for food/drink
-                if (iProto->GetClass() == ITEM_CLASS_CONSUMABLE && iProto->GetSubClass() == ITEM_SUBCLASS_FOOD_DRINK)
+                if (iProto->Effects.size() >= 1)
                 {
-                    if (iProto->Effects.size() >= 1)
+                    switch (iProto->Effects[0]->SpellCategoryID)
                     {
-                        switch (iProto->Effects[0]->SpellCategoryID)
-                        {
-                            case SPELL_CATEGORY_FOOD:                                // food
-                                count = getClass() == CLASS_DEATH_KNIGHT ? 10 : 4;
-                                break;
-                            case SPELL_CATEGORY_DRINK:                                // drink
-                                count = 2;
-                                break;
-                        }
+                        case SPELL_CATEGORY_FOOD:                                // food
+                            count = getClass() == CLASS_DEATH_KNIGHT ? 10 : 4;
+                            break;
+                        case SPELL_CATEGORY_DRINK:                                // drink
+                            count = 2;
+                            break;
                     }
-                    if (iProto->GetMaxStackSize() < count)
-                        count = iProto->GetMaxStackSize();
                 }
-                StoreNewItemInBestSlots(itemId, count);
+                if (iProto->GetMaxStackSize() < count)
+                    count = iProto->GetMaxStackSize();
             }
+            StoreNewItemInBestSlots(itemId, count);
         }
-
-        for (PlayerCreateInfoItems::const_iterator item_id_itr = info->item.begin(); item_id_itr != info->item.end(); ++item_id_itr)
-            StoreNewItemInBestSlots(item_id_itr->item_id, item_id_itr->item_amount);
     }
+
+    for (PlayerCreateInfoItems::const_iterator item_id_itr = info->item.begin(); item_id_itr != info->item.end(); ++item_id_itr)
+        StoreNewItemInBestSlots(item_id_itr->item_id, item_id_itr->item_amount);
 
     // bags and main-hand weapon must equipped at this moment
     // now second pass for not equipped (offhand weapon/shield if it attempt equipped before main-hand weapon)
@@ -2288,8 +2285,8 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid const& guid, uint64 npcflag
     if (creature->GetReactionTo(this) <= REP_UNFRIENDLY)
         return nullptr;
 
-    // not too far, taken from CGGameUI::SetInteractTarget
-    if (!creature->IsWithinDistInMap(this, creature->GetCombatReach() + 4.0f))
+    // not too far
+    if (!creature->IsWithinDistInMap(this, INTERACTION_DISTANCE))
         return nullptr;
 
     return creature;
@@ -2297,36 +2294,33 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid const& guid, uint64 npcflag
 
 GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid const& guid) const
 {
-    if (!guid)
-        return nullptr;
+    if (GameObject* go = GetMap()->GetGameObject(guid))
+    {
+        if (go->IsWithinDistInMap(this, go->GetInteractionDistance()))
+            return go;
 
-    if (!IsInWorld())
-        return nullptr;
+        TC_LOG_DEBUG("maps", "Player::GetGameObjectIfCanInteractWith: GameObject '%s' (%s) is too far away from player '%s' (%s) to be used by him (Distance: %f, maximal %f is allowed)",
+            go->GetGOInfo()->name.c_str(), go->GetGUID().ToString().c_str(), GetName().c_str(), GetGUID().ToString().c_str(), go->GetDistance(this), go->GetInteractionDistance());
+    }
 
-    if (IsInFlight())
-        return nullptr;
-
-    // exist
-    GameObject* go = ObjectAccessor::GetGameObject(*this, guid);
-    if (!go)
-        return nullptr;
-
-    if (!go->IsWithinDistInMap(this, go->GetInteractionDistance()))
-        return nullptr;
-
-    return go;
+    return nullptr;
 }
 
 GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid const& guid, GameobjectTypes type) const
 {
-    GameObject* go = GetGameObjectIfCanInteractWith(guid);
-    if (!go)
-        return nullptr;
+    if (GameObject* go = GetMap()->GetGameObject(guid))
+    {
+        if (go->GetGoType() == type)
+        {
+            if (go->IsWithinDistInMap(this, go->GetInteractionDistance()))
+                return go;
 
-    if (go->GetGoType() != type)
-        return nullptr;
+            TC_LOG_DEBUG("maps", "Player::GetGameObjectIfCanInteractWith: GameObject '%s' (%s) is too far away from player '%s' (%s) to be used by him (Distance: %f, maximal %f is allowed)",
+                go->GetGOInfo()->name.c_str(), go->GetGUID().ToString().c_str(), GetName().c_str(), GetGUID().ToString().c_str(), go->GetDistance(this), go->GetInteractionDistance());
+        }
+    }
 
-    return go;
+    return nullptr;
 }
 
 bool Player::IsUnderWater() const
@@ -2335,9 +2329,9 @@ bool Player::IsUnderWater() const
         GetPositionZ() < (GetMap()->GetWaterLevel(GetPhaseShift(), GetPositionX(), GetPositionY()) - 2);
 }
 
-void Player::SetInWater(bool inWater)
+void Player::SetInWater(bool apply)
 {
-    if (m_isInWater == inWater)
+    if (m_isInWater == apply)
         return;
 
     //define player in water by opcodes
@@ -2345,10 +2339,10 @@ void Player::SetInWater(bool inWater)
     //which can't swim and move guid back into ThreatList when
     //on surface.
     /// @todo exist also swimming mobs, and function must be symmetric to enter/leave water
-    m_isInWater = inWater;
+    m_isInWater = apply;
 
     // remove auras that need water/land
-    RemoveAurasWithInterruptFlags(inWater ? AURA_INTERRUPT_FLAG_NOT_ABOVEWATER : AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
+    RemoveAurasWithInterruptFlags(apply ? AURA_INTERRUPT_FLAG_NOT_ABOVEWATER : AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
 
     getHostileRefManager().updateThreatTables();
 }
@@ -3768,6 +3762,9 @@ void Player::ResetPvpTalents()
     {
         PvpTalentEntry const* talentInfo = sPvpTalentStore.LookupEntry(talentId);
         if (!talentInfo)
+            continue;
+
+        if (talentInfo->ClassID && talentInfo->ClassID != getClass())
             continue;
 
         RemovePvpTalent(talentInfo);
@@ -7344,8 +7341,8 @@ void Player::UpdateArea(uint32 newAreaId)
     pvpInfo.IsInFFAPvPArea = areaEntry && (areaEntry->Flags[0] & AREA_FLAG_ARENA);
     UpdatePvPState(true);
 
-    UpdateAreaDependentAuras();
     PhasingHandler::OnAreaChange(this);
+    UpdateAreaDependentAuras();
 
     if (IsAreaThatActivatesPvpTalents(areaEntry))
         EnablePvpRules();
@@ -8500,7 +8497,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, Objec
         spell->m_CastItem = item;
         spell->m_misc.Raw.Data[0] = misc[0];
         spell->m_misc.Raw.Data[1] = misc[1];
-        spell->prepare(&targets); 
+        spell->prepare(&targets);
         return;
     }
 
@@ -24972,10 +24969,8 @@ void Player::LearnQuestRewardedSpells(Quest const* quest)
             return;
 
         // profession specialization can be re-learned from npc
-        if (SpellEffectInfo const* learnedInfoEffect0 = learnedInfo->GetEffect(EFFECT_0))
-            if (SpellEffectInfo const* learnedInfoEffect1 = learnedInfo->GetEffect(EFFECT_1))
-                if (learnedInfoEffect0->Effect == SPELL_EFFECT_TRADE_SKILL && learnedInfoEffect1->Effect == 0 && !learnedInfo->SpellLevel)
-                    return;
+        if (learnedInfo->GetEffect(EFFECT_0)->Effect == SPELL_EFFECT_TRADE_SKILL && learnedInfo->GetEffect(EFFECT_1)->Effect == 0 && !learnedInfo->SpellLevel)
+            return;
     }
 
     CastSpell(this, spell_id, true);
@@ -25630,27 +25625,16 @@ bool Player::HasItemFitToSpellRequirements(SpellInfo const* spellInfo, Item cons
         {
             if (!spellInfo->HasAttribute(SPELL_ATTR8_ARMOR_SPECIALIZATION))
             {
-                // most used check: shield only
-                if (spellInfo->EquippedItemSubClassMask & (1 << ITEM_SUBCLASS_ARMOR_SHIELD))
-                {
-                    if (Item* item = GetUseableItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
-                        if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo))
-                            return true;
-
-                    // special check to filter things like Shield Wall, the aura is not permanent and must stay even without required item
-                    if (!spellInfo->IsPassive())
-                    {
-                        for (SpellEffectInfo const* effect : spellInfo->GetEffectsForDifficulty(DIFFICULTY_NONE))
-                            if (effect && effect->IsAura())
-                                return true;
-                    }
-                }
-
                 // tabard not have dependent spells
                 for (uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_MAINHAND; ++i)
                     if (Item* item = GetUseableItemByPos(INVENTORY_SLOT_BAG_0, i))
                         if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo))
                             return true;
+
+                // shields can be equipped to offhand slot
+                if (Item* item = GetUseableItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                    if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo))
+                        return true;
             }
             else
             {
@@ -25664,6 +25648,7 @@ bool Player::HasItemFitToSpellRequirements(SpellInfo const* spellInfo, Item cons
 
                 return true;
             }
+
             break;
         }
         default:
@@ -26108,7 +26093,7 @@ PartyResult Player::CanUninviteFromGroup(ObjectGuid guidMember) const
 
         /// @todo Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.
         for (GroupReference const* itr = grp->GetFirstMember(); itr != nullptr; itr = itr->next())
-            if (itr->GetSource() && itr->GetSource()->IsInCombat())
+            if (itr->GetSource() && itr->GetSource()->IsInMap(this) && itr->GetSource()->IsInCombat())
                 return ERR_PARTY_LFG_BOOT_IN_COMBAT;
 
         /* Missing support for these types
