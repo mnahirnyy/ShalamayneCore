@@ -1549,18 +1549,20 @@ public:
     {
         npc_armoire_next_AI(Creature* creature) : ScriptedAI(creature) { }
 
-        void OnSpellClick(Unit* clicker, bool& result) override
+        void OnSpellClick(Unit* Clicker, bool& /*result*/) override
         {
-            if (Player* player = clicker->ToPlayer())
-                if (player->GetQuestStatus(QUEST_WAITING_TO_EXSANGUINATE) == QUEST_STATUS_INCOMPLETE)
-                    if (Creature* rane = me->FindNearestCreature(NPC_DEATHSTALKER_RANE_YORICK, 5.0f))
-                    {
-                        player->CastSpell(me, SPELL_HIDE_IN_ARMOIRE, true);
-                        player->CastSpell(1314.91f, 1211.39f, 58.49675f, SPELL_SUMMON_HIDING_SPOT, true);
-                        return;
-                    }
+            if (!Clicker->IsPlayer())
+                return;
 
-            result = false;
+            Player* player = Clicker->ToPlayer();
+
+            if (player->GetQuestStatus(QUEST_WAITING_TO_EXSANGUINATE) == QUEST_STATUS_INCOMPLETE)
+                if (Creature* rane = me->FindNearestCreature(NPC_DEATHSTALKER_RANE_YORICK, 15.0f))
+                {
+                    player->CastSpell(me, SPELL_HIDE_IN_ARMOIRE, true);
+                    player->CastSpell(1314.91f, 1211.39f, 58.49675f, SPELL_SUMMON_HIDING_SPOT, true);
+                    return;
+                }
         }
     };
 

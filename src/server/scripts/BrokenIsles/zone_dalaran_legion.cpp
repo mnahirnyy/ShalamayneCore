@@ -402,15 +402,13 @@ public:
         if (checkTimer <= diff)
         {
             if (player->getClass() == CLASS_DEMON_HUNTER && player->GetAreaId() == 7581 &&
-                player->GetQuestStatus(QUEST_BLINK_OF_AN_EYE) == QUEST_STATUS_REWARDED &&
-                player->GetQuestStatus(QUEST_CALL_OF_THE_ILLIDARI) == QUEST_STATUS_NONE && !_korvasSummoned
-                ) {
-                    if (Creature* creature = player->FindNearestCreature(116704, 10.0f)) {
+                player->GetQuestStatus(QUEST_BLINK_OF_AN_EYE) == QUEST_STATUS_REWARDED && !_korvasSummoned) {
+                    if (Creature* creature = player->FindNearestCreature(99343, 10.0f)) {
                         creature->DestroyForPlayer(player);
                         _korvasSummoned = false;
                     }
 
-                    player->CastSpell(player, 232347, true);
+                    player->CastSpell(player, 195286, true);
                     _korvasSummoned = true;
             }
             checkTimer = 1000;
@@ -546,16 +544,16 @@ enum eChoices
     KILL_CREDIT_DH_ARTIFACT_CHOSEN = 105177,
 };
 
-class npc_altruis_sufferer_artifact : public CreatureScript
+class npc_dh_questgiver_artifact : public CreatureScript
 {
 public:
-    npc_altruis_sufferer_artifact() : CreatureScript("npc_altruis_sufferer_artifact") { }
+    npc_dh_questgiver_artifact() : CreatureScript("npc_dh_questgiver_artifact") { }
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
     {
-        if (quest->GetQuestId() == QUEST_THE_POWER_TO_SURVIVE)
+        if (quest->GetQuestId() == 40816 || quest->GetQuestId() == 40814)
         {
-            player->CastSpell(player, 201092, true); // Display player spec choice
+            player->CastSpell(player, SPELL_PLAYERCHOICE, true); // Display player spec choice
         }
         return true;
     }
@@ -565,8 +563,9 @@ public:
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
-        if (player->HasQuest(QUEST_THE_POWER_TO_SURVIVE) &&
-            player->GetQuestStatus(QUEST_THE_POWER_TO_SURVIVE) != QUEST_STATUS_REWARDED) {
+        if ((player->HasQuest(40816) || player->HasQuest(40814)) &&
+            (player->GetQuestStatus(40816) != QUEST_STATUS_REWARDED || player->GetQuestStatus(40814) != QUEST_STATUS_REWARDED)
+        ) {
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I would like to review weapons we might pursue.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
         }
 
@@ -581,7 +580,7 @@ public:
         switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF + 1:
-                player->CastSpell(player, 201092, true); // Display player spec choice
+                player->CastSpell(player, SPELL_PLAYERCHOICE, true); // Display player spec choice
                 CloseGossipMenuFor(player);
                 break;
         }
@@ -594,209 +593,38 @@ class PlayerScript_DH_artifact_choice : public PlayerScript
 public:
     PlayerScript_DH_artifact_choice() : PlayerScript("PlayerScript_DH_artifact_choice") {}
 
-    void OnCompleteQuestChoice(Player* player, uint32 choiceID, uint32 responseID)
+    void OnPlayerChoiceResponse(Player* player, uint32 choiceID, uint32 responseID) override
     {
         if (choiceID != PLAYER_CHOICE_DH_ARTIFACT_SELECTION)
             return;
 
         switch (responseID)
         {
-            case PLAYER_CHOICE_DH_HAVOC:
-            {
-                player->RemoveRewardedQuest(QUEST_ALDRACHI_WARBLADES_CHOSEN);
-                player->KilledMonsterCredit(KILL_CREDIT_DH_ARTIFACT_CHOSEN);
-
-                if (ChrSpecializationEntry const* spec = sChrSpecializationStore.AssertEntry(577))
-                    player->ActivateTalentGroup(spec);
-
-                break;
-            }   
-            case PLAYER_CHOICE_DH_VENGEANCE:
-            {
-                player->RemoveRewardedQuest(QUEST_TWINBLADES_OFTHE_DECEIVER_CHOSEN);
-                player->KilledMonsterCredit(KILL_CREDIT_DH_ARTIFACT_CHOSEN);
-
-                if (ChrSpecializationEntry const* spec = sChrSpecializationStore.AssertEntry(581))
-                    player->ActivateTalentGroup(spec);
-
-                break;
-            }   
-            default:
-                break;
-        }
-    }
-};
-
-#define GOSSIP_HELLO_ALTURAS1 "There's no time to explain. Let us inside the hold, warden."
-#define GOSSIP_HELLO_ALTURAS2 "Let us inside or I'll show you the difference."
-#define GOSSIP_HELLO_ALTURAS3 "Do you want to find out?"
-#define GOSSIP_HELLO_ALTURAS4 "What do you have to lose either way?"
-class npc_warden_alturas : public CreatureScript
-{
-public:
-    npc_warden_alturas() : CreatureScript("npc_warden_alturas") { }
-
-    enum {
-        TEXT_ALLOW_ENTER = 3,
-        EVENT_TELEPORT_VIOLETHOLD = 11,
-        EVENT_START_MOVE = 12,
-        EVENT_MOVE_TO_GATES = 13,
-        EVENT_TELEPORT = 14,
-        EVENT_RESET = 15,
-        DATA_START_EVENT = 21,
-    };
-
-    bool _diffsPicked = false;
-    bool _noTimePicked = false;
-    
-    bool OnGossipHello(Player* player, Creature* creature) override
-    {
-        if (player->GetQuestStatus(41121) == QUEST_STATUS_INCOMPLETE && !_diffsPicked && !_noTimePicked)
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, GOSSIP_HELLO_ALTURAS1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-
-        if (player->GetQuestStatus(41121) == QUEST_STATUS_INCOMPLETE && !_diffsPicked)
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, GOSSIP_HELLO_ALTURAS2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-
-        if (player->GetQuestStatus(41121) == QUEST_STATUS_INCOMPLETE && _diffsPicked)
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, GOSSIP_HELLO_ALTURAS3, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
-
-        if (player->GetQuestStatus(41121) == QUEST_STATUS_INCOMPLETE && _diffsPicked)
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, GOSSIP_HELLO_ALTURAS4, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
-
-        SendGossipMenuFor(player, player->GetGossipTextId(creature), creature->GetGUID());
-        return true;
-    }
-
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
-    {
-        if (!player)
-            return false;
-
-        player->PlayerTalkClass->ClearMenus();
-
-        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        case PLAYER_CHOICE_DH_HAVOC:
         {
-            _noTimePicked = true;
-            creature->AI()->Talk(0);
-            creature->SetStandState(UNIT_STAND_STATE_STAND);
-            CloseGossipMenuFor(player);
-        }
+            player->RemoveRewardedQuest(QUEST_ALDRACHI_WARBLADES_CHOSEN);
+            player->ForceCompleteQuest(QUEST_TWINBLADES_OFTHE_DECEIVER_CHOSEN);
+            player->KilledMonsterCredit(KILL_CREDIT_DH_ARTIFACT_CHOSEN);
 
-        if (action == GOSSIP_ACTION_INFO_DEF + 2)
+            if (ChrSpecializationEntry const* spec = sChrSpecializationStore.AssertEntry(577))
+                player->ActivateTalentGroup(spec);
+
+            break;
+        }
+        case PLAYER_CHOICE_DH_VENGEANCE:
         {
-            _diffsPicked = true;
-            creature->SetStandState(UNIT_STAND_STATE_STAND);
-            CloseGossipMenuFor(player);
+            player->RemoveRewardedQuest(QUEST_TWINBLADES_OFTHE_DECEIVER_CHOSEN);
+            player->ForceCompleteQuest(QUEST_ALDRACHI_WARBLADES_CHOSEN);
+            player->KilledMonsterCredit(KILL_CREDIT_DH_ARTIFACT_CHOSEN);
+
+            if (ChrSpecializationEntry const* spec = sChrSpecializationStore.AssertEntry(581))
+                player->ActivateTalentGroup(spec);
+
+            break;
         }
-
-        if (action == GOSSIP_ACTION_INFO_DEF + 3)
-        {
-            creature->AI()->Talk(2);
-            player->KilledMonsterCredit(96313);
-            creature->AI()->SetData(DATA_START_EVENT, DATA_START_EVENT);
-            CloseGossipMenuFor(player);
+        default:
+            break;
         }
-
-        if (action == GOSSIP_ACTION_INFO_DEF + 4)
-        {
-            creature->AI()->Talk(1);
-            player->KilledMonsterCredit(96313);
-            creature->AI()->SetData(DATA_START_EVENT, DATA_START_EVENT);
-            CloseGossipMenuFor(player);
-        }
-
-        return true;
-    }
-
-    bool OnQuestAccept(Player* /*player*/, Creature* /*creature*/, Quest const* quest) override
-    {
-        if (quest->GetQuestId() == 41121)
-        {
-            _diffsPicked = false;
-            _noTimePicked = false;
-        }
-
-        return true;
-    }
-
-    struct npc_warden_alturas_AI : public ScriptedAI
-    {
-        npc_warden_alturas_AI(Creature* creature) : ScriptedAI(creature) {
-            Initialize();
-        }
-
-        void Reset() override
-        {
-            _events.Reset();
-        }
-
-        void Initialize() {}
-
-        void UpdateAI(uint32 diff) override
-        {
-            UpdateVictim();
-            _events.Update(diff);
-
-            while (uint32 eventId = _events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                case EVENT_TELEPORT_VIOLETHOLD: {
-                    Talk(TEXT_ALLOW_ENTER, me->GetOwner());
-                    _events.ScheduleEvent(EVENT_START_MOVE, 4000);
-                    break;
-                }   
-                case EVENT_START_MOVE: {
-                    _events.ScheduleEvent(EVENT_MOVE_TO_GATES, 2000);
-                    me->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
-                    me->SetOrientation(4.0119f);
-                    break;
-                }
-                case EVENT_MOVE_TO_GATES: {
-                    _events.ScheduleEvent(EVENT_TELEPORT, 3000);
-                    me->GetMotionMaster()->MovePoint(2, -958.91f, 4326.97f, 740.20f);
-                    break;
-                }
-                case EVENT_TELEPORT: {
-                    _events.ScheduleEvent(EVENT_RESET, 1500);
-                    me->CastSpell(me, 52096, true); // cosmetic-teleport-effect
-                    break;
-                }
-                case EVENT_RESET: {
-                    me->AI()->Reset();
-                    _events.CancelEvent(EVENT_TELEPORT_VIOLETHOLD);
-                    _events.CancelEvent(EVENT_START_MOVE);
-                    _events.CancelEvent(EVENT_MOVE_TO_GATES);
-                    _events.CancelEvent(EVENT_TELEPORT);
-                    me->DespawnOrUnsummon(5000, Seconds(3));
-                    break;
-                }
-                default:
-                    break;
-                }
-            }
-            // no melee attacks
-        }
-
-        void SetData(uint32 id, uint32 /*value*/) override
-        {
-            switch (id)
-            {
-                case DATA_START_EVENT:
-                {
-                    _events.ScheduleEvent(EVENT_TELEPORT_VIOLETHOLD, 3000);
-                    break;
-                }
-            }
-        }
-
-    private:
-        EventMap _events;
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_warden_alturas_AI(creature);
     }
 };
 
@@ -828,7 +656,7 @@ public:
 
         for (Player* player : playerList)
         {
-            if (player->GetQuestStatus(41121) == QUEST_STATUS_INCOMPLETE)
+            if (player->HasQuest(41121) || player->HasQuest(39051))
             {
                 player->KilledMonsterCredit(95731, ObjectGuid::Empty);
                 player->TeleportTo(1494, 1293.185f, -262.720f, 44.364f, 0.307976f);
@@ -1667,12 +1495,11 @@ void AddSC_dalaran_legion()
     new zone_legion_dalaran_underbelly();
     new npc_hunter_talua();
     new npc_great_eagle();
-    new npc_warden_alturas();
     new go_violethold_entrance_portal();
     new PlayerScript_DH_artifact_choice();
     new PlayerScript_summon_korvas_bloodthorn();
     new npc_korvas_bloodthorn_summon();
-    new npc_altruis_sufferer_artifact();
+    new npc_dh_questgiver_artifact();
     new npc_archmage_khadgar_86563();
     new npc_archmage_khadgar_90417();
     new npc_jace_darkweaver_99262();

@@ -38,6 +38,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldQuestMgr.h"
+#include "Log.h"
 
 void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPackets::Quest::QuestGiverStatusQuery& packet)
 {
@@ -686,16 +687,22 @@ void WorldSession::HandleQueryQuestRewards(WorldPackets::Quest::QueryQuestReward
 
 void WorldSession::HandlePlayerChoiceResponse(WorldPackets::Quest::ChoiceResponse& choiceResponse)
 {
+    TC_LOG_ERROR("server.worldserver", "HandlePlayerChoiceResponse: PlayerTalkClass->GetInteractionData().PlayerChoiceId = '%u', choiceResponse.ChoiceID '%u'", _player->PlayerTalkClass->GetInteractionData().PlayerChoiceId, uint32(choiceResponse.ChoiceID));
+    // TO DO: debug InteractionData: Why do we cannot get the PlayerChoiceId
+    // The following is temporary
     if (_player->PlayerTalkClass->GetInteractionData().PlayerChoiceId != uint32(choiceResponse.ChoiceID))
     {
         TC_LOG_ERROR("entities.player.cheat", "Error in CMSG_CHOICE_RESPONSE: %s tried to respond to invalid player choice %d (allowed %u) (possible packet-hacking detected)",
             GetPlayerInfo().c_str(), choiceResponse.ChoiceID, _player->PlayerTalkClass->GetInteractionData().PlayerChoiceId);
-        return;
+        // return;
     }
 
     PlayerChoice const* playerChoice = sObjectMgr->GetPlayerChoice(choiceResponse.ChoiceID);
     if (!playerChoice)
+    {
+        TC_LOG_ERROR("entities.player.cheat", "Error in CMSG_CHOICE_RESPONSE: Not found ChoiceID %u.", choiceResponse.ChoiceID);
         return;
+    }
 
     PlayerChoiceResponse const* playerChoiceResponse = playerChoice->GetResponse(choiceResponse.ResponseID);
     if (!playerChoiceResponse)

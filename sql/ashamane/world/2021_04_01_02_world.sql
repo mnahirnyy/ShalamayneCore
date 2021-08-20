@@ -605,6 +605,11 @@
 -- (@PATH, 8, -1081.691, 896.4653, 36.73196, 0, 0, 0, 0, 100, 0);
 -- -- 0x2016DC51C024D140000A5200007C7A4A .go xyz -1086.516 887.8559 37.05409
 -- -- ----------------------------------------------------------------------
+-- Recently Bandaged debuff shouldn't break stealth
+DELETE FROM `spell_custom_attr` WHERE `entry` = 11196;
+INSERT INTO `spell_custom_attr` (`entry`, `attributes`) VALUES
+(11196, 0x40);
+
 -- DB/Spells: Sparkles for the quest Fear No Evil
 DELETE FROM `spell_area` WHERE `spell` IN (84459) AND `area`=9;
 INSERT INTO `spell_area` (`spell`,`area`,`quest_start`,`quest_end`,`aura_spell`,`racemask`,`gender`,`flags`,`quest_start_status`,`quest_end_status`) VALUES

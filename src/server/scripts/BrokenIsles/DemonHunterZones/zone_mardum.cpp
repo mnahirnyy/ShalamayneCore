@@ -755,43 +755,6 @@ public:
     };
 };
 
-enum SPELLS
-{
-    SPELL_GAUNTLET_EVENT_WARNING = 195644,
-    SPELL_BRIDGE_EVENT = 192228,
-    CONVERSATION_BOMBARDMENT_WARNING = 747,
-    CONVERSATION_CAPTAINS = 569,
-};
-
-//class PlayerScript_event_warning : public PlayerScript
-//{
-//
-//public:
-//    PlayerScript_event_warning() : PlayerScript("PlayerScript_event_warning") { }
-//
-//    void OnUpdateArea(Player* player, Area* newArea, Area* oldArea) override
-//    {
-//        if (player->GetZoneId() != 7705 || player->getClass() != CLASS_DEMON_HUNTER)
-//            return;
-//
-//        switch (newArea->GetId())
-//        {
-//            case 7705:
-//                if (oldArea->GetId() != 7742 || player->GetQuestStatus(QUEST_SHIVARRA_FORCES) != QUEST_STATUS_COMPLETE)
-//                    return;
-//                Conversation::CreateConversation(CONVERSATION_BOMBARDMENT_WARNING, player, player->GetPosition(), { player->GetGUID() });
-//                break;
-//            case 7713:
-//                if (oldArea->GetId() == 7712 || player->GetQuestStatus(QUEST_THEIR_NUMBERS_ARE_LEGION) != QUEST_STATUS_INCOMPLETE)
-//                    return;
-//                Conversation::CreateConversation(CONVERSATION_CAPTAINS, player, player->GetPosition(), { player->GetGUID() });
-//                break;
-//            default:
-//                break;
-//        }
-//    }
-//};
-
 class go_meeting_with_queen_ritual : public GameObjectScript
 {
 public:
@@ -2586,18 +2549,59 @@ public:
     }
 };
 
-// Brood Quieen Tyranna Script
-enum eTyrannaAttacker
+/* Cyana Nightglaive (97297) */
+class npc_mardum_cyana_nightglaive : public CreatureScript
 {
-    DATA_TYRANNA_DEATH = 1,
-    TEXT_DEATH = 0,
-    BROOD_QUEEN_TYRANNA = 93802,
+public:
+    npc_mardum_cyana_nightglaive() : CreatureScript("npc_mardum_cyana_nightglaive") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_THE_KEYSTONE)
+        {
+            creature->AI()->Talk(0);
+
+            creature->GetScheduler().Schedule(Seconds(4), [](TaskContext context)
+            {
+                GetContextUnit()->ToCreature()->AI()->Talk(1);
+            });
+
+            WorldLocation loc;
+            loc.m_mapId = 1481;
+            loc.m_positionX = 1467.47f;
+            loc.m_positionY = 1412.78f;
+            loc.m_positionZ = 243.96f;
+            loc.SetOrientation(player->GetOrientation());
+            player->SetHomebind(loc, 7749);
+            player->SendBindPointUpdate();
+        }
+
+        return true;
+    }
 };
 
-// Kayn: 20542609 (Entry: 97244)
-// Allari: 20542497 (Entry: 97962)
-// Jace: 20542610 (Entry: 97959)
-// Korvas: 20542498 (Entry: 98712)
+/* Brood Queen Tyranna (93802) and quest "The Keystone" (38728) scripts */
+enum eTyrannaAttacker
+{
+    DATA_TYRANNA_DEATH = 11,
+    DATA_QUEENS_BITE = 12,
+    TEXT_DEATH = 0,
+    BROOD_QUEEN_TYRANNA = 93802,
+    SPELL_EYE_BEAM = 197641,
+    SPELL_TRANSFORMATION = 197523,
+    EVENT_EYE_BEAM = 2,
+    EVENT_TRANSFORMATION = 3,
+    NPC_KAYN_ENTRY = 97244,
+};
+
+/* Attackers
+ * - Kayn Sunfury: (Entry: 97244)
+ * - Allari Souleater: (Entry: 97962)
+ * - Jace Darkweaver: (Entry: 97959)
+ * - Korvas Bloodthorn: (Entry: 98712)
+ * Abilities: Transformation (208121)
+*/
+
 class npc_tyranna_attacker : public CreatureScript
 {
 public:
@@ -2609,47 +2613,74 @@ public:
             me->SetReactState(REACT_DEFENSIVE);
         }
 
-        void MoveInLineOfSight(Unit* who) override
-        {
-            if (who->IsPlayer())
-                if (Creature* creature = me->FindNearestCreature(BROOD_QUEEN_TYRANNA, me->GetVisibilityRange(), true))
-                    AttackStart(creature);
+        void MoveInLineOfSight(Unit* who) override {   
+            if (Player* player = who->ToPlayer())
+                if (player->GetDistance(me) < 20.0f && player->IsInCombat())
+                    if (player->HasQuest(QUEST_THE_KEYSTONE) && !player->GetQuestObjectiveData(QUEST_THE_KEYSTONE, 0))
+                        if (Creature* tyranna = me->FindNearestCreature(BROOD_QUEEN_TYRANNA, me->GetVisibilityRange(), true))
+                            AttackStart(tyranna);
         }
 
-        void EnterCombat(Unit* who) override
-        {
-            who->GetAI()->AttackStart(me);
+        void EnterCombat(Unit* who) override {
+            _events.ScheduleEvent(EVENT_EYE_BEAM, urand(25000, 65000));
         }
 
-        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+        void DamageTaken(Unit* attacker, uint32& damage) override
         {
-            if (HealthAbovePct(75))
-                damage = urand(1, 2);
-            else
-                me->SetHealth(me->GetMaxHealth() * 0.85f);
+            if (!attacker->IsPlayer())
+            {
+                if (HealthAbovePct(75))
+                    damage = urand(1, 2);
+                else
+                    me->SetHealth(me->GetMaxHealth() * 0.85f);
+            }
         }
-
-        void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override {}
 
         void SetData(uint32 id, uint32 /*value*/) override
         {
-            switch (id)
-            {
-            case DATA_TYRANNA_DEATH:
-                if (me->GetEntry() == 97244) {
-                    Talk(TEXT_DEATH);
-                }
-                EnterEvadeMode(EVADE_REASON_OTHER);
-                break;
+            switch (id) {
+                case DATA_TYRANNA_DEATH:
+                    if (me->GetEntry() == NPC_KAYN_ENTRY) {
+                        Talk(TEXT_DEATH);
+                    }
+                    EnterEvadeMode(EVADE_REASON_OTHER);
+                    break;
+                case DATA_QUEENS_BITE: {
+                    _events.ScheduleEvent(EVENT_TRANSFORMATION, 4000);
+                    DoCast(me, 197486, true);
+                    break;
+                }   
+                default:
+                    break;
             }
         }
+
+        void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override {}
 
         void JustReachedHome() override {}
 
         void UpdateAI(uint32 diff) override
         {
+            if (!UpdateVictim())
+                return;
+
             _events.Update(diff);
 
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_EYE_BEAM:
+                    DoCast(SPELL_EYE_BEAM);
+                    _events.ScheduleEvent(EVENT_EYE_BEAM, 32000);
+                    break;
+                case EVENT_TRANSFORMATION:
+                    DoCast(me, SPELL_TRANSFORMATION, true);
+                    break;
+                default:
+                    break;
+                }
+            }
             DoMeleeAttackIfReady();
         }
 
@@ -2665,15 +2696,12 @@ public:
 
 enum eTyranna
 {
-    SPELL_BROOD_SWARM = 197627, // 1
-    SPELL_INTO_THE_SHADOWS = 197414, // // phase -35%
+    SPELL_BROOD_SWARM = 197627,
+    SPELL_INTO_THE_SHADOWS = 197414,
     SPELL_QUEENS_BITE = 197486,
     EVENT_BROOD_SWARM = 1,
     EVENT_INTO_THE_SHADOWS = 2,
     EVENT_QUEENS_BITE = 3,
-    EVENT_SAY_TEXT_2 = 4,
-    EVENT_SAY_TEXT_1 = 5,
-    EVENT_TYRANNA_DIED = 6,
     TEXT_START_COMBAT = 0,
     TEXT_KEYSTONE = 1,
     TEXT_KISS = 2,
@@ -2684,10 +2712,15 @@ enum eTyranna
     NPC_KAYN_TYRANNA = 97244,
     NPC_ALLARI_TYRANNA = 97962,
     NPC_TYRANNA_SPAWN = 100334,
-    NPC_SKITTERING_BROODLING = 100333, // NPC_ADD
+    NPC_SKITTERING_BROODLING = 100333,
 };
 
-// 93802
+/* Brood Queen Tyranna (93802) https://www.wowhead.com/npc=93802/brood-queen-tyranna#abilities
+ * Abilities:
+ * - Brood Swarm 197627 https://www.wowhead.com/spell=197627/brood-swarm
+ * - Into the Shadows 197414 https://www.wowhead.com/spell=197414/into-the-shadows
+ * - Queens Bite 197486 https://www.wowhead.com/spell=197486/queens-bite
+*/
 class npc_brood_queen_tyranna : public CreatureScript
 {
 public:
@@ -2701,9 +2734,8 @@ public:
 
         void Initialize()
         {
-            _playerParticipating = false;
-            _combatStarted = false;
             _swarmSummoned = 0;
+            _sayText1 = false;
         }
 
         void Reset() override
@@ -2711,31 +2743,25 @@ public:
             _events.Reset();
             Initialize();
             me->setActive(true);
-            me->SetReactState(REACT_PASSIVE);
+            me->SetReactState(REACT_AGGRESSIVE);
         }
 
-        void MoveInLineOfSight(Unit* who) override
-        {
-            if (Player* player = who->ToPlayer())
-                if (player->GetDistance(me) < 10.0f)
-                    if (!_combatStarted)
-                    {
-                        _combatStarted = true;
-                        // Enter Combat
-                        _events.ScheduleEvent(EVENT_SAY_TEXT_1, 0);
-                        _events.ScheduleEvent(EVENT_BROOD_SWARM, 19000);
-                        _events.ScheduleEvent(EVENT_INTO_THE_SHADOWS, 22000);
-                        _events.ScheduleEvent(EVENT_QUEENS_BITE, urand(16000, 18000));
-                    }  
-        }
+        // void MoveInLineOfSight(Unit* who) override {}
 
         void EnterCombat(Unit* /*who*/) override
         {
-            // We will schedule the npc abilities when player move near the npc 
+            Talk(0);
+            _events.ScheduleEvent(EVENT_BROOD_SWARM, Seconds(20));
+            _events.ScheduleEvent(EVENT_QUEENS_BITE, urand(10000, 15000));
         }
 
         void DamageTaken(Unit* attacker, uint32& damage) override
         {
+            if (HealthBelowPct(80) && !_sayText1) {
+                Talk(TEXT_KEYSTONE);
+                _sayText1 = true;
+            }
+
             if (HealthAbovePct(65) && attacker->IsCreature())
                 if (attacker->GetEntry() == NPC_KAYN_TYRANNA)
                     damage = urand(1, 2);
@@ -2743,42 +2769,23 @@ public:
             if (HealthBelowPct(65) && attacker->IsCreature())
                 if (attacker->GetEntry() == NPC_KAYN_TYRANNA)
                     me->SetHealth(me->GetHealth() + damage);
-
-            if (!_playerParticipating && attacker->ToPlayer())
-            {
-                if (Creature* creature = me->FindNearestCreature(NPC_KAYN_TYRANNA, me->GetVisibilityRange(), true))
-                {
-                    _playerParticipating = true;
-                }
-            }
-
-            if (damage >= me->GetHealth())
-            {
-                _events.ScheduleEvent(EVENT_TYRANNA_DIED, 0);
-
-                std::list<HostileReference*> threatList;
-                threatList = me->getThreatManager().getThreatList();
-                for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
-                    if (Player* target = (*itr)->getTarget()->ToPlayer())
-                        if (target->GetQuestStatus(38728) == QUEST_STATUS_INCOMPLETE)
-                            target->KilledMonsterCredit(101760);
-            }
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* killer) override
         {
-            std::list<Creature*> summonedSwarm;
-            me->GetCreatureListWithEntryInGrid(summonedSwarm, NPC_TYRANNA_SPAWN, me->GetVisibilityRange());
-            for (std::list<Creature*>::const_iterator itr = summonedSwarm.begin(); itr != summonedSwarm.end(); ++itr)
-                (*itr)->ToCreature()->DespawnOrUnsummon();
+            Talk(TEXT_TYRANNA_DEATH);
 
+            /* Give Kill Credit to all players in the range */
+            std::list<Player*> players;
+            me->GetPlayerListInGrid(players, 20.0f);
+            for (Player* player : players)
+            {
+                player->KilledMonsterCredit(me->GetEntry());
+                player->ClearInCombat();
+            }   
+
+            /* Set Data for Kayn to talk and go */
             if (Creature* creature = me->FindNearestCreature(NPC_KAYN_TYRANNA, me->GetVisibilityRange(), true))
-                creature->AI()->SetData(DATA_TYRANNA_DEATH, DATA_TYRANNA_DEATH);
-            if (Creature* creature = me->FindNearestCreature(NPC_KORVAS_TYRANNA, me->GetVisibilityRange(), true))
-                creature->AI()->SetData(DATA_TYRANNA_DEATH, DATA_TYRANNA_DEATH);
-            if (Creature* creature = me->FindNearestCreature(NPC_JACE_TYRANNA, me->GetVisibilityRange(), true))
-                creature->AI()->SetData(DATA_TYRANNA_DEATH, DATA_TYRANNA_DEATH);
-            if (Creature* creature = me->FindNearestCreature(NPC_ALLARI_TYRANNA, me->GetVisibilityRange(), true))
                 creature->AI()->SetData(DATA_TYRANNA_DEATH, DATA_TYRANNA_DEATH);
 
             me->DespawnOrUnsummon(30000, Seconds(20));
@@ -2790,20 +2797,23 @@ public:
             {
                 uint8 rand = urand(1, 2);
                 float angle = frand(0.0f, 2.0f * float(M_PI));
-                float x = targetPos.GetPositionX() + (10.0f * std::cos(angle));
-                float y = targetPos.GetPositionY() + (10.0f * std::sin(angle));
+                float x = targetPos.GetPositionX() + (5.0f * std::cos(angle));
+                float y = targetPos.GetPositionY() + (5.0f * std::cos(angle));
                 Position randomPosition = {
                     x, y, targetPos.GetPositionZ(), targetPos.GetOrientation()
                 };
-                me->SummonCreature(entry, randomPosition, TEMPSUMMON_CORPSE_DESPAWN, duration);
+                me->SummonCreature(entry, randomPosition, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, duration);
             }
         }
 
         void UpdateAI(uint32 diff) override
         {
+            if (!UpdateVictim())
+                return;
+
             _events.Update(diff);
 
-            if (!UpdateVictim())
+            if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             while (uint32 eventId = _events.ExecuteEvent())
@@ -2813,33 +2823,51 @@ public:
                 case EVENT_BROOD_SWARM:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                     {
-                        Talk(TEXT_CHILDREN, me->GetOwner());
-                        SummomNearTarget(2, NPC_TYRANNA_SPAWN, target->GetPosition(), 20000); // 2 bigger spiders
-                        SummomNearTarget(3, NPC_SKITTERING_BROODLING, target->GetPosition(), 15000); // 3 small spiders
+                        Talk(TEXT_CHILDREN);
+                        DoCast(target, SPELL_BROOD_SWARM);
+                        if (_swarmSummoned < 2) {
+                            SummomNearTarget(2, NPC_TYRANNA_SPAWN, target->GetPosition(), 30000); // 2 bigger spiders
+                        }   
+                        SummomNearTarget(4, NPC_SKITTERING_BROODLING, target->GetPosition(), 30000); // 3 small spiders
+                        ++_swarmSummoned;
                     }
-                    _events.ScheduleEvent(EVENT_BROOD_SWARM, 16000);
-                    _swarmSummoned++;
+                    _events.RescheduleEvent(EVENT_INTO_THE_SHADOWS, Seconds(2));
+                    _events.RescheduleEvent(EVENT_BROOD_SWARM, Seconds(46));
                     break;
-                case EVENT_QUEENS_BITE:
-                    Talk(TEXT_KISS, me->GetOwner());
-                    DoCast(SelectTarget(SELECT_TARGET_RANDOM, 1), SPELL_QUEENS_BITE, true);
-                    _events.ScheduleEvent(EVENT_QUEENS_BITE, urand(18000, 24000));
+                case EVENT_QUEENS_BITE: {
+                    Talk(TEXT_KISS);
+                    _events.ScheduleEvent(EVENT_QUEENS_BITE, urand(16000, 22000));
+
+                    std::list<Unit*> targetList;
+                    me->GetAttackableUnitListInRange(targetList, 20.0f);
+                    targetList.remove_if([](WorldObject* target)
+                    {
+                        if (target->GetEntry() == 97244)
+                            return false;
+                        if (target->GetEntry() == 97959)
+                            return false;
+                        if (target->GetEntry() == 97962)
+                            return false;
+                        if (target->GetEntry() == 98712)
+                            return false;
+
+                        return true;
+                    });
+
+                    if (!targetList.empty()) {
+                        std::vector<Unit*> targetVector(targetList.begin(), targetList.end());
+                        Creature* targeted = targetVector[urand(0, targetVector.size() - 1)]->ToCreature();
+                        DoCast(targeted, SPELL_QUEENS_BITE, false);
+                        targeted->AI()->SetData(DATA_QUEENS_BITE, DATA_QUEENS_BITE);
+                    }
                     break;
+                }   
                 case EVENT_INTO_THE_SHADOWS:
+                    Talk(5);
                     DoCast(me, SPELL_INTO_THE_SHADOWS, true);
-                    _events.RescheduleEvent(EVENT_QUEENS_BITE, 20000 + urand(14000, 20000));
-                    _events.RescheduleEvent(EVENT_BROOD_SWARM, 20000 + urand(20000, 26000));
-                    _events.ScheduleEvent(EVENT_INTO_THE_SHADOWS, 20000 + 20000);
+                    _events.RescheduleEvent(EVENT_QUEENS_BITE, Seconds(15));
                     break;
-                case EVENT_SAY_TEXT_2:
-                    Talk(TEXT_KEYSTONE, me->GetOwner());
-                    break;
-                case EVENT_SAY_TEXT_1:
-                    Talk(TEXT_START_COMBAT, me->GetOwner());
-                    _events.ScheduleEvent(EVENT_SAY_TEXT_2, 3000);
-                    break;
-                case EVENT_TYRANNA_DIED:
-                    Talk(TEXT_TYRANNA_DEATH, me->GetOwner());
+                default:
                     break;
                 }
             }
@@ -2848,15 +2876,51 @@ public:
 
     private:
         EventMap _events;
-        bool _playerParticipating;
-        bool _combatStarted;
         uint8 _swarmSummoned;
+        bool _sayText1;
     };
 
     CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_brood_queen_tyrannaAI(creature);
     }
+};
+
+class npc_mardum_keystone_downstairs : public CreatureScript
+{
+public:
+    npc_mardum_keystone_downstairs() : CreatureScript("npc_mardum_keystone_downstairs") { }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_mardum_keystone_downstairs_AI(creature);
+    }
+
+    struct npc_mardum_keystone_downstairs_AI : public ScriptedAI
+    {
+        npc_mardum_keystone_downstairs_AI(Creature* creature) : ScriptedAI(creature) {
+            SetCanSeeEvenInPassiveMode(true);
+        }
+
+        int8 storageId_101760 = 2;
+        int8 storageId_93802 = 0;
+
+        void Reset() override { me->SetReactState(REACT_PASSIVE); }
+
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (!who->IsPlayer() || !me->IsWithinDistInMap(who, 20.0f))
+                return;
+
+            if (who->ToPlayer()->GetQuestObjectiveData(QUEST_THE_KEYSTONE, storageId_101760)
+                || !who->ToPlayer()->GetQuestObjectiveData(QUEST_THE_KEYSTONE, storageId_93802))
+                return;
+
+            // Give Credit
+            who->ToPlayer()->KilledMonsterCredit(me->GetEntry());
+        }
+    };
 };
 
 // 97303
@@ -2874,6 +2938,33 @@ public:
 //        return true;
 //    }
 //};
+
+/* Scene:1142 PackageId: 1512 "7.0 Quest - DH-Mardum (The Keystone: Metamorphosis) - ELM" */
+class scene_mardum_metamorphosis : public SceneScript
+{
+public:
+    scene_mardum_metamorphosis() : SceneScript("scene_mardum_metamorphosis") {}
+
+    // Called when a scene is either canceled or completed
+    void OnSceneEnd(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) override
+    {
+        Finish(player);
+    }
+
+    // Called when a scene is completed
+    void OnSceneComplete(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) override
+    {
+        Finish(player);
+    }
+
+    void Finish(Player* player)
+    {
+        if (player->GetSceneMgr().HasScene(1142, 1512)) {
+            player->GetSceneMgr().CancelSceneByPackageId(1512);
+            player->GetSceneMgr().RemoveAurasDueToSceneId(1142);
+        }
+    }
+};
 
 // 245728
 class go_mardum_the_keystone : public GameObjectScript
@@ -3000,7 +3091,6 @@ void AddSC_zone_mardum()
     new npc_mardum_izal_whitemoon();
     new npc_tyranna_attacker();
     new npc_brood_queen_tyranna();
-    // new npc_mardum_kayn_sunfury_end();   
     new go_mardum_the_keystone();
     RegisterSpellScript(spell_mardum_back_to_black_temple);
     new PlayerScript_mardum_conversation_trigger();
@@ -3012,11 +3102,13 @@ void AddSC_zone_mardum()
     new spell_destroying_soulharvester();
     new npc_mardum_devastator();
     new npc_mardum_announcer();
-    // new PlayerScript_event_warning();
     new npc_general_volroth();
     new npc_count_nefarious();
     new go_well_of_souls();
     new npc_lady_stheno_soulengine();
     new npc_mardum_gaardoun();
     new spell_rallying();
+    new npc_mardum_cyana_nightglaive();
+    new npc_mardum_keystone_downstairs();
+    new scene_mardum_metamorphosis();
 }

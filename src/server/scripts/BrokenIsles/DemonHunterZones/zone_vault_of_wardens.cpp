@@ -1148,23 +1148,98 @@ public:
     {
         player->KilledMonsterCredit(100166, ObjectGuid::Empty);
         player->SendMovieStart(478);
-        return true;
+        return false;
     }
 };
 
-enum eBastillax
+/* Kayn Subfury (97273) or Altruis the Sufferer (97274) will assist the Player in Bastillax fight */
+class npc_bastillax_attacker : public CreatureScript
 {
-    EVENT_FEL_ANNIHILATION = 0,
-    EVENT_CRUSHING_SHADOWS = 1,
-    EVENT_BLUR_OF_SHADOWS = 2,
-    SPELL_FEL_ANNIHILATION = 200007, // 5 + 35
-    SPELL_CRUSHING_SHADOWS = 200027, // 45
-    SPELL_BLUR_OF_SHADOWS = 200002, // 23 say
-    SPELL_PORTAL_SURGE = 200353,  // ??? 16 + 50  say + summon
-    SPELL_BASTILLAX_DIES_01 = 210493,
-    SPELL_BASTILLAX_DIES_02 = 210496,
-    SPELL_POWER_02 = 210500,
-    BASTILLAXS_POWER_QUEST_CREDIT = 106255,
+    enum atData {
+        NPC_BASTILLAX = 96783,
+        DATA_BASTILLAX_DEATH = 21,
+        EVENT_EYE_BEAM = 1,
+        EVENT_CHAOS_STRIKE = 2,
+        SPELL_EYE_BEAM = 197641,
+        SPELL_CHAOS_STRIKE = 197639,
+    };
+public:
+    npc_bastillax_attacker() : CreatureScript("npc_bastillax_attacker") { }
+
+    struct npc_bastillax_attacker_AI : public ScriptedAI
+    {
+        npc_bastillax_attacker_AI(Creature* creature) : ScriptedAI(creature) {
+            me->SetReactState(REACT_DEFENSIVE);
+        }
+
+        void MoveInLineOfSight(Unit* who) override {
+            if (Player* player = who->ToPlayer())
+                if (player->GetDistance(me) < 20.0f && player->IsInCombat())
+                    if (player->HasQuest(QUEST_BETWEEN_US_AND_FREEDOM_HA) ||
+                        player->HasQuest(QUEST_BETWEEN_US_AND_FREEDOM_HH) ||
+                        player->HasQuest(QUEST_BETWEEN_US_AND_FREEDOM_VA) ||
+                        player->HasQuest(QUEST_BETWEEN_US_AND_FREEDOM_VH))
+                            if (Creature* bastillax = me->FindNearestCreature(NPC_BASTILLAX, me->GetVisibilityRange(), true))
+                                AttackStart(bastillax);
+        }
+
+        void EnterCombat(Unit* who) override
+        {   
+            _events.ScheduleEvent(EVENT_EYE_BEAM, urand(20000, 35000));
+            _events.ScheduleEvent(EVENT_CHAOS_STRIKE, urand(15000, 45000));
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+        {
+            if (HealthBelowPct(45))
+                damage = urand(1, 2);
+            else
+                me->SetHealth(me->GetMaxHealth() * 0.85f);
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_BASTILLAX_DEATH:
+                Talk(0);
+                EnterEvadeMode(EVADE_REASON_OTHER);
+                break;
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_EYE_BEAM:
+                    DoCast(SPELL_EYE_BEAM);
+                    _events.ScheduleEvent(EVENT_EYE_BEAM, 12000);
+                    break;
+                case EVENT_CHAOS_STRIKE:
+                    DoCast(SPELL_CHAOS_STRIKE);
+                    _events.ScheduleEvent(EVENT_EYE_BEAM, 22000);
+                    break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_bastillax_attacker_AI(creature);
+    }
 };
 
 /* Bastillax (96783) https://www.wowhead.com/npc=96783/bastillax#abilities
@@ -1175,6 +1250,20 @@ enum eBastillax
  * - Fel Annihilation (https://www.wowhead.com/spell=200007/fel-annihilation)
  * - Portal Surge (https://www.wowhead.com/spell=200104/portal-surge)
  */
+enum eBastillax
+{
+    EVENT_FEL_ANNIHILATION = 0,
+    EVENT_CRUSHING_SHADOWS = 1,
+    EVENT_BLUR_OF_SHADOWS = 2,
+    EVENT_PORTAL_SURGE = 3,
+    SPELL_FEL_ANNIHILATION = 200007,
+    SPELL_CRUSHING_SHADOWS = 200066,
+    SPELL_BLUR_OF_SHADOWS = 200002,
+    SPELL_PORTAL_SURGE = 200104,
+    SPELL_POWER_02 = 210500,
+    BASTILLAXS_POWER_QUEST_CREDIT = 106255,
+};
+
 class npc_bastillax : public CreatureScript
 {
 public:
@@ -1191,6 +1280,8 @@ public:
             _firstTextTrigger = false;
             _secondTextTrigger = false;
             _thirdTextTrigger = false;
+            me->SetCorpseDelay(30);
+            me->SetRespawnDelay(15);
         }
 
         void Reset() override
@@ -1200,23 +1291,30 @@ public:
         }
 
         void JustDied(Unit* killer) override
-        {
-            if (killer->GetTypeId() == TYPEID_PLAYER) {
-                killer->CastSpell(killer, SPELL_BASTILLAX_DIES_01, true);
-                killer->CastSpell(killer, SPELL_BASTILLAX_DIES_02, true);
-
-                killer->ToPlayer()->KilledMonsterCredit(113812, ObjectGuid::Empty);
-                killer->ToPlayer()->KilledMonsterCredit(BASTILLAXS_POWER_QUEST_CREDIT, ObjectGuid::Empty);
-
-                killer->CastSpell(killer, SPELL_POWER_02, true);
+        {   
+            /* Give Kill Credit to all players in the range */
+            std::list<Player*> players;
+            me->GetPlayerListInGrid(players, 30.0f);
+            for (Player* player : players)
+            {
+                player->KilledMonsterCredit(BASTILLAXS_POWER_QUEST_CREDIT);
+                player->CastSpell(player, SPELL_POWER_02);
+                player->ClearInCombat();
             }
+
+            /* Set Data for Kayn (97273) and Altruis (97274) to talk and go */
+            if (Creature* creature = me->FindNearestCreature(97273, me->GetVisibilityRange(), true))
+                creature->AI()->SetData(21, 21);
+            if (Creature* creature = me->FindNearestCreature(97274, me->GetVisibilityRange(), true))
+                creature->AI()->SetData(21, 21);
         }
 
         void EnterCombat(Unit* /*who*/) override
         {
             events.RescheduleEvent(EVENT_FEL_ANNIHILATION, urand(4000, 6000));
-            events.RescheduleEvent(EVENT_CRUSHING_SHADOWS, 45000);
-            events.RescheduleEvent(EVENT_BLUR_OF_SHADOWS, 23000);
+            events.RescheduleEvent(EVENT_CRUSHING_SHADOWS, 22000);
+            events.RescheduleEvent(EVENT_BLUR_OF_SHADOWS, 13000);
+            events.RescheduleEvent(EVENT_PORTAL_SURGE, 35000);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage) override
@@ -1239,6 +1337,9 @@ public:
 
         void UpdateAI(uint32 diff) override
         {
+            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -1246,27 +1347,45 @@ public:
                 switch (eventId)
                 {
                 case EVENT_FEL_ANNIHILATION:
-                    if (Unit* target = me->GetVictim())
-                        me->CastSpell(me, SPELL_FEL_ANNIHILATION, true);
-                    events.RescheduleEvent(EVENT_FEL_ANNIHILATION, 35000);
+                    DoCast(SPELL_FEL_ANNIHILATION);
+                    events.RescheduleEvent(EVENT_FEL_ANNIHILATION, 15000);
                     break;
                 case EVENT_CRUSHING_SHADOWS:
-                    if (Unit* target = me->GetVictim())
-                        me->CastSpell(target, SPELL_CRUSHING_SHADOWS, true);
-                    events.RescheduleEvent(EVENT_CRUSHING_SHADOWS, 45000);
+                    DoCast(SPELL_CRUSHING_SHADOWS);
+                    events.RescheduleEvent(EVENT_CRUSHING_SHADOWS, 32000);
                     break;
                 case EVENT_BLUR_OF_SHADOWS:
-                    if (Unit* target = me->GetVictim())
-                        me->CastSpell(target, SPELL_BLUR_OF_SHADOWS, true);
+                    Talk(3);
+                    DoCast(SPELL_BLUR_OF_SHADOWS);
                     events.RescheduleEvent(EVENT_BLUR_OF_SHADOWS, 23000);
+                    break;
+                case EVENT_PORTAL_SURGE:
+                    DoCast(SPELL_PORTAL_SURGE);
+                    for (uint8 i = 0; i < 3; i++)
+                    {
+                        if (Creature* add = me->SummonCreature(101505, 4221.51f + irand(-3, 3), -627.92f + irand(-3, 3), 255.12f, 3.10f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000))
+                        {
+                            add->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+                            if (Unit* target = me->GetVictim())
+                                add->AI()->AttackStart(target);
+                        }
+                    }
+                    for (uint8 i = 0; i < 3; i++)
+                    {
+                        if (Creature* add = me->SummonCreature(101505, 4146.97f + irand(-3, 3), -626.29f + irand(-3, 3), 255.12f, 6.27f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000))
+                        {
+                            add->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
+                            if (Unit* target = me->GetVictim())
+                                add->AI()->AttackStart(target);
+                        }
+                    }
+                    events.RescheduleEvent(EVENT_PORTAL_SURGE, 50000);
                     break;
                 default:
                     break;
                 }
             }
-
-            if (UpdateVictim())
-                DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
         }
     private:
         EventMap events;
@@ -1448,7 +1567,7 @@ public:
                 _phase1 = true;
             }
 
-            if (HealthBelowPct(5) && !_phase2) {
+            if (HealthBelowPct(6) && !_phase2) {
                 Talk(1);
                 _phase2 = true;
                 _events.ScheduleEvent(EVENT_CHAOS_NOVA, Seconds(1));
@@ -1465,18 +1584,14 @@ public:
             if (Creature* creature = me->FindNearestCreature(NPC_CYANA_IMMOLANTH, me->GetVisibilityRange(), true))
                 creature->AI()->SetData(DATA_IMMOLANTH_DEATH, DATA_IMMOLANTH_DEATH);
 
-            std::list<HostileReference*> threatList;
-            threatList = me->getThreatManager().getThreatList();
-            for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
-                if (Player* target = (*itr)->getTarget()->ToPlayer())
-                    if (target->GetQuestStatus(QUEST_FORGED_IN_FIRE_H) == QUEST_STATUS_INCOMPLETE ||
-                        target->GetQuestStatus(QUEST_FORGED_IN_FIRE_V) == QUEST_STATUS_INCOMPLETE)
-                    {
-                        target->CastSpell(target, FORGED_IN_FIRE_IMMOLANTH_DIES_01, true);
-                        target->CastSpell(target, FORGED_IN_FIRE_TAKING_POWER_02, true);
-                        target->KilledMonsterCredit(IMMOLANTH_POWER_TAKEN);
-                        target->KilledMonsterCredit(KILL_CREDIT_BONUS_OBJECTIVE);
-                    }
+            std::list<Player*> players;
+            me->GetPlayerListInGrid(players, 30.0f);
+            for (Player* player : players)
+            {
+                player->CastSpell(player, FORGED_IN_FIRE_TAKING_POWER_02, true);
+                player->KilledMonsterCredit(IMMOLANTH_POWER_TAKEN);
+                player->KilledMonsterCredit(KILL_CREDIT_BONUS_OBJECTIVE);
+            }
 
             me->DespawnOrUnsummon(20000, Seconds(1));
         }
@@ -1606,9 +1721,9 @@ public:
 
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
-        player->CastSpell(player, SPELL_NEW_DIRECTION_CHOICE_KAYN_OR_ALTRUIS, true); // Display follower choice
-        CloseGossipMenuFor(player);
-        return true;
+        player->CastSpell(player, SPELL_NEW_DIRECTION_CHOICE_KAYN_OR_ALTRUIS, true); // Display follower choice 234
+        
+        return false;
     }
 
     bool OnQuestReward(Player* player, Creature* /*creature*/, const Quest* quest, uint32 /*p_Option*/) override
@@ -1655,8 +1770,105 @@ public:
                     if (player->GetQuestStatus(QUEST_ALL_THE_WAY_UP) == QUEST_STATUS_COMPLETE && !_greetSaid)
                     {
                         me->AI()->Talk(0);
+                        if (Creature* kayn = me->FindNearestCreature(97265, me->GetVisibilityRange(), true))
+                            kayn->AI()->SetData(24, 24);
+                        if (Creature* altruis = me->FindNearestCreature(97267, me->GetVisibilityRange(), true))
+                            altruis->AI()->SetData(24, 24);
                         _greetSaid = true;
                     }
+        }
+    };
+};
+
+/* Kayn (97265) and Altruis (97267) scripts for quest "A New Direction" */
+enum eData {
+    DATA_CHOICE_KAYN = 22,
+    DATA_CHOICE_ALTRUIS = 23,
+    DATA_START_CONVERSATION = 24,
+};
+class npc_votw_kayn_altruis_choice : public CreatureScript
+{   
+public:
+    npc_votw_kayn_altruis_choice() : CreatureScript("npc_votw_kayn_altruis_choice") { }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_votw_kayn_altruis_choice_AI(creature);
+    }
+
+    struct npc_votw_kayn_altruis_choice_AI : public ScriptedAI
+    {
+        npc_votw_kayn_altruis_choice_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Initialize() {
+            /*if (me->GetEntry() == 97265)
+                if (Creature* altruis = me->FindNearestCreature(97267, me->GetVisibilityRange(), true))
+                    AttackStart(altruis);
+            if (me->GetEntry() == 97267)
+                if (Creature* kayn = me->FindNearestCreature(97265, me->GetVisibilityRange(), true))
+                    AttackStart(kayn);*/
+        }
+
+        void Reset() override
+        {
+            Initialize();
+            me->SetCorpseDelay(0);
+            me->SetRespawnDelay(0);
+            me->SetRespawnTime(0);
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_CHOICE_KAYN:
+                if (me->GetEntry() == 97267) { // Altruis
+                    Talk(1);
+                    me->GetScheduler().Schedule(Seconds(6), [this](TaskContext context)
+                    {
+                        Creature* altruis = GetContextCreature();
+                        altruis->GetMotionMaster()->MovePoint(4227.93f, -449.99f, 266.79f, false);
+                        altruis->DespawnOrUnsummon(6000, Seconds(15));
+                    });
+                }
+                break;
+            case DATA_CHOICE_ALTRUIS:
+                if (me->GetEntry() == 97265) { // Kayn
+                    Talk(2);
+                }
+                me->GetScheduler().Schedule(Seconds(6), [this](TaskContext context)
+                {
+                    Creature* kayn = GetContextCreature();
+                    kayn->GetMotionMaster()->MovePoint(4227.93f, -449.99f, 266.79f, false);
+                    kayn->DespawnOrUnsummon(6000, Seconds(15));
+                });
+                break;
+            case DATA_START_CONVERSATION:
+                if (me->GetEntry() == 97265)
+                {
+                    me->GetScheduler().Schedule(Seconds(4), [this](TaskContext context)
+                    {
+                        Creature* kayn = GetContextCreature();
+                        kayn->AI()->Talk(0);
+                    })
+                    .Schedule(Seconds(18), [this](TaskContext context)
+                    {
+                        Creature* kayn = GetContextCreature();
+                        kayn->AI()->Talk(1);
+                    });
+                }
+                if (me->GetEntry() == 97267)
+                {
+                    me->GetScheduler().Schedule(Seconds(13), [this](TaskContext context)
+                    {
+                        Creature* altruis = GetContextCreature();
+                        altruis->AI()->Talk(0);
+                    });
+                }
+                break;
+            }
         }
     };
 };
@@ -1676,10 +1888,14 @@ public:
         case PLAYER_CHOICE_DH_FOLLOWER_SELECTION_KAYN:
             player->CastSpell(player, SPELL_NEW_DIRECTION_CHOSE_KAYN, true);
             player->ForceCompleteQuest(QUEST_OBTAINED_KAYN);
+            if (Creature* altruis = player->FindNearestCreature(97267, player->GetVisibilityRange(), true))
+                altruis->AI()->SetData(22, 22);
             break;
         case PLAYER_CHOICE_DH_FOLLOWER_SELECTION_ALTRUIS:
             player->CastSpell(player, SPELL_NEW_DIRECTION_CHOSE_ALTRUIS, true);
             player->ForceCompleteQuest(QUEST_OBTAINED_ALTRUIS);
+            if (Creature* kayn = player->FindNearestCreature(97265, player->GetVisibilityRange(), true))
+                kayn->AI()->SetData(23, 23);
             break;
         default:
             break;
@@ -1803,45 +2019,45 @@ public:
     }
 };
 
-class On100DHArrival : public PlayerScript
-{
-public:
-    On100DHArrival() : PlayerScript("On100DHArrival") { }
-    enum
-    {
-        SPELL_DH_IMPRISON = 217832,
-        SPELL_DH_DARKNESS = 196718,
-        SPELL_DH_BLADE_DANCE = 188499,
-        SPELL_DH_SIGIL_OF_FLAME = 204596,
-    };
-
-    void OnLogin(Player* player, bool firstLogin) override
-    {
-        // For recovery purposes
-        if (player->getLevel() >= 100 && firstLogin)
-            Handle100DHArrival(player);
-    }
-
-    void OnLevelChanged(Player* player, uint8 oldLevel) override
-    {
-        if (oldLevel < 100 && player->getLevel() >= 100)
-            Handle100DHArrival(player);
-    }
-
-    void Handle100DHArrival(Player* player)
-    {
-        if (player->getClass() == CLASS_DEMON_HUNTER)
-        {
-            player->LearnSpell(SPELL_DH_IMPRISON, false);
-            if (player->GetSpecializationId() == TALENT_SPEC_DEMON_HUNTER_HAVOC) {
-                player->LearnSpell(SPELL_DH_BLADE_DANCE, false);
-            }
-            else {
-                player->LearnSpell(SPELL_DH_SIGIL_OF_FLAME, false);
-            }
-        }
-    }
-};
+//class On100DHArrival : public PlayerScript
+//{
+//public:
+//    On100DHArrival() : PlayerScript("On100DHArrival") { }
+//    enum
+//    {
+//        SPELL_DH_IMPRISON = 217832,
+//        SPELL_DH_DARKNESS = 196718,
+//        SPELL_DH_BLADE_DANCE = 188499,
+//        SPELL_DH_SIGIL_OF_FLAME = 204596,
+//    };
+//
+//    void OnLogin(Player* player, bool firstLogin) override
+//    {
+//        // For recovery purposes
+//        if (player->getLevel() >= 100 && firstLogin)
+//            Handle100DHArrival(player);
+//    }
+//
+//    void OnLevelChanged(Player* player, uint8 oldLevel) override
+//    {
+//        if (oldLevel < 100 && player->getLevel() >= 100)
+//            Handle100DHArrival(player);
+//    }
+//
+//    void Handle100DHArrival(Player* player)
+//    {
+//        if (player->getClass() == CLASS_DEMON_HUNTER)
+//        {
+//            player->LearnSpell(SPELL_DH_IMPRISON, false);
+//            if (player->GetSpecializationId() == TALENT_SPEC_DEMON_HUNTER_HAVOC) {
+//                player->LearnSpell(SPELL_DH_BLADE_DANCE, false);
+//            }
+//            else {
+//                player->LearnSpell(SPELL_DH_SIGIL_OF_FLAME, false);
+//            }
+//        }
+//    }
+//};
 
 class PlayerScript_bonus_objective : public PlayerScript
 {
@@ -2504,7 +2720,7 @@ void AddSC_zone_vault_of_wardens() {
     new npc_maiev_shadowsong();
     new npc_legion_portal();
     new PlayerScript_follower_choice();
-    new On100DHArrival();
+    // new On100DHArrival();
     new PlayerScript_bonus_objective();
     new npc_altruis_sufferer_freed_99632();
     new npc_kayn_sunfury_freed_99631();
@@ -2517,4 +2733,6 @@ void AddSC_zone_vault_of_wardens() {
     new spell_196462(); // Pulse
     new spell_199760(); // Burning Fel
     new npc_korvas_bloodthorn_97643(); // 97643
+    new npc_votw_kayn_altruis_choice(); // 97265, 97267 
+    new npc_bastillax_attacker(); // 97273, 97274
  }

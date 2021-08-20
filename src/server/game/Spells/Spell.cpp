@@ -1399,35 +1399,7 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
             LiquidData liquidData;
             if (m_caster->GetMap()->getLiquidStatus(m_caster->GetPhaseShift(), x, y, z, MAP_ALL_LIQUIDS, &liquidData))
                 liquidLevel = liquidData.level;
-            switch (m_caster->GetAreaId()) // Dalaran Hack Needed because water in Dalaran is not set as Water
-	    	{
-				case 7595: // Dalaran : The Eventide
-				{
-					if(m_caster->IsWithinDist2d(-952.68f, 4431.89f, 13.0f)) // Caster must be near Dalaran's Fountain
-						liquidLevel = 733.95f;
-					break;
-				}
-				case 7592: // Dalaran : The Violet Hold
-				{
-					if(m_caster->IsWithinDist2d(-931.03f, 4324.63f, 20.0f) || m_caster->IsWithinDist2d(-890.96f, 4321.35f, 20.0f) || m_caster->IsWithinDist2d(-981.21f, 4389.05f, 20.0f) || m_caster->IsWithinDist2d(-967.59f, 4353.53f, 20.0f)) 
-						liquidLevel = 733.50f;
-					break;
-				}
-				case 8270: // Dalaran : Margoss's Retreat
-				{
-					if(m_caster->IsWithinDist2d(-514.73f, 4704.44f, 23.0f)) // Must be near the "lake"
-						liquidLevel = 654.60f;
-					break;
-				}
-				case 7594: // Dalaran : The UnderBelly
-				{
-					if(m_caster->IsWithinDist2d(-723.74f, 4378.54f, 5.0f) || m_caster->IsWithinDist2d(-714.95f, 4395.90f, 5.0f) || m_caster->IsWithinDist2d(-737.77f, 4392.29f, 10.0f) || m_caster->IsWithinDist2d(-726.81f, 4405.69f, 8.0f) || m_caster->IsWithinDist2d(-715.84f, 4406.43f, 10.0f)) // Must be near water
-						liquidLevel = 654.60f;
-					break;
-				}
-				default:
-				break;			
-	    	}
+
             if (liquidLevel <= ground) // When there is no liquid Map::GetWaterOrGroundLevel returns ground level
             {
                 SendCastResult(SPELL_FAILED_NOT_HERE);
@@ -3223,9 +3195,8 @@ bool Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
 
     m_casttime *= m_caster->GetTotalAuraMultiplier(SPELL_AURA_MOD_CASTING_SPEED);
 
-    // focus if not controlled creature
     if (m_caster->GetTypeId() == TYPEID_UNIT && !m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED)) // _UNIT actually means creature. for some reason.
-        if (!(m_spellInfo->IsNextMeleeSwingSpell() || IsAutoRepeat()))
+        if (!(m_spellInfo->IsNextMeleeSwingSpell() || IsAutoRepeat() || (_triggeredCastFlags & TRIGGERED_IGNORE_SET_FACING)))
         {
             if (m_targets.GetObjectTarget() && m_caster != m_targets.GetObjectTarget())
                 m_caster->ToCreature()->FocusTarget(this, m_targets.GetObjectTarget());
@@ -5074,7 +5045,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint
                 return SPELL_FAILED_SPELL_IN_PROGRESS;
 
             // check if we are using a potion in combat for the 2nd+ time. Cooldown is added only after caster gets out of combat
-            if (!IsIgnoringCooldowns() && m_caster->ToPlayer()->GetLastPotionId() && m_CastItem && (m_CastItem->IsPotion() || m_spellInfo->IsCooldownStartedOnEvent()))
+            if (m_caster->ToPlayer()->GetLastPotionId() && m_CastItem && (m_CastItem->IsPotion() || m_spellInfo->IsCooldownStartedOnEvent()))
                 return SPELL_FAILED_NOT_READY;
         }
 
@@ -5236,18 +5207,6 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* param1 /*= nullptr*/, uint
 
     if (Unit* target = m_targets.GetUnitTarget())
     {
-        // do not allow to cast on hostile targets in sanctuary
-        if (!m_caster->IsFriendlyTo(target))
-        {
-            if (m_caster->IsInSanctuary() || target->IsInSanctuary())
-            {
-                // fix for duels
-                Player* player = m_caster->ToPlayer();
-                if (!player || !player->duel || target != player->duel->opponent)
-                    return SPELL_FAILED_NOTHING_TO_DISPEL;
-            }
-        }
-
         SpellCastResult castResult = m_spellInfo->CheckTarget(m_caster, target, m_caster->GetEntry() == WORLD_TRIGGER); // skip stealth checks for GO casts
         if (castResult != SPELL_CAST_OK)
             return castResult;

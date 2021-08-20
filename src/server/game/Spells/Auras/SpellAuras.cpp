@@ -1764,7 +1764,7 @@ uint32 Aura::IsProcTriggeredOnEvent(AuraApplication* aurApp, ProcEventInfo& even
         return 0;
 
     // At least one effect has to pass checks to proc aura
-    uint32 procEffectMask = 0;
+    uint32 procEffectMask = aurApp->GetEffectMask(); // Was 0 -- fixed procs never triggered;
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         if (aurApp->HasEffect(i))
             if (GetEffect(i)->CheckEffectProc(aurApp, eventInfo))
