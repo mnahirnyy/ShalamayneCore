@@ -204,9 +204,10 @@ void AddSC_boss_new_opera();
 void AddSC_boss_new_vizaduum();
 void AddSC_boss_new_nightbane();
 
-//scenario
+// Scenario
 void AddSC_scenario_artifact_brokenshore();
 void AddSC_scenario_artifact_violethold_dh();
+void AddSC_scenario_artifact_suramar_acquisition();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -391,7 +392,8 @@ void AddBrokenIslesScripts()
     AddSC_boss_new_vizaduum();
     AddSC_boss_new_nightbane();
 	
-	//scenario
+	// Scenario
     AddSC_scenario_artifact_brokenshore();
     AddSC_scenario_artifact_violethold_dh();
+    AddSC_scenario_artifact_suramar_acquisition();
 }

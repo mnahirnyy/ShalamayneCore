@@ -1172,7 +1172,7 @@ Position const brokenShorePath[] =
     { -840.329f, 4223.146f, 759.037f },
     { -831.249f, 4173.871f, 723.158f }
 };
-size_t const pathSize = std::extent<decltype(brokenShorePath)>::value;
+size_t const brokenShorePathSize = std::extent<decltype(brokenShorePath)>::value;
 
 class npc_illidari_felbat_94324 : public CreatureScript
 {
@@ -1206,20 +1206,30 @@ public:
             if (apply && passenger->GetTypeId() == TYPEID_PLAYER) {
                 _playerGUID = passenger->ToPlayer()->GetGUID();
 
-                if (passenger->ToPlayer()->HasQuest(QUEST_THE_HUNT_1) || passenger->ToPlayer()->HasQuest(QUEST_THE_HUNT_2)) {
-                    _events.ScheduleEvent(EVENT_TELEPORT_SURAMAR, Seconds(1));
-                }
+                Player* player = passenger->ToPlayer();
 
-                if (passenger->ToPlayer()->HasQuest(QUEST_VENGEANCE_WILL_BE_OURS_1) || passenger->ToPlayer()->HasQuest(QUEST_VENGEANCE_WILL_BE_OURS_2)) {
-                    _events.ScheduleEvent(EVENT_START_BROKENSHORE_PATH, Seconds(1));
-                }
+                if (player->HasQuest(QUEST_THE_HUNT_1))
+                    Conversation::CreateConversation(6807, player, player->GetPosition(), { player->GetGUID() });
+
+                if (player->HasQuest(QUEST_THE_HUNT_2))
+                    Conversation::CreateConversation(6808, player, player->GetPosition(), { player->GetGUID() });
+
+                _events.ScheduleEvent(EVENT_START_BROKENSHORE_PATH, 1500);
             }
         }
 
         void MovementInform(uint32 type, uint32 pointId) override
         {
-            if (type == EFFECT_MOTION_TYPE && pointId == pathSize)
-                _events.ScheduleEvent(EVENT_TELEPORT_BROKENSHORE, 200);
+            if (type == EFFECT_MOTION_TYPE && pointId == brokenShorePathSize)
+                if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                {
+                    if (player->HasQuest(QUEST_THE_HUNT_1) || player->HasQuest(QUEST_THE_HUNT_2))
+                        _events.ScheduleEvent(EVENT_TELEPORT_SURAMAR, 500);
+                    else if (player->HasQuest(QUEST_VENGEANCE_WILL_BE_OURS_1) || player->HasQuest(QUEST_VENGEANCE_WILL_BE_OURS_2))
+                        _events.ScheduleEvent(EVENT_TELEPORT_BROKENSHORE, 500);
+                    else
+                        me->GetMotionMaster()->MoveTargetedHome();
+                }
         }
 
         void UpdateAI(uint32 diff) override
@@ -1234,7 +1244,7 @@ public:
                 switch (eventId)
                 {
                 case EVENT_START_BROKENSHORE_PATH:
-                    me->GetMotionMaster()->MoveSmoothPath(uint32(pathSize), brokenShorePath, pathSize, false, true);
+                    me->GetMotionMaster()->MoveSmoothPath(uint32(brokenShorePathSize), brokenShorePath, brokenShorePathSize, false, true);
                     break;
                 case EVENT_TELEPORT_BROKENSHORE:
                     me->RemoveAllAuras();

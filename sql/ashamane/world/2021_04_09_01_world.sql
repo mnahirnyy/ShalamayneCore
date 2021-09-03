@@ -177,8 +177,8 @@ UPDATE `creature` SET `PhaseId`=0, `PhaseGroup`=471 WHERE `guid` IN
 -- ==================
 -- Core/Spells: implement Mad/Crazy Alchemist's potions
 -- ==================
-DELETE FROM spell_script_names WHERE spell_id IN (45051, 53750);
-INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (45051, 53750);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (45051, 'spell_item_mad_alchemists_potion'),
 (53750, 'spell_item_crazy_alchemists_potion');
 
