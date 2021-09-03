@@ -3406,31 +3406,6 @@ void SpellInfo::_LoadImmunityInfo()
             loadImmunityInfoFn(const_cast<SpellEffectInfo*>(effect));
         }
     }
-
-    if (HasAttribute(SPELL_ATTR5_USABLE_WHILE_STUNNED))
-    {
-        switch (Id)
-        {
-        case 22812: // Barkskin
-            _allowedMechanicMask |=
-                (1 << MECHANIC_STUN) |
-                (1 << MECHANIC_FREEZE) |
-                (1 << MECHANIC_KNOCKOUT) |
-                (1 << MECHANIC_SLEEP);
-            break;
-        case 49039: // Lichborne, don't allow normal stuns
-            break;
-        default:
-            _allowedMechanicMask |= (1 << MECHANIC_STUN);
-            break;
-        }
-    }
-
-    if (HasAttribute(SPELL_ATTR5_USABLE_WHILE_CONFUSED))
-        _allowedMechanicMask |= (1 << MECHANIC_DISORIENTED);
-
-    if (HasAttribute(SPELL_ATTR5_USABLE_WHILE_FEARED))
-        _allowedMechanicMask |= (1 << MECHANIC_FEAR);
 }
 
 void SpellInfo::ApplyAllSpellImmunitiesTo(Unit* target, SpellEffectInfo const* effect, bool apply) const

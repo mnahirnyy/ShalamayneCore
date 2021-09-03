@@ -184,9 +184,9 @@ void WorldSession::HandleArtifactSetAppearance(WorldPackets::Artifact::ArtifactS
     if (!artifactAppearanceSet || artifactAppearanceSet->ArtifactID != artifact->GetTemplate()->GetArtifactID())
         return;
 
-    if (PlayerConditionEntry const* playerCondition = sPlayerConditionStore.LookupEntry(artifactAppearance->UnlockPlayerConditionID))
+    /*if (PlayerConditionEntry const* playerCondition = sPlayerConditionStore.LookupEntry(artifactAppearance->UnlockPlayerConditionID))
         if (!sConditionMgr->IsPlayerMeetingCondition(_player, playerCondition))
-            return;
+            return;*/
 
     artifact->SetAppearanceModId(artifactAppearance->ItemAppearanceModifierID);
     artifact->SetModifier(ITEM_MODIFIER_ARTIFACT_APPEARANCE_ID, artifactAppearance->ID);

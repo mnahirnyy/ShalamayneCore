@@ -51,8 +51,6 @@ UPDATE `creature_template` SET `ScriptName` = 'npc_altruis_cell' WHERE `entry` =
 UPDATE `creature_template` SET `ScriptName` = 'npc_korvas_bloodthorn' WHERE `entry` = 97644;
 UPDATE `creature_template` SET `ScriptName` = 'npc_khadgar' WHERE `entry` = 97978;
 UPDATE `creature_template` SET `ScriptName` = 'npc_maiev_shadowsong' WHERE `entry` = 92718;
-UPDATE `creature_template` SET `ScriptName` = 'npc_sledge' WHERE `entry` = 92990;
-UPDATE `creature_template` SET `ScriptName` = 'npc_crusher' WHERE `entry` = 97632;
 UPDATE `creature_template` SET `ScriptName` = 'npc_immolanth' WHERE `entry` = 96682;
 UPDATE `creature_template` SET `ScriptName` = 'npc_vow_ashgolm' WHERE `entry` = 96681;
 UPDATE `creature_template` SET `ScriptName` = 'npc_bastillax' WHERE `entry` = 96783;
@@ -213,8 +211,8 @@ SET @MIRANA := 99451;
 UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@MIRANA;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@MIRANA AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
-(@MIRANA,0,0,0,0,0,100,0,0,0,3400,4700,11,195783,64,0,0,0,0,2,0,0,0,0,0,0,0,"Mirana - In Combat - Cast 'Fan of Blades'"),
-(@MIRANA,0,1,0,0,0,100,0,5000,8000,12000,15000,11,191026,0,0,0,0,0,2,0,0,0,0,0,0,0,"Mirana - In Combat - Cast 'Throwing Blade'");
+(@MIRANA,0,0,0,0,0,100,0,0,0,3400,4700,11,189609,64,0,0,0,0,2,0,0,0,0,0,0,0,"Mirana - In Combat - Cast 'Fan of Blades'"),
+(@MIRANA,0,1,0,0,0,100,0,5000,8000,12000,15000,11,191029,0,0,0,0,0,2,0,0,0,0,0,0,0,"Mirana - In Combat - Cast 'Throwing Blade'");
 
 -- Drelanin Whisperwind SAI
 SET @DRELANIN := 96847;
@@ -223,7 +221,7 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`=@DRELANIN AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (@DRELANIN,0,0,0,10,0,100,1,1,15,0,0,1,0,10000,0,0,0,0,18,15,0,0,0,0,0,0,"Drelanin - Within 1-15 Range Out of Combat LoS - Say Line 0 (No Repeat)"),
 (@DRELANIN,0,1,0,0,0,100,0,5000,8000,18000,22000,11,189469,0,0,0,0,0,2,0,0,0,0,0,0,0,"Drelanin - In Combat - Cast 'Turn Kick'"),
-(@DRELANIN,0,2,0,0,0,100,0,2000,5000,12000,15000,11,195783,0,0,0,0,0,2,0,0,0,0,0,0,0,"Drelanin - In Combat - Cast 'Fan of Blades'");
+(@DRELANIN,0,2,0,0,0,100,0,2000,5000,12000,15000,11,189609,0,0,0,0,0,2,0,0,0,0,0,0,0,"Drelanin - In Combat - Cast 'Fan of Blades'");
 
 DELETE FROM `creature_text` WHERE `CreatureID` = @DRELANIN;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
@@ -257,7 +255,7 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 SET @CYANA := 96672;
 DELETE FROM `creature_text` WHERE `CreatureID` = @CYANA;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
-(@CYANA,0,0,'That was too close for my liking. $n, the demon\'s power is yours.',12,0,100,0,0,57357,0,0,'Cyana to Player');
+(@CYANA,0,0,'That was too close for my liking. $p, the demon\'s power is yours.',12,0,100,0,0,57357,0,0,'Cyana to Player');
 
 -- Kayn near Ashgolm SAI
 SET @KAYN_1 := 102393;
@@ -273,7 +271,7 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 DELETE FROM `creature_text` WHERE `CreatureID` = @ALLARI_1;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `Comment`) VALUES
-(@ALLARI_1,0,0,'The elevator will be here shortly. The others are waiting for you above.',12,0,100,0,0,57356,0,0,'Allari the Souleater to Player');
+(@ALLARI_1,1,0,'The elevator will be here shortly. The others are waiting for you above.',12,0,100,0,0,57356,0,0,'Allari the Souleater to Player');
 
 SET @KORVAS_2 := 97644;
 UPDATE `creature_template` SET `AIName`="SmartAI" WHERE `entry`=@KORVAS_2;
@@ -583,7 +581,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 -- Lady Sylvana Windrunner in Durotar Funeral
 DELETE FROM `creature` WHERE `guid`=280000278;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
-(280000278,101035,1,14,4982,0,0,1180,0,-1,0,0,1244.27,-4381.93,28.2979,4.74574,120,0,0,1075122944,0,0,3,0,0,0,0,'npc_lady_sylvana_funeral',25549);
+(280000278,101035,1,14,4982,0,0,1180,0,-1,0,0,1251.626,-4379.606,34.833,4.46349,120,0,0,1075122944,0,0,3,0,0,0,0,'npc_lady_sylvana_funeral',25549);
 -- Faction Acquisition quests
 UPDATE `quest_template_addon` SET `PrevQuestID`=40976 WHERE `ID`=40982; -- Second Sight
 UPDATE `quest_template_addon` SET `PrevQuestID`=40982 WHERE `ID`=40983; -- Demons Among Them
@@ -636,7 +634,7 @@ DELETE FROM `creature_equip_template` WHERE `CreatureID`=116704;
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES 
 (116704,1,128359,0,0,128371,0,0,0,0,0,25549);
 
-UPDATE `creature_template` SET `npcflag`=3, `gossip_menu_id`=20463, `ScriptName`='npc_altruis_sufferer_artifact', `VerifiedBuild`=25549 WHERE `entry`=99254;
+UPDATE `creature_template` SET `npcflag`=3, `gossip_menu_id`=20463, `ScriptName`='', `VerifiedBuild`=25549 WHERE `entry`=99254;
 
 UPDATE `quest_template_addon` SET `PrevQuestID`=39047 WHERE `ID`=40816; -- The Power To Survive (Altruis)
 UPDATE `quest_template_addon` SET `PrevQuestID`=39261 WHERE `ID`=40814; -- The Power To Survive (Kayn)
@@ -1133,10 +1131,14 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 
 DELETE FROM `creature_text` WHERE `CreatureID` = 96313;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
-(96313, 0, 0, 'If you don\'t have time to explain, then I don\'t have time to waste on you.', 12, 0, 100, 0, 0, 64624, 0, 0, 'Warden Alturas to Player'),
-(96313, 1, 0, 'Fair enough. Let\'s get this over with, then.', 12, 0, 100, 0, 0, 64623, 0, 0, 'Warden Alturas to Player'),
-(96313, 2, 0, 'You\'re fortunate that Khadgar trusts you. But make no mistake... I do not share his sentiment.', 12, 0, 100, 0, 0, 64622, 0, 0, 'Warden Alturas to Player'),
-(96313, 3, 0, 'You may enter the hold, but I will not put the lives of my guards at risk for your mission. Is that clear?', 12, 0, 100, 0, 0, 64641, 0, 0, 'Warden Alturas to Player');
+(96313, 0, 0, 'If you don\'t have time to explain, then I don\'t have time to waste on you.', 12, 0, 100, 14, 0, 64624, 0, 0, 'Warden Alturas to Player'),
+(96313, 1, 0, 'Fair enough. Let\'s get this over with, then.', 12, 0, 100, 1, 0, 64623, 0, 0, 'Warden Alturas to Player'),
+(96313, 2, 0, 'You\'re fortunate that Khadgar trusts you. But make no mistake... I do not share his sentiment.', 12, 0, 100, 1, 0, 64622, 0, 0, 'Warden Alturas to Player'),
+(96313, 3, 0, 'You may enter the hold, but I will not put the lives of my guards at risk for your mission. Is that clear?', 12, 0, 100, 1, 0, 64641, 0, 0, 'Warden Alturas to Player');
+DELETE FROM `creature_text_locale` WHERE `CreatureID`=96313;
+INSERT INTO `creature_text_locale` (`CreatureID`, `GroupID`, `ID`, `Locale`, `Text`) VALUES
+(96313, 0, 0, 'ruRU', 'Ну, если у вас нет времени, то и я не буду тратить на вас свое.'),
+(96313, 2, 0, 'ruRU', 'Тебе повезло, что Кадгар тебе доверяет. Имей в виду, я совершенно не разделяю его восторгов.');
 
 DELETE FROM `spell_area` WHERE `area` = 7873 AND `spell` = 59074;
 -- INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `quest_start_status`, `quest_end_status`) VALUES
@@ -1149,7 +1151,7 @@ DELETE FROM `creature` WHERE `guid`=280000401;
 
 DELETE FROM `creature_text` WHERE `CreatureID` = 99473;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
-(99473, 0, 0, 'Lower the barrier and evacuate the hold. These Illidari wish to... exchange words... with the eredar.', 12, 0, 100, 0, 0, 64634, 0, 0, 'Warden Alturas to Player'),
-(99473, 1, 0, 'Follow me. I shall open the cell for you.', 12, 0, 100, 0, 0, 64635, 0, 0, 'Warden Alturas to Player'),
+(99473, 0, 0, 'Lower the barrier and evacuate the hold. These Illidari wish to... exchange words... with the eredar.', 12, 0, 100, 1, 0, 64634, 0, 0, 'Warden Alturas to Player'),
+(99473, 1, 0, 'Follow me. I shall open the cell for you.', 12, 0, 100, 25, 0, 64635, 0, 0, 'Warden Alturas to Player'),
 (99473, 2, 0, 'Meet Taldath, one of the most powerful eredar we\'ve ever encountered. I\'m sure you two will be fast friends.', 12, 0, 100, 0, 0, 57564, 0, 0, 'Warden Alturas to Player'),
-(99473, 3, 0, 'Remember, demon hunter... you were never here.', 12, 0, 100, 0, 0, 64638, 0, 0, 'Warden Alturas to Player');
+(99473, 3, 0, 'Remember, demon hunter... you were never here.', 12, 0, 100, 1, 0, 64638, 0, 0, 'Warden Alturas to Player');

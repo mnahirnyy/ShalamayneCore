@@ -68,6 +68,7 @@ GameObject::GameObject() : WorldObject(false), MapObject(),
     _dynamicValuesCount = GAMEOBJECT_DYNAMIC_END;
     m_respawnTime = 0;
     m_respawnDelayTime = 300;
+    m_despawnDelay = 0;
     m_lootState = GO_NOT_READY;
     m_spawnedByDefault = true;
     m_usetimes = 0;
@@ -458,6 +459,14 @@ void GameObject::Update(uint32 diff)
         AI()->UpdateAI(diff);
     else if (!AIM_Initialize())
         TC_LOG_ERROR("misc", "Could not initialize GameObjectAI");
+
+    if (m_despawnDelay)
+    {
+        if (m_despawnDelay > diff)
+            m_despawnDelay -= diff;
+        else
+            DespawnOrUnsummon();
+    }
 
     switch (m_lootState)
     {
@@ -857,6 +866,21 @@ void GameObject::AddUniqueUse(Player* player)
 {
     AddUse();
     m_unique_users.insert(player->GetGUID());
+}
+
+void GameObject::DespawnOrUnsummon(Milliseconds const& delay)
+{
+    if (delay > Milliseconds::zero())
+    {
+        if (!m_despawnDelay || m_despawnDelay > delay.count())
+            m_despawnDelay = delay.count();
+    }
+    else
+    {
+        if (m_goData && m_respawnDelayTime)
+            SaveRespawnTime();
+        Delete();
+    }
 }
 
 void GameObject::Delete()

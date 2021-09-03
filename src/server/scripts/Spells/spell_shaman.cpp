@@ -182,8 +182,6 @@ enum ShamanSpells
     SPELL_SHAMAN_WINDFURY_ATTACK_OFF_HAND                   = 33750,
     SPELL_SHAMAN_WINDFURY_WEAPON_PASSIVE                    = 33757,
     SPELL_SHAMAN_WIND_RUSH_TOTEM                            = 192077,
-    SPELL_SHAMAN_HAILSTORM_BASE				    = 210853,
-    SPELL_SHAMAN_HAILSTORM_DAMAGE			    = 210854,
 };
 
 enum TotemSpells
@@ -230,44 +228,6 @@ enum ShamanNpcs
 {
     NPC_RAINFALL                                            = 73400,
     NPC_HEALING_RAIN                                        = 73400, // Same as Rainfall at 7.3.5
-};
-
-// 196834 - Frostbrand
-// 7.1.5
-class spell_sha_hailstorm : public SpellScriptLoader
-{
-public:
-	spell_sha_hailstorm() : SpellScriptLoader("spell_sha_hailstorm") { }
-
-	class spell_sha_hailstorm_AuraScript : public AuraScript
-	{
-		PrepareAuraScript(spell_sha_hailstorm_AuraScript);
-
-		bool Validate(SpellInfo const* /*spellInfo*/) override
-		{
-			return ValidateSpellInfo
-			({
-				SPELL_SHAMAN_HAILSTORM_BASE,
-				SPELL_SHAMAN_HAILSTORM_DAMAGE
-			});
-		}
-
-		void HandleProc(ProcEventInfo& eventInfo)
-		{
-			if (GetCaster() && GetCaster()->HasAura(SPELL_SHAMAN_HAILSTORM_BASE))
-				GetCaster()->CastSpell(GetCaster(), SPELL_SHAMAN_HAILSTORM_DAMAGE, true);
-		}
-
-		void Register() override
-		{
-			OnProc += AuraProcFn(spell_sha_hailstorm_AuraScript::HandleProc);
-		}
-	};
-
-	AuraScript* GetAuraScript() const override
-	{
-		return new spell_sha_hailstorm_AuraScript();
-	}
 };
 
 // Feral Lunge - 196884

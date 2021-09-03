@@ -42,7 +42,6 @@
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 #include "Unit.h"
-#include "Log.h"
 
 enum HunterSpells
 {
@@ -831,13 +830,8 @@ public:
         {
             if (Player* player = GetCaster()->ToPlayer())
                 if (player->HasAura(SPELL_HUNTER_BEAST_CLEAVE_AURA))
-		{
                     if (Pet* pet = player->GetPet())
                         player->CastSpell(pet, SPELL_HUNTER_BEAST_CLEAVE_PROC, true);
-
-					if (Creature* hati = player->GetHati())
-                        player->CastSpell(hati, SPELL_HUNTER_BEAST_CLEAVE_PROC, true);
-		}  
         }
 
         void Register() override
@@ -1049,25 +1043,6 @@ public:
                         pet->ToCreature()->AI()->AttackStart(GetExplTargetUnit());
 
                     pet->CastSpell(GetExplTargetUnit(), SPELL_HUNTER_KILL_COMMAND_CHARGE, true);
-                }
-				if (Creature* hati = GetCaster()->GetHati())
-                {
-                    if (!hati || hati->isDead())
-                        return;
-
-                    if (!GetExplTargetUnit() || !hati->IsWithinDist(GetExplTargetUnit(), 25.0f, true) || !GetExplTargetUnit()->IsWithinLOSInMap(hati) || !GetCaster()->HasAura(197248))
-                        return;
-                    hati->CastSpell(GetExplTargetUnit(), SPELL_HUNTER_KILL_COMMAND_TRIGGER, true);
-
-                    if (hati->GetVictim())
-                    {
-                        hati->AttackStop();
-                        hati->ToCreature()->AI()->AttackStart(GetExplTargetUnit());
-                    }
-                    else
-                        hati->ToCreature()->AI()->AttackStart(GetExplTargetUnit());
-
-                    hati->CastSpell(GetExplTargetUnit(), SPELL_HUNTER_KILL_COMMAND_CHARGE, true);
                 }
             }
         }

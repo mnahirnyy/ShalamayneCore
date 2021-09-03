@@ -273,7 +273,7 @@ UPDATE `creature` SET `equipment_id`=1 WHERE `id`=108646;
 UPDATE `creature_template` SET `unit_class`=12, `lootid`=99184, `AIName`='', `ScriptName`='npc_caria_felsoul_99184', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=99184;
 DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (99184);
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
-(99184,1,128832,0,0,0,0,0,0,0,0,25549);
+(99184,1,128832,0,0,128831,0,0,0,0,0,25549);
 UPDATE `creature` SET `equipment_id`=1 WHERE `id`=99184;
 DELETE FROM `creature_text` WHERE `CreatureID` = 99184;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
@@ -451,7 +451,7 @@ UPDATE `quest_template_addon` SET `PrevQuestID`=42869 WHERE `ID`=42872;
 -- Delete NPCs Altruis and Kayn in the cells, they will be spawned as tempsummon cretures via script
 DELETE FROM `creature` WHERE `guid` IN (20542660, 20542664);
 -- Vampiric Illidari Felbat
-UPDATE `creature_template` SET `unit_flags`=0, `VehicleId`=1064, `MovementId`=0, `AIName`='', `ScriptName`='npc_vault_of_the_wardens_vampiric_felbat' WHERE `entry`=99443;
+UPDATE `creature_template` SET `unit_flags`=0, `VehicleId` = '4372', `minlevel` = '100', `maxlevel` = '100', `faction` = '1610', `AIName`='', `ScriptName`='npc_vault_of_the_wardens_vampiric_felbat' WHERE `entry`=99443;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=99443 AND `source_type`=0;
 UPDATE `quest_template_addon` SET `ScriptName`='q_securing_the_way' WHERE `ID`=42872;
 -- make creatures dead

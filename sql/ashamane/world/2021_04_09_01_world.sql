@@ -94,115 +94,6 @@ INSERT INTO `spell_area` (`spell`, `area`, `quest_start`, `quest_end`, `aura_spe
 (64576, 4522, 13859, 13859, 0, 0, 2, 1, 74, 11),
 (64576, 4522, 13860, 13860, 0, 0, 2, 1, 74, 11);
 
--- ==================
--- Isle of Quel'Danas -- 9
--- ==================
-
-DELETE FROM `pool_template` WHERE `entry`= 959; -- Reuse poolentry 959 from previous commit (dead pool in master)
-INSERT INTO `pool_template` (`entry`,`max_limit`,`description`) VALUES
-(959,4,'Master Herb Pool - Isle of Quel''Danas'); -- 9 Total Spawns
-
-DELETE FROM `gameobject` WHERE `guid` IN (13539,23985,27591,27592,27617,27742,27743);
-DELETE FROM `gameobject_addon` WHERE `guid` IN (13539,23985,27591,27592,27617,27742,27743);
-
-SET @QUELDANASGUID := 7400; -- 9 GUIDs SET BY TC
-DELETE FROM `gameobject` WHERE `guid` BETWEEN @QUELDANASGUID+1 AND @QUELDANASGUID+9;
-INSERT INTO `gameobject` (guid, id, map, spawnDifficulties, position_x, position_y, position_z, orientation, rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state) VALUES
-((@QUELDANASGUID := @QUELDANASGUID + 1), 181280, 530, '0', 11621.3, -7061.17, 1.39133, 1.51908, 0, 0, 0, 0, 60, 255, 1),
-((@QUELDANASGUID := @QUELDANASGUID + 1), 181281, 530, '0', 11743.6, -7218.65, 9.22726, 0.90757, 0, 0, 0, 0, 60, 255, 1),
-((@QUELDANASGUID := @QUELDANASGUID + 1), 181281, 530, '0', 12330.4, -7352.54, 2.83294, -0.977383, 0, 0, 0, 0, 60, 255, 1),
-((@QUELDANASGUID := @QUELDANASGUID + 1), 181281, 530, '0', 12696.2, -7066.53, 19.3097, 4.20522, 0, 0, 0, 0, 60, 255, 1),
-((@QUELDANASGUID := @QUELDANASGUID + 1), 181281, 530, '0', 12599, -6930.48, 5.01902, 4.00416, 0, 0, 0, 0, 60, 255, 1),
-((@QUELDANASGUID := @QUELDANASGUID + 1), 181281, 530, '0', 12588, -6619.87, 12.4062, 1.5278, 0, 0, 0, 0, 60, 255, 1),
-((@QUELDANASGUID := @QUELDANASGUID + 1), 181281, 530, '0', 11744.2, -7218.29, 9.25358, 2.99719, 0, 0, 0, 0, 60, 255, 1),
-((@QUELDANASGUID := @QUELDANASGUID + 1), 181281, 530, '0', 12330, -7353.95, 2.96635, 5.98563, 0, 0, 0, 0, 60, 255, 1),
-((@QUELDANASGUID := @QUELDANASGUID + 1), 181281, 530, '0', 12669.1, -7420.74, 2.88691, 0.790224, 0, 0, 0, 0, 60, 255, 1);
-
--- Individual Gameobject Spawn Pools
-DELETE FROM `pool_gameobject` WHERE `pool_entry` = 959;
-SET @POOL_QUELDANASGUID := 7400; -- SAME AS @QUELDANASGUID IN THE BEGINNING
-DELETE FROM `pool_gameobject` WHERE `guid` BETWEEN @POOL_QUELDANASGUID+1 AND @POOL_QUELDANASGUID+9;
-INSERT INTO `pool_gameobject` (`guid`,`pool_entry`,`chance`,`description`) VALUES
-((@POOL_QUELDANASGUID := @POOL_QUELDANASGUID + 1), 959, 0, 'Isle of QuelDanas - Nightmare Vine'),
-((@POOL_QUELDANASGUID := @POOL_QUELDANASGUID + 1), 959, 0, 'Isle of QuelDanas - Mana Thistle'),
-((@POOL_QUELDANASGUID := @POOL_QUELDANASGUID + 1), 959, 0, 'Isle of QuelDanas - Mana Thistle'),
-((@POOL_QUELDANASGUID := @POOL_QUELDANASGUID + 1), 959, 0, 'Isle of QuelDanas - Mana Thistle'),
-((@POOL_QUELDANASGUID := @POOL_QUELDANASGUID + 1), 959, 0, 'Isle of QuelDanas - Mana Thistle'),
-((@POOL_QUELDANASGUID := @POOL_QUELDANASGUID + 1), 959, 0, 'Isle of QuelDanas - Mana Thistle'),
-((@POOL_QUELDANASGUID := @POOL_QUELDANASGUID + 1), 959, 0, 'Isle of QuelDanas - Mana Thistle'),
-((@POOL_QUELDANASGUID := @POOL_QUELDANASGUID + 1), 959, 0, 'Isle of QuelDanas - Mana Thistle'),
-((@POOL_QUELDANASGUID := @POOL_QUELDANASGUID + 1), 959, 0, 'Isle of QuelDanas - Mana Thistle');
-
--- Prospecting loot, 4 ores are wrongly assumed to work
-DELETE FROM `prospecting_loot_template`WHERE `Entry` IN (23424, 36909, 36910, 36912);
-INSERT INTO `prospecting_loot_template` (`Entry`,`Item`,`Chance`,`LootMode`,`GroupId`,`Reference`,`MinCount`,`MaxCount`) VALUES
-(23424,     1, 100, 1, 1,  1000, 1, 1),
-(36909,     1, 100, 1, 1,  1001, 1, 1),
-(36910, 46849,  75, 1, 0,     0, 1, 1),
-(36910,     1,  20, 1, 0, 13005, 1, 1),
-(36910,     2, 100, 1, 1,  1002, 1, 1),
-(36910,     3,  75, 1, 1,  1003, 1, 1),
-(36912,     1,  85, 1, 0,  1003, 1, 1),
-(36912,     2, 100, 1, 1,  1004, 1, 1);
-
-DELETE FROM `reference_loot_template` WHERE `Entry` IN (13003, 13004); -- Remove now unused references
-DELETE FROM `reference_loot_template` WHERE `Entry` IN (1000, 1001, 1002, 1003, 1004);
-INSERT INTO `reference_loot_template` (`Entry`,`Item`,`Chance`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`) VALUES 
-(1000, 21929,   16, 1, 1, 1, 2),
-(1000, 23077,   16, 1, 1, 1, 2),
-(1000, 23079,   16, 1, 1, 1, 2),
-(1000, 23107,   16, 1, 1, 1, 2),
-(1000, 23112,   15, 1, 1, 1, 2),
-(1000, 23117,   15, 1, 1, 1, 2),
-(1000, 23436,    1, 1, 1, 1, 1),
-(1000, 23437,    1, 1, 1, 1, 1),
-(1000, 23438,    1, 1, 1, 1, 1),
-(1000, 23439,    1, 1, 1, 1, 1),
-(1000, 23440,    1, 1, 1, 1, 1),
-(1000, 23441,    1, 1, 1, 1, 1),
-(1001, 36917,   16, 1, 1, 1, 2),
-(1001, 36920,   16, 1, 1, 1, 2),
-(1001, 36923,   16, 1, 1, 1, 2),
-(1001, 36926,   16, 1, 1, 1, 2),
-(1001, 36929,   15, 1, 1, 1, 2),
-(1001, 36932,   15, 1, 1, 1, 2),
-(1001, 36918,    1, 1, 1, 1, 2),
-(1001, 36921,    1, 1, 1, 1, 2),
-(1001, 36924,    1, 1, 1, 1, 2),
-(1001, 36927,    1, 1, 1, 1, 2),
-(1001, 36930,    1, 1, 1, 1, 2),
-(1001, 36933,    1, 1, 1, 1, 2),
-(1002, 36917, 12.5, 1, 1, 1, 2),
-(1002, 36920, 12.5, 1, 1, 1, 2),
-(1002, 36923, 12.5, 1, 1, 1, 2),
-(1002, 36926, 12.5, 1, 1, 1, 2),
-(1002, 36929, 12.5, 1, 1, 1, 2),
-(1002, 36932, 12.5, 1, 1, 1, 2),
-(1002, 36918,    5, 1, 1, 1, 2),
-(1002, 36921,    4, 1, 1, 1, 2),
-(1002, 36924,    4, 1, 1, 1, 2),
-(1002, 36927,    4, 1, 1, 1, 2),
-(1002, 36930,    4, 1, 1, 1, 2),
-(1002, 36933,    4, 1, 1, 1, 2),
-(1003, 36917,    0, 1, 1, 1, 2),
-(1003, 36920,    0, 1, 1, 1, 2),
-(1003, 36923,    0, 1, 1, 1, 2),
-(1003, 36926,    0, 1, 1, 1, 2),
-(1003, 36929,    0, 1, 1, 1, 2),
-(1003, 36932,    0, 1, 1, 1, 2),
-(1004, 36917,   15, 1, 1, 1, 2),
-(1004, 36920,   15, 1, 1, 1, 2),
-(1004, 36923,   14, 1, 1, 1, 2),
-(1004, 36926,   14, 1, 1, 1, 2),
-(1004, 36929,   14, 1, 1, 1, 2),
-(1004, 36932,   14, 1, 1, 1, 2),
-(1004, 36918,    3, 1, 1, 1, 2),
-(1004, 36921,    3, 1, 1, 1, 2),
-(1004, 36924,    2, 1, 1, 1, 2),
-(1004, 36927,    2, 1, 1, 1, 2),
-(1004, 36930,    2, 1, 1, 1, 2),
-(1004, 36933,    2, 1, 1, 1, 2);
-
 -- Condition for source Spell implicit target condition type Object entry guid
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceGroup`=1 AND `SourceEntry` IN (62727, 63438, 63439, 63440, 63441, 63442, 63443, 63444, 63445, 63446) AND `SourceId`=0;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
@@ -286,7 +177,37 @@ UPDATE `creature` SET `PhaseId`=0, `PhaseGroup`=471 WHERE `guid` IN
 -- ==================
 -- Core/Spells: implement Mad/Crazy Alchemist's potions
 -- ==================
-DELETE FROM spell_script_names WHERE spell_id IN (45051, 53750);
-INSERT INTO spell_script_names (spell_id, ScriptName) VALUES
+DELETE FROM `spell_script_names` WHERE `spell_id` IN (45051, 53750);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (45051, 'spell_item_mad_alchemists_potion'),
 (53750, 'spell_item_crazy_alchemists_potion');
+
+-- ==================
+-- DB/Creature: TEMP Remove 'Legion Gateway' creature, they are aggressive and non targetable
+-- ==================
+DELETE FROM `creature` WHERE `id`= 101585;
+
+-- ==================
+-- DB/Creature: Fixed number of Laughing Skull summoned on Yogg Saron
+-- ==================
+DELETE FROM `creature_summon_groups` WHERE `summonerId`=33890 AND `entry`=33990; -- Laughing Skull
+INSERT INTO `creature_summon_groups` (`summonerId`,`summonerType`,`groupId`,`entry`,`position_x`,`position_y`,`position_z`,`orientation`,`summonType`,`summonTime`) VALUES
+(33890,0,0,33990,2063.156,27.95839,244.2707,5.288348,3,60000), -- Chambers of Aspects
+(33890,0,0,33990,2061.257,-53.8788,239.8633,2.478368,3,60000),
+(33890,0,0,33990,2109.908,29.33236,239.8817,0.1919862,3,60000),
+(33890,0,0,33990,2135.219,-41.44271,239.8027,5.846853,3,60000),
+(33890,0,1,33990,1932.213,-93.62798,240.073,4.852015,3,60000), -- Icecrown Citadel
+(33890,0,1,33990,1905.937,-133.1651,240.073,5.77704,3,60000),
+(33890,0,1,33990,1948.668,-152.4481,240.073,1.919862,3,60000),
+(33890,0,1,33990,1992.463,-131.2119,240.073,3.455752,3,60000),
+(33890,0,2,33990,1917.492,91.10191,239.7496,0.5235988,3,60000), -- Stormwind Keep
+(33890,0,2,33990,1918.132,73.82926,241.7929,2.600541,3,60000),
+(33890,0,2,33990,1922.55,54.68001,241.1263,0.1919862,3,60000);
+
+-- ==================
+-- Ymiron: Dark Slash (it was wrongly damaging half of total health, it's supposed to be half of CURRENT health!)
+-- ==================
+DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_gen_50pct_count_pct_from_max_hp' AND `spell_id`=48292;
+DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_dark_slash';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(48292, 'spell_dark_slash');

@@ -38,6 +38,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldQuestMgr.h"
+#include "Log.h"
 
 void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPackets::Quest::QuestGiverStatusQuery& packet)
 {
@@ -684,90 +685,69 @@ void WorldSession::HandleQueryQuestRewards(WorldPackets::Quest::QueryQuestReward
     SendPacket(response.Write());
 }
 
-void WorldSession::HandlePlayerChoiceResponse(WorldPackets::Quest::ChoiceResponse& packet)
+void WorldSession::HandlePlayerChoiceResponse(WorldPackets::Quest::ChoiceResponse& choiceResponse)
 {
-    Player* player = GetPlayer();
-    if (!player)
-        return;
-
-    PlayerChoice const* choice = sObjectMgr->GetPlayerChoice(packet.ChoiceID);
-    if (!choice)
+    TC_LOG_ERROR("server.worldserver", "HandlePlayerChoiceResponse: PlayerTalkClass->GetInteractionData().PlayerChoiceId = '%u', choiceResponse.ChoiceID '%u'", _player->PlayerTalkClass->GetInteractionData().PlayerChoiceId, uint32(choiceResponse.ChoiceID));
+    // TO DO: debug InteractionData: Why do we cannot get the PlayerChoiceId
+    // The following is temporary
+    if (_player->PlayerTalkClass->GetInteractionData().PlayerChoiceId != uint32(choiceResponse.ChoiceID))
     {
-        TC_LOG_ERROR("server", "CMSG: Not found ChoiceID: %u", packet.ChoiceID);
+        TC_LOG_ERROR("entities.player.cheat", "Error in CMSG_CHOICE_RESPONSE: %s tried to respond to invalid player choice %d (allowed %u) (possible packet-hacking detected)",
+            GetPlayerInfo().c_str(), choiceResponse.ChoiceID, _player->PlayerTalkClass->GetInteractionData().PlayerChoiceId);
+        // return;
+    }
+
+    PlayerChoice const* playerChoice = sObjectMgr->GetPlayerChoice(choiceResponse.ChoiceID);
+    if (!playerChoice)
+    {
+        TC_LOG_ERROR("entities.player.cheat", "Error in CMSG_CHOICE_RESPONSE: Not found ChoiceID %u.", choiceResponse.ChoiceID);
         return;
     }
 
-    PlayerChoiceResponse const* response = choice->GetResponse(packet.ResponseID);
-    if (!response)
+    PlayerChoiceResponse const* playerChoiceResponse = playerChoice->GetResponse(choiceResponse.ResponseID);
+    if (!playerChoiceResponse)
     {
-        TC_LOG_ERROR("server", "CMSG: Not found ResponseID: %u", packet.ResponseID);
-        return;
-	}
-
-    Quest const* quest = sObjectMgr->GetQuestTemplate(response->QuestId);
-    if (!quest)
-    {
-        TC_LOG_ERROR("server", "NOT FOUND QUEST", response->QuestId);
+        TC_LOG_ERROR("entities.player.cheat", "Error in CMSG_CHOICE_RESPONSE: %s tried to select invalid player choice response %d (possible packet-hacking detected)",
+            GetPlayerInfo().c_str(), choiceResponse.ResponseID);
         return;
     }
 
-    if (choice->ChoiceId == 237 || choice->ChoiceId == 238)
-    {
-        player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, player->GetGUID(), false, false);
-        return;
-    }
+    sScriptMgr->OnPlayerChoiceResponse(GetPlayer(), choiceResponse.ChoiceID, choiceResponse.ResponseID);
 
-    if (quest->GetRewItemsCount() > 0)
+    if (playerChoiceResponse->Reward)
     {
-        for (uint32 i = 0; i < quest->GetRewItemsCount(); ++i)
+        if (playerChoiceResponse->Reward->TitleId)
+            _player->SetTitle(sCharTitlesStore.AssertEntry(playerChoiceResponse->Reward->TitleId), false);
+
+        if (playerChoiceResponse->Reward->PackageId)
+            _player->RewardQuestPackage(playerChoiceResponse->Reward->PackageId);
+
+        if (playerChoiceResponse->Reward->SkillLineId && _player->HasSkill(playerChoiceResponse->Reward->SkillLineId))
+            _player->UpdateSkillPro(playerChoiceResponse->Reward->SkillLineId, 1000, playerChoiceResponse->Reward->SkillPointCount);
+
+        if (playerChoiceResponse->Reward->HonorPointCount)
+            _player->AddHonorXP(playerChoiceResponse->Reward->HonorPointCount);
+
+        if (playerChoiceResponse->Reward->Money)
+            _player->ModifyMoney(playerChoiceResponse->Reward->Money, false);
+
+        if (playerChoiceResponse->Reward->Xp)
+            _player->GiveXP(playerChoiceResponse->Reward->Xp, nullptr, 0.0f);
+
+        for (PlayerChoiceResponseRewardItem const& item : playerChoiceResponse->Reward->Items)
         {
-            if (uint32 itemId = quest->RewardItemId[i])
+            ItemPosCountVec dest;
+            if (_player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item.Id, item.Quantity) == EQUIP_ERR_OK)
             {
-                ItemPosCountVec dest;
-                if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardItemCount[i]) == EQUIP_ERR_OK)
-                {
-                    Item* item = player->StoreNewItem(dest, itemId, true, GenerateItemRandomPropertyId(itemId));
-                    player->SendNewItem(item, quest->RewardItemCount[i], true, false);
-                }
-                else
-                    player->SendItemRetrievalMail(quest->RewardItemId[i], quest->RewardItemCount[i], {}, {});
+                Item* newItem = _player->StoreNewItem(dest, item.Id, true, GenerateItemRandomPropertyId(item.Id), {}, 0, item.BonusListIDs);
+                _player->SendNewItem(newItem, item.Quantity, true, false);
             }
         }
+
+        for (PlayerChoiceResponseRewardEntry const& currency : playerChoiceResponse->Reward->Currency)
+            _player->ModifyCurrency(currency.Id, currency.Quantity);
+
+        for (PlayerChoiceResponseRewardEntry const& faction : playerChoiceResponse->Reward->Faction)
+            _player->GetReputationMgr().ModifyReputation(sFactionStore.AssertEntry(faction.Id), faction.Quantity);
     }
-
-    for (uint8 i = 0; i < QUEST_REWARD_CURRENCY_COUNT; ++i)
-    if (quest->RewardCurrencyId[i])
-        player->ModifyCurrency(quest->RewardCurrencyId[i], quest->RewardCurrencyCount[i]);
-
-    if (uint32 skill = quest->GetRewardSkillId())
-    player->UpdateSkillPro(skill, 1000, quest->GetRewardSkillPoints());
-
-    for (uint32 i = 0; i < QUEST_REWARD_DISPLAY_SPELL_COUNT; ++i)
-    if (quest->RewardDisplaySpell[i])
-        player->CastSpell(player, quest->RewardDisplaySpell[i], true);
-
-    player->RewardReputation(quest);
-
-    uint32 XP = player->GetQuestXPReward(quest);
-
-    int32 moneyRew = player->GetQuestMoneyReward(quest);
-
-    if (player->getLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
-        player->GiveXP(XP, nullptr);
-    else if (moneyRew >= 0)
-        moneyRew += int32(quest->GetRewMoneyMaxLevel() * sWorld->getRate(RATE_DROP_MONEY));
-
-    if (moneyRew)
-    player->ModifyMoney(moneyRew);
-
-    // title reward
-    if (quest->GetRewTitle())
-    {
-        if (CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(quest->GetRewTitle()))
-            player->SetTitle(titleEntry);
-    }
-
-	player->SetRewardedQuest(quest->ID);
-    sScriptMgr->OnCompleteQuestChoice(player, packet.ChoiceID, packet.ResponseID);
-
-};
+}

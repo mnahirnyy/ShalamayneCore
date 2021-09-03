@@ -64,7 +64,7 @@ public:
         }
 
         // .addquest #entry'
-        // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
+        // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
         char* cId = handler->extractKeyFromLink((char*)args, "Hquest");
         if (!cId)
             return false;
@@ -112,7 +112,7 @@ public:
         }
 
         // .removequest #entry'
-        // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
+        // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
         char* cId = handler->extractKeyFromLink((char*)args, "Hquest");
         if (!cId)
             return false;
@@ -130,42 +130,33 @@ public:
 
         QuestStatus oldStatus = player->GetQuestStatus(entry);
 
-        if (player->GetQuestStatus(entry) != QUEST_STATUS_NONE)
+        // remove all quest entries for 'entry' from quest log
+        for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
         {
-            // remove all quest entries for 'entry' from quest log
-            for (uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot)
+            uint32 logQuest = player->GetQuestSlotQuestId(slot);
+            if (logQuest == entry)
             {
-                uint32 logQuest = player->GetQuestSlotQuestId(slot);
-                if (logQuest == entry)
+                player->SetQuestSlot(slot, 0);
+
+                // we ignore unequippable quest items in this case, its' still be equipped
+                player->TakeQuestSourceItem(logQuest, false);
+
+                if (quest->HasFlag(QUEST_FLAGS_FLAGS_PVP))
                 {
-                    player->SetQuestSlot(slot, 0);
-
-                    // we ignore unequippable quest items in this case, its' still be equipped
-                    player->TakeQuestSourceItem(logQuest, false);
-
-                    if (quest->HasFlag(QUEST_FLAGS_FLAGS_PVP))
-                    {
-                        player->pvpInfo.IsHostile = player->pvpInfo.IsInHostileArea || player->HasPvPForcingQuest();
-                        player->UpdatePvPState();
-                    }
+                    player->pvpInfo.IsHostile = player->pvpInfo.IsInHostileArea || player->HasPvPForcingQuest();
+                    player->UpdatePvPState();
                 }
             }
-
-            player->RemoveActiveQuest(quest, false);
-            player->RemoveRewardedQuest(entry);
-
-            sScriptMgr->OnQuestStatusChange(player, entry);
-            sScriptMgr->OnQuestStatusChange(player, quest, oldStatus, QUEST_STATUS_NONE);
-
-            handler->SendSysMessage(LANG_COMMAND_QUEST_REMOVED);
-            return true;
         }
-        else
-        {
-            handler->SendSysMessage(LANG_COMMAND_QUEST_NOTFOUND);
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
+
+        player->RemoveActiveQuest(quest, false);
+        player->RemoveRewardedQuest(entry);
+
+        sScriptMgr->OnQuestStatusChange(player, entry);
+        sScriptMgr->OnQuestStatusChange(player, quest, oldStatus, QUEST_STATUS_NONE);
+
+        handler->SendSysMessage(LANG_COMMAND_QUEST_REMOVED);
+        return true;
     }
 
     static bool HandleQuestComplete(ChatHandler* handler, const char* args)
@@ -179,7 +170,7 @@ public:
         }
 
         // .quest complete #entry
-        // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
+        // number or [name] Shift-click form |color|Hquest:quest_id:quest_level|h[name]|h|r
         char* cId = handler->extractKeyFromLink((char*)args, "Hquest");
         if (!cId)
             return false;

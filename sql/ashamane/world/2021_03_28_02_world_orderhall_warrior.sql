@@ -1,4 +1,4 @@
-SET @CGUID := 685;
+SET @CGUID := 280000532;
 DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+124;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `PhaseId`, `PhaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
 (@CGUID+0, 112392, 1479, 7813, 7813, '0', 5997, 0, 0, 0, 1076.599, 7248.414, 97.78458, 0.7000231, 120, 0, 0, 0, 0, 2, 0, 0, 0, '', 24015), -- Quartermaster Durnolf

@@ -200,7 +200,6 @@ enum WarlockSpells
     SPELL_WARLOCK_UNSTABLE_AFFLICTION_DAMAGE_5      = 233499,
     SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 196364,
     SPELL_WARLOCK_WRITHE_IN_AGONY                   = 196102,
-	SPELL_WARLOCK_SINDOREY_SPITE                    = 208871,
 };
 
 enum WarlockSpellIcons
@@ -499,8 +498,6 @@ class spell_warl_conflagrate : public SpellScript
                 }
             }
         }
-		
-		caster->ModifyPower(POWER_SOUL_SHARDS, 5);
     }
 
     void Register() override
@@ -1692,14 +1689,14 @@ public:
                 if (Unit* target = GetHitUnit())
                 {
                     int32 nrofsummons = 1;
-                    nrofsummons += (caster->GetPower(POWER_SOUL_SHARDS) / 10);
+                    nrofsummons += caster->GetPower(POWER_SOUL_SHARDS);
                     if (nrofsummons > 4)
                         nrofsummons = 4;
 
                     int8 offsetX[4]{ 0, 0, 1, 1 };
                     int8 offsetY[4]{ 0, 1, 0, 1 };
 
-                    for (int i = 1; i < nrofsummons; i++)
+                    for (int i = 0; i < nrofsummons; i++)
                         caster->CastSpell(target->GetPositionX() + offsetX[i], target->GetPositionY() + offsetY[i], target->GetPositionZ(), SPELL_WARLOCK_HAND_OF_GULDAN_SUMMON, true);
                     caster->CastSpell(target, SPELL_WARLOCK_HAND_OF_GULDAN_DAMAGE, true);
                 }
@@ -1735,21 +1732,23 @@ public:
             soulshards = 1;
         }
 
-    uint32 soulshards;
+    private:
 
-        void Cast()
+        bool Load() override
         {
-            soulshards += (GetCaster()->GetPower(POWER_SOUL_SHARDS) / 10);
-            if (soulshards > 3)
+            soulshards += GetCaster()->GetPower(POWER_SOUL_SHARDS);
+            if (soulshards > 4)
             {
-                GetCaster()->EnergizeBySpell(GetCaster(), GetSpellInfo()->Id, -30, POWER_SOUL_SHARDS);
-                soulshards = 3;
+                GetCaster()->SetPower(POWER_SOUL_SHARDS, 1);
+                soulshards = 4;
 
             }
             else
                 GetCaster()->SetPower(POWER_SOUL_SHARDS, 0);
-            soulshards++;
+            return true;
         }
+
+        uint32 soulshards;
 
         void HandleOnHit(SpellEffIndex /*effIndex*/)
         {
@@ -1768,8 +1767,7 @@ public:
 
         void Register() override
         {
-            AfterCast += SpellCastFn(spell_warl_hand_of_guldan_damage_SpellScript::Cast);
-			OnEffectHitTarget += SpellEffectFn(spell_warl_hand_of_guldan_damage_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            OnEffectHitTarget += SpellEffectFn(spell_warl_hand_of_guldan_damage_SpellScript::HandleOnHit, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
         }
     };
 
@@ -3605,130 +3603,27 @@ class spell_warl_grimoire_of_service_aura : public AuraScript
 };
 
 // Incinerate - 29722
-// 7.3.5
-class spell_warl_incinerate : public SpellScriptLoader
+class spell_warl_incinerate : public SpellScript
 {
-public:
-	spell_warl_incinerate() : SpellScriptLoader("spell_warl_incinerate") { }
+    PrepareSpellScript(spell_warl_incinerate);
 
-	class spell_warl_incinerate_SpellScript : public SpellScript
-	{
-		PrepareSpellScript(spell_warl_incinerate_SpellScript);
-
-		void FilterTargets(std::list<WorldObject*>& targets)
-		{
-			Unit* caster = GetCaster();
-			Unit* target = GetExplTargetUnit();
-			if (!caster || !target)
-				return;
-
-			if (caster->HasAura(SPELL_WARLOCK_FIRE_AND_BRIMSTONE))
-			{ }
-			else
-				targets.clear();
-			targets.push_back(target); // main target
-			mtarget = target;
-		}
-
-        void Cast()
-        {
-            GetCaster()->ModifyPower(POWER_SOUL_SHARDS, 2);
-       }
-
-		void HandleHitTarget(SpellEffIndex /*eff*/)
-		{
-			//bool crit = GetHitMask() & PROC_HIT_CRITICAL;
-           // if (crit)
-			//GetCaster()->ModifyPower(POWER_SOUL_SHARDS, 1);
-		}
-
-		void Register() override
-		{
-			OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warl_incinerate_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
-			OnEffectHitTarget += SpellEffectFn(spell_warl_incinerate_SpellScript::HandleHitTarget, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
-            AfterCast += SpellCastFn(spell_warl_incinerate_SpellScript::Cast);
-		}
-
-	private:
-		Unit* mtarget;
-	};
-
-	SpellScript* GetSpellScript() const override
-	{
-		return new spell_warl_incinerate_SpellScript();
-	}
- };
-
-// Sin'dorei Spite - 208868
-// 7.3.5
-class spell_warl_sindorei_spite : public SpellScriptLoader
-{
-public:
-    spell_warl_sindorei_spite() : SpellScriptLoader("spell_warl_sindorei_spite") { }
-
-    class spell_warl_sindorei_spite_AuraScript : public AuraScript
+    void HandleOnHitMainTarget(SpellEffIndex /*effIndex*/)
     {
-        PrepareAuraScript(spell_warl_sindorei_spite_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            return ValidateSpellInfo({ SPELL_WARLOCK_SINDOREY_SPITE });
-        }
-
-        bool CheckProc(ProcEventInfo& eventInfo)
-        {
-            return false;
-        }
-
-        void Register() override
-        {
-            DoCheckProc += AuraCheckProcFn(spell_warl_sindorei_spite_AuraScript::CheckProc);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
-    {
-        return new spell_warl_sindorei_spite_AuraScript();
+        GetCaster()->ModifyPower(POWER_SOUL_SHARDS, 20);
     }
-};
 
-// 18540 && 1122
-// 7.3.5
-class spell_warl_sindorei_spite_proc : public SpellScriptLoader
-{
-public:
-    spell_warl_sindorei_spite_proc() : SpellScriptLoader("spell_warl_sindorei_spite_proc") { }
-
-    class spell_warl_sindorei_spite_proc_SpellScript : public SpellScript
+    void HandleOnHitTarget(SpellEffIndex /*effIndex*/)
     {
-        PrepareSpellScript(spell_warl_sindorei_spite_proc_SpellScript);
+        if (Unit* target = GetHitUnit())
+            if (!GetCaster()->HasAura(SPELL_WARLOCK_FIRE_AND_BRIMSTONE))
+                if (target != GetExplTargetUnit())
+                    PreventHitDamage();
+    }
 
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            return ValidateSpellInfo({ SPELL_WARLOCK_SINDOREY_SPITE });
-        }
-
-        void Cast()
-        {
-            Unit* caster = GetCaster();
-            if (!caster)
-                return;
-
-            caster->CastSpell(caster, SPELL_WARLOCK_SINDOREY_SPITE, true);
-
-            if (Unit* pet = caster->GetGuardianPet())
-                pet->CastSpell(pet, SPELL_WARLOCK_SINDOREY_SPITE, true);
-        }
-
-        void Register() override
-        {
-            AfterCast += SpellCastFn(spell_warl_sindorei_spite_proc_SpellScript::Cast);
-        }
-    };
-
-    SpellScript* GetSpellScript() const override
+    void Register() override
     {
-        return new spell_warl_sindorei_spite_proc_SpellScript();
+        OnEffectHitTarget += SpellEffectFn(spell_warl_incinerate::HandleOnHitMainTarget, EFFECT_0, SPELL_EFFECT_DUMMY);
+        OnEffectHitTarget += SpellEffectFn(spell_warl_incinerate::HandleOnHitTarget, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
     }
 };
 
@@ -3810,7 +3705,7 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_eradication();
     RegisterAuraScript(aura_warl_phantomatic_singularity);
     RegisterAuraScript(spell_warl_grimoire_of_service_aura);
-    new spell_warl_incinerate();
+    RegisterSpellScript(spell_warl_incinerate);
 
     ///AreaTrigger scripts
     RegisterAreaTriggerAI(at_warl_rain_of_fire);
@@ -3820,6 +3715,4 @@ void AddSC_warlock_spell_scripts()
     new spell_npc_warl_demonic_gateway_purple();
     new npc_pet_warlock_darkglare();
     RegisterCreatureAI(npc_pet_warlock_wild_imp);
-	new spell_warl_sindorei_spite();
-    new spell_warl_sindorei_spite_proc();
 }

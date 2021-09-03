@@ -34,6 +34,7 @@
 #include "WorldSession.h"
 #include "PhasingHandler.h"
 #include "CombatAI.h"
+#include "Log.h"
 
 enum eQuests
 {
@@ -61,6 +62,7 @@ enum eQuests
 enum eSpells
 {
     SPELL_FEL_INFUSION          = 133508,
+    SPELL_CANCEL_FEL_BAR        = 133510,
     SPELL_UNLOCKING_ALTRUIS     = 184012,
     SPELL_UNLOCKING_KAYN        = 177803,
     SPELL_PRISON_EXPLOSION      = 232248,
@@ -250,9 +252,9 @@ public:
         {
             if (killer->GetTypeId() == TYPEID_PLAYER)
             {
-                killer->ToPlayer()->SetPower(POWER_ALTERNATE_POWER, killer->GetPower(POWER_ALTERNATE_POWER) + 10);
+                killer->ToPlayer()->SetPower(POWER_ALTERNATE_POWER, killer->GetPower(POWER_ALTERNATE_POWER) + 8);
 
-                for (uint8 i = 0; i < 10; ++i)
+                for (uint8 i = 0; i < 8; ++i)
                     killer->ToPlayer()->KilledMonsterCredit(89297, ObjectGuid::Empty);
             }
         }
@@ -283,9 +285,9 @@ public:
 
     void OnQuestStatusChange(Player* player, Quest const* /*quest*/, QuestStatus /*oldStatus*/, QuestStatus newStatus) override
     {
-        if (newStatus == QUEST_STATUS_NONE)
+        if (newStatus == QUEST_STATUS_NONE || newStatus == QUEST_STATE_COMPLETE)
         {
-            player->RemoveAurasDueToSpell(SPELL_FEL_INFUSION);
+            player->CastSpell(player, SPELL_CANCEL_FEL_BAR, true);
             PhasingHandler::OnConditionChange(player);
         }
     }
@@ -308,7 +310,7 @@ public:
     bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) override
     {
         if (quest->GetQuestId() == QUEST_FEL_INFUSION)
-            player->RemoveAurasDueToSpell(SPELL_FEL_INFUSION);
+            player->CastSpell(player, SPELL_CANCEL_FEL_BAR, true);
 
         return true;
     }
@@ -340,7 +342,6 @@ enum KaynSledgeFightEvents
 {
     EVENT_EYE_BEAM = 1,
     EVENT_BLINK = 2,
-    EVENT_UPDATE_PHASES = 3,
     SAY_DO_NOT_SPEAK_OLD_TIMES = 10,
     SAY_HE_WAS_FIGHTING = 11,
     SAY_HE_MADE_HARD_CHOICES = 12,
@@ -348,7 +349,7 @@ enum KaynSledgeFightEvents
 
 enum KaynSledgeFightSpells
 {
-    SPELL_EYE_BEAM = 117275,
+    SPELL_EYE_BEAM = 197641,
     SPELL_BLINK = 117312,
     SPELL_ANNIHILATE = 199604,
 };
@@ -360,6 +361,7 @@ enum KaynSledgeFightData
     DATA_ALTRUIS_TALK_FOLLOW_BLINDLY = 23,
     DATA_ALTRUIS_TALK_DID_NOT_MURDER = 24,
     DATA_SLEDGE_DEATH = 4,
+    DATA_CRUSHER_DEATH = 5,
 };
 
 enum KaynSledgeFightTexts
@@ -379,6 +381,12 @@ enum KaynSledgeFightMisc
     DB_PHASE_AFTER_FIGHT = 993
 };
 
+enum SledgeMisc
+{
+    QUEST_KILL_CREDIT = 106241,
+};
+
+
 class npc_kayn_sledge_fight : public CreatureScript
 {
 public:
@@ -388,6 +396,8 @@ public:
     {
         npc_kayn_sledge_fightAI(Creature* creature) : ScriptedAI(creature) {
             me->SetReactState(REACT_DEFENSIVE);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         }
 
         bool _talkedKaynFirstLine = false;
@@ -459,12 +469,7 @@ public:
             }
         }
 
-        void JustReachedHome() override
-        {
-            if (Creature* creature = me->FindNearestCreature(NPC_CRUSHER, me->GetVisibilityRange(), false))
-                if (creature->isDead())
-                    _events.ScheduleEvent(EVENT_UPDATE_PHASES, 2000);
-        }
+        void JustReachedHome() override {}
 
         void UpdateAI(uint32 diff) override
         {
@@ -494,18 +499,7 @@ public:
                     DoCastVictim(SPELL_BLINK);
                     _events.ScheduleEvent(EVENT_EYE_BEAM, urand(15000, 17000));
                     break;
-                case EVENT_UPDATE_PHASES:
-                    std::list<Player*> players;
-                    me->GetPlayerListInGrid(players, me->GetVisibilityRange());
-                    for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                    {
-                        if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_COMPLETE ||
-                            (*itr)->ToPlayer()->GetQuestStatus(QUEST_STOP_GULDAN_A) == QUEST_STATUS_COMPLETE)
-                        {
-                            PhasingHandler::AddPhase(*itr, DB_PHASE_AFTER_FIGHT, true);
-                            PhasingHandler::RemovePhase(*itr, DB_PHASE_FIGHT, true);
-                        }
-                    }
+                default:
                     break;
                 }
             }
@@ -521,8 +515,16 @@ public:
         return new npc_kayn_sledge_fightAI(creature);
     }
 };
-// guid: 20542915 npc: 92990 "Sledge"
-// (abilities: 199556/brutal-attacks, 199375/demon-link, 199604/annihilate, 199474/leaping-retreat, 199481/shoulder-charge)
+
+/** guid: 20542915 npc: 92990 "Sledge"
+ *  guid: 20542912 npc: 97632 "Crusher"
+ *  abilities:
+ *   - 199556/brutal-attacks,
+ *   - 199375/demon-link,
+ *   - 199604/annihilate,
+ *   - 199474/leaping-retreat,
+ *   - 199481/shoulder-charge
+*/
 enum SledgeEvents
 {
     EVENT_BRUTAL_ATTACKS = 1,
@@ -530,6 +532,7 @@ enum SledgeEvents
     EVENT_SHOULDER_CHARGE = 3,
     EVENT_LEAPING_RETREAT = 4,
     EVENT_DEMON_LINK = 5,
+    EVENT_FACE_KICK = 6,
 };
 
 enum SledgeSpells
@@ -538,23 +541,22 @@ enum SledgeSpells
     SPELL_DEMON_LINK = 199375,
     SPELL_LEAPING_RETREAT = 199474,
     SPELL_SHOULDER_CHARGE = 199481,
+    SPELL_FACE_KICK = 199645,
     SPELL_DEATH_INVIS = 117555,
     SPELL_SEE_DEATH_INVIS = 117491,
+    SPELL_STOP_GULDAN_QUEST_ACCEPT = 223661,
+    SPELL_STOP_GULDAN_TAKING_POWER_02 = 210461,
+    SPELL_STOP_GULDAN_CRUSHER_DIES_01 = 210439,
 };
 
-enum SledgeMisc
-{
-    QUEST_KILL_CREDIT = 106241,
-};
-
-class npc_sledge : public CreatureScript
+class npc_sledge_crusher : public CreatureScript
 {
 public:
-    npc_sledge() : CreatureScript("npc_sledge") { }
+    npc_sledge_crusher() : CreatureScript("npc_sledge_crusher") { }
 
-    struct npc_sledgeAI : public ScriptedAI
+    struct npc_sledge_crusher_AI : public ScriptedAI
     {
-        npc_sledgeAI(Creature* creature) : ScriptedAI(creature) {
+        npc_sledge_crusher_AI(Creature* creature) : ScriptedAI(creature) {
             Initialize();
         }
 
@@ -563,6 +565,7 @@ public:
             _playerParticipating = false;
             _secondBrutalAttack = false;
             _brutalAnnounced = false;
+            _conversationStarted = false;
         }
 
         void Reset() override
@@ -570,92 +573,141 @@ public:
             _events.Reset();
             Initialize();
             me->setActive(true);
-            me->SetReactState(REACT_PASSIVE);
-            PhasingHandler::AddPhase(me, 543, true);
+            me->SetReactState(REACT_DEFENSIVE);
+
+            if (me->GetVictim() || me->IsInEvadeMode())
+                return;
+
+            std::list<Unit*> list;
+            me->GetAttackableUnitListInRange(list, 70.0f);
+            for (auto enemy : list)
+            {
+                if (enemy->ToPlayer())
+                    continue;
+                me->AI()->AttackStart(enemy);
+                break;
+            }
         }
 
         void EnterCombat(Unit* /*who*/) override
         {
-            _events.ScheduleEvent(EVENT_SHOULDER_CHARGE, 8000);
-            _events.ScheduleEvent(EVENT_LEAPING_RETREAT, 9000);
-            _events.ScheduleEvent(EVENT_DEMON_LINK, 1000);
-            _events.ScheduleEvent(EVENT_ANNIHILATE, urand(18000, 20000));
-            _events.ScheduleEvent(EVENT_BRUTAL_ATTACKS, urand(18000, 20000));
+            if (me->GetEntry() == NPC_SLEDGE) {
+                _events.ScheduleEvent(EVENT_ANNIHILATE, 20000);
+                _events.ScheduleEvent(EVENT_BRUTAL_ATTACKS, urand(18000, 20000));
+            }
+
+            if (me->GetEntry() == NPC_CRUSHER)
+                _events.ScheduleEvent(EVENT_FACE_KICK, 16000);
+
+            _events.ScheduleEvent(EVENT_LEAPING_RETREAT, urand(9000, 18000));
+            _events.ScheduleEvent(EVENT_SHOULDER_CHARGE, urand(18000, 24000));
         }
 
         void DamageTaken(Unit* attacker, uint32& damage) override
         {
             if (HealthAbovePct(85) && attacker->IsCreature())
-                if (attacker->GetEntry() == NPC_KAYN_SUNFURY_SLEDGE)
+                if (attacker->GetEntry() == NPC_KAYN_SUNFURY_SLEDGE || attacker->GetEntry() == NPC_ALTRUIS_SUFFERER_CRUSHER)
                     damage = urand(1, 2);
 
             if (HealthBelowPct(85) && attacker->IsCreature())
-                if (attacker->GetEntry() == NPC_KAYN_SUNFURY_SLEDGE)
+                if (attacker->GetEntry() == NPC_KAYN_SUNFURY_SLEDGE || attacker->GetEntry() == NPC_ALTRUIS_SUFFERER_CRUSHER)
                     me->SetHealth(me->GetHealth() + damage);
 
-            if (damage >= me->GetHealth())
+            if (HealthBelowPct(80) && me->GetEntry() == 97632 /* Crusher*/ && !_conversationStarted)
             {
-                std::list<HostileReference*> threatList;
-                threatList = me->getThreatManager().getThreatList();
-                for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
-                    if (Player* target = (*itr)->getTarget()->ToPlayer())
-                        if (target->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_INCOMPLETE ||
-                            target->GetQuestStatus(QUEST_STOP_GULDAN_A) == QUEST_STATUS_INCOMPLETE)
-                        {
-                            target->KilledMonsterCredit(QUEST_KILL_CREDIT);
-                        }
+                if (Creature* creature = me->FindNearestCreature(NPC_ALTRUIS_SUFFERER_CRUSHER, me->GetVisibilityRange(), true))
+                {
+                    creature->AI()->SetData(DATA_ALTRUIS_TALK_OLD_TIMES, DATA_ALTRUIS_TALK_OLD_TIMES);
+                    _conversationStarted = true;
+                }
             }
+
+            if (Creature* oAdd = GetOtherAdd())
+                if (damage < me->GetHealth())
+                    oAdd->SetHealth(oAdd->GetHealth() - damage);
+
+            if (attacker->IsPlayer() && me->HasAura(SPELL_BRUTAL_ATTACKS) && !_brutalAnnounced) {
+                Talk(0);
+                _brutalAnnounced = true;
+            }
+                
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void JustDied(Unit* killer) override
         {
-            if (Creature* creature = me->FindNearestCreature(NPC_KAYN_SUNFURY_SLEDGE, me->GetVisibilityRange(), true))
-                creature->AI()->SetData(DATA_SLEDGE_DEATH, DATA_SLEDGE_DEATH);
+            if (Creature* oAdd = GetOtherAdd())
+                killer->Kill(oAdd, false);
 
-            std::list<Player*> playersVisibility;
-            me->GetPlayerListInGrid(playersVisibility, me->GetVisibilityRange());
-            for (std::list<Player*>::const_iterator itr = playersVisibility.begin(); itr != playersVisibility.end(); ++itr)
-                (*itr)->CastSpell((*itr), SPELL_SEE_DEATH_INVIS, true);
+            if (me->GetEntry() == NPC_SLEDGE)
+                if (Creature* creature = me->FindNearestCreature(NPC_KAYN_SUNFURY_SLEDGE, me->GetVisibilityRange(), true))
+                    creature->AI()->SetData(DATA_SLEDGE_DEATH, DATA_SLEDGE_DEATH);
 
-            DoCastSelf(SPELL_DEATH_INVIS, true);
-            me->DespawnOrUnsummon(20000, Seconds(1));
+            if (me->GetEntry() == NPC_CRUSHER)
+                if (Creature* creature = me->FindNearestCreature(NPC_ALTRUIS_SUFFERER_CRUSHER, me->GetVisibilityRange(), true))
+                    creature->AI()->SetData(DATA_CRUSHER_DEATH, DATA_CRUSHER_DEATH);
+
+
+            me->GetScheduler().Schedule(Seconds(3), [this](TaskContext context) {
+                std::list<Player*> lList;
+                me->GetPlayerListInGrid(lList, me->GetVisibilityRange());
+                for (auto player : lList) {
+                    player->CastSpell(player, SPELL_STOP_GULDAN_TAKING_POWER_02);
+
+                    if (player->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_INCOMPLETE
+                        || player->GetQuestStatus(QUEST_STOP_GULDAN_A) == QUEST_STATUS_INCOMPLETE)
+                            player->KilledMonsterCredit(QUEST_KILL_CREDIT);
+                }
+            });
+
+            me->DespawnOrUnsummon(20000, Seconds(30));
         }
 
         void UpdateAI(uint32 diff) override
         {
             _events.Update(diff);
 
-            if (!UpdateVictim())
+            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
                 return;
 
             while (uint32 eventId = _events.ExecuteEvent())
-            {
+            {   
                 switch (eventId)
                 {
                 case EVENT_BRUTAL_ATTACKS:
                     DoCast(me, SPELL_BRUTAL_ATTACKS, true);
-                    // _events.ScheduleEvent(EVENT_BRUTAL_ATTACKS, 24000);
+                    _events.RescheduleEvent(EVENT_BRUTAL_ATTACKS, 42000);
+                    _brutalAnnounced = false;
                     break;
                 case EVENT_ANNIHILATE:
-                    DoCastVictim(SPELL_ANNIHILATE);
-                    // DoCast(SelectTarget(SELECT_TARGET_RANDOM, 1), SPELL_ANNIHILATE);
-                    _events.ScheduleEvent(SPELL_BRUTAL_ATTACKS, urand(15000, 18000));
-                    _events.ScheduleEvent(EVENT_ANNIHILATE, urand(15000, 18000));
+                    DoCast(SPELL_ANNIHILATE);
+                    _events.RescheduleEvent(EVENT_ANNIHILATE, urand(15000, 18000));
+                    break;
+                case EVENT_FACE_KICK:
+                    DoCast(SPELL_FACE_KICK);
+                    _events.RescheduleEvent(EVENT_FACE_KICK, urand(16000, 18000));
                     break;
                 case EVENT_SHOULDER_CHARGE:
-                    DoCast(SelectTarget(SELECT_TARGET_RANDOM, 1), SPELL_SHOULDER_CHARGE);
+                    DoCast(SPELL_SHOULDER_CHARGE);
                     _events.ScheduleEvent(EVENT_SHOULDER_CHARGE, urand(12000, 16000));
-                    _events.ScheduleEvent(EVENT_LEAPING_RETREAT, urand(12000, 16000));
                     break;
                 case EVENT_LEAPING_RETREAT:
-                    DoCastVictim(SPELL_LEAPING_RETREAT);
+                    DoCast(SPELL_LEAPING_RETREAT);
                     break;
-                case EVENT_DEMON_LINK:
-                    DoCast(me, SPELL_DEMON_LINK, true);
+                default:
                     break;
                 }
             }
             DoMeleeAttackIfReady();
+        }
+
+        Creature* GetOtherAdd() {
+
+            if (Creature* secondAdd = me->FindNearestCreature((me->GetEntry() == NPC_SLEDGE ? NPC_SLEDGE : NPC_CRUSHER), me->GetVisibilityRange(), true))
+            {
+                if (secondAdd->IsAlive())
+                    return secondAdd;
+            }
+            return NULL;
         }
 
     private:
@@ -663,25 +715,16 @@ public:
         bool _playerParticipating;
         bool _secondBrutalAttack;
         bool _brutalAnnounced;
+        bool _conversationStarted;
     };
 
     CreatureAI* GetAI(Creature* creature) const override
     {
-        return new npc_sledgeAI(creature);
+        return new npc_sledge_crusher_AI(creature);
     }
 };
 
 // guid: 20542914 id: 92985 Altruis the Sufferer to fight with Crusher
-enum AltruisCrusherFightSpells
-{
-    SPELL_FACE_KICK = 199645
-};
-
-enum AltruisCrusherFightData
-{
-    DATA_CRUSHER_DEATH = 5,
-};
-
 enum AltruisCrusherFightTexts
 {
     TEXT_SAY_OLD_TIMES = 0,
@@ -787,13 +830,7 @@ public:
             }
         }
 
-        void JustReachedHome() override
-        {
-            if (Creature* creature = me->FindNearestCreature(NPC_SLEDGE, me->GetVisibilityRange(), false))
-                if (creature->isDead())
-                    _events.ScheduleEvent(EVENT_UPDATE_PHASES, 2000);
-            // _events.ScheduleEvent(EVENT_UPDATE_PHASES, 5000);
-        }
+        void JustReachedHome() override {}
 
         void UpdateAI(uint32 diff) override
         {
@@ -823,18 +860,7 @@ public:
                     DoCastVictim(SPELL_BLINK);
                     _events.ScheduleEvent(EVENT_EYE_BEAM, urand(15000, 17000));
                     break;
-                case EVENT_UPDATE_PHASES:
-                    std::list<Player*> players;
-                    me->GetPlayerListInGrid(players, me->GetVisibilityRange());
-                    for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                    {
-                        if ((*itr)->ToPlayer()->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_COMPLETE ||
-                            (*itr)->ToPlayer()->GetQuestStatus(QUEST_STOP_GULDAN_A) == QUEST_STATUS_COMPLETE)
-                        {
-                            PhasingHandler::AddPhase(*itr, DB_PHASE_AFTER_FIGHT, true);
-                            PhasingHandler::RemovePhase(*itr, DB_PHASE_FIGHT, true);
-                        }
-                    }
+                default:
                     break;
                 }
             }
@@ -851,153 +877,72 @@ public:
     }
 };
 
-enum CrusherMisc
-{
-    TAKING_POWER_KILL_CREDIT = 106241,
-};
-// guid: 20542912 npc: 97632 "Crusher"
-// (abilities: 199556/brutal-attacks, 199375/demon-link, 199645/face-kick, 199474/leaping-retreat, 199481/shoulder-charge)
-class npc_crusher : public CreatureScript
+/* Korvas Bloodthorn (97643) https://www.wowhead.com/npc=97643/korvas-bloodthorn */
+class npc_korvas_bloodthorn_97643 : public CreatureScript
 {
 public:
-    npc_crusher() : CreatureScript("npc_crusher") { }
+    npc_korvas_bloodthorn_97643() : CreatureScript("npc_korvas_bloodthorn_97643") { }
 
-    enum CrusherEvents
+    bool OnQuestReward(Player* player, Creature* /*creature*/, const Quest* quest, uint32 /*p_Option*/) override
     {
-        EVENT_BRUTAL_ATTACKS = 1,
-        EVENT_FACE_KICK = 2,
-        EVENT_SHOULDER_CHARGE = 3,
-        EVENT_LEAPING_RETREAT = 4,
-        EVENT_DEMON_LINK = 5,
-    };
+        if (quest->GetQuestId() == QUEST_GRAND_THEFT_FELBAT) {
+            WorldLocation loc;
+            loc.m_mapId = 1468;
+            loc.m_positionX = 4317.87f;
+            loc.m_positionY = -451.61f;
+            loc.m_positionZ = 259.36f;
+            loc.SetOrientation(player->GetOrientation());
+            player->SetHomebind(loc, 7866);
+            player->SendBindPointUpdate();
+        }
+        return true;
+    }
 
-    struct npc_crusherAI : public ScriptedAI
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
     {
-        npc_crusherAI(Creature* creature) : ScriptedAI(creature) {
-            Initialize();
-        }
+        if (quest->GetQuestId() == QUEST_FROZEN_IN_TIME) {
+            creature->AI()->Talk(1);
 
-        void Initialize()
-        {
-            _playerParticipating = false;
-            _conversationStarted = false;
-            _faceKickAnnounced = false;
-        }
-
-        void Reset() override
-        {
-            _events.Reset();
-            Initialize();
-            me->setActive(true);
-            me->SetReactState(REACT_PASSIVE);
-            PhasingHandler::AddPhase(me, 543, true);
-        }
-
-        void EnterCombat(Unit* /*who*/) override
-        {
-            _events.ScheduleEvent(EVENT_SHOULDER_CHARGE, 8000);
-            _events.ScheduleEvent(EVENT_LEAPING_RETREAT, 9000);
-            _events.ScheduleEvent(EVENT_DEMON_LINK, 1000);
-            _events.ScheduleEvent(EVENT_FACE_KICK, urand(18000, 20000));
-            _events.ScheduleEvent(EVENT_BRUTAL_ATTACKS, urand(18000, 20000));
-        }
-
-        void DamageTaken(Unit* attacker, uint32& damage) override
-        {
-            if (HealthAbovePct(85) && attacker->IsCreature())
-                if (attacker->GetEntry() == NPC_ALTRUIS_SUFFERER_CRUSHER)
-                    damage = urand(1, 2);
-
-            if (HealthBelowPct(85) && attacker->IsCreature())
-                if (attacker->GetEntry() == NPC_ALTRUIS_SUFFERER_CRUSHER)
-                    me->SetHealth(me->GetHealth() + damage);
-
-            if (HealthBelowPct(75) && !_conversationStarted)
+            creature->GetScheduler().Schedule(Seconds(8), [this](TaskContext context)
             {
-                if (Creature* creature = me->FindNearestCreature(NPC_ALTRUIS_SUFFERER_CRUSHER, me->GetVisibilityRange(), true))
-                {
-                    creature->AI()->SetData(DATA_ALTRUIS_TALK_OLD_TIMES, DATA_ALTRUIS_TALK_OLD_TIMES);
-                    _conversationStarted = true;
-                }
-            }       
-            
-            if (damage >= me->GetHealth())
-            {
-                std::list<HostileReference*> threatList;
-                threatList = me->getThreatManager().getThreatList();
-                for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
-                    if (Player* target = (*itr)->getTarget()->ToPlayer())
-                        if (target->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_INCOMPLETE ||
-                            target->GetQuestStatus(QUEST_STOP_GULDAN_A) == QUEST_STATUS_INCOMPLETE)
-                                target->KilledMonsterCredit(TAKING_POWER_KILL_CREDIT);
-            }
+                Creature* korvas = GetContextCreature();
+                korvas->AI()->Talk(2);
+            });
         }
 
-        void JustDied(Unit* /*killer*/) override
-        {
-            if (Creature* creature = me->FindNearestCreature(NPC_ALTRUIS_SUFFERER_CRUSHER, me->GetVisibilityRange(), true))
-                creature->AI()->SetData(DATA_CRUSHER_DEATH, DATA_CRUSHER_DEATH);
-
-            std::list<Player*> playersVisibility;
-            me->GetPlayerListInGrid(playersVisibility, me->GetVisibilityRange());
-            for (std::list<Player*>::const_iterator itr = playersVisibility.begin(); itr != playersVisibility.end(); ++itr)
-                (*itr)->CastSpell((*itr), SPELL_SEE_DEATH_INVIS, true);
-
-            DoCastSelf(SPELL_DEATH_INVIS, true);
-            me->DespawnOrUnsummon(20000, Seconds(1));
-        }
-
-        void UpdateAI(uint32 diff) override
-        {
-            _events.Update(diff);
-
-            if (!UpdateVictim())
-                return;
-
-            while (uint32 eventId = _events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                case EVENT_BRUTAL_ATTACKS:
-                    DoCast(me, SPELL_BRUTAL_ATTACKS, true);
-                    // _events.ScheduleEvent(EVENT_BRUTAL_ATTACKS, 24000);
-                    break;
-                case EVENT_FACE_KICK:
-                    DoCastVictim(SPELL_FACE_KICK);
-                    // DoCast(SelectTarget(SELECT_TARGET_RANDOM, 1), SPELL_FACE_KICK);
-                    _events.ScheduleEvent(EVENT_BRUTAL_ATTACKS, urand(16000, 18000));
-                    _events.ScheduleEvent(EVENT_FACE_KICK, urand(16000, 18000));
-                    break;
-                case EVENT_SHOULDER_CHARGE:
-                    DoCast(SelectTarget(SELECT_TARGET_RANDOM, 1), SPELL_SHOULDER_CHARGE);
-                    _events.ScheduleEvent(EVENT_SHOULDER_CHARGE, urand(12000, 16000));
-                    _events.ScheduleEvent(EVENT_LEAPING_RETREAT, urand(12000, 16000));
-                    break;
-                case EVENT_LEAPING_RETREAT:
-                    DoCastVictim(SPELL_LEAPING_RETREAT);
-                    break;
-                case EVENT_DEMON_LINK:
-                    DoCast(me, SPELL_DEMON_LINK, true);
-                    break;
-                }
-            }
-            DoMeleeAttackIfReady();
-        }
-
-    private:
-        EventMap _events;
-        bool _playerParticipating;
-        bool _conversationStarted;
-        bool _faceKickAnnounced;
-    };
+        return true;
+    }
 
     CreatureAI* GetAI(Creature* creature) const override
     {
-        return new npc_crusherAI(creature);
+        return new npc_korvas_bloodthorn_97643_AI(creature);
     }
+
+    struct npc_korvas_bloodthorn_97643_AI : public ScriptedAI
+    {
+        npc_korvas_bloodthorn_97643_AI(Creature* creature) : ScriptedAI(creature) { }
+
+        bool _greetSaid = false;
+
+        void MoveInLineOfSight(Unit* unit) override
+        {
+            if (Player* player = unit->ToPlayer())
+                if (player->GetDistance(me) < 15.0f)
+                    if (player->GetQuestStatus(QUEST_GRAND_THEFT_FELBAT) == QUEST_STATUS_COMPLETE && !_greetSaid) {
+                        me->AI()->Talk(0);
+                        _greetSaid = true;
+                    }
+        }
+    };
 };
 
-// 243967
+/* Reflective Mirror (244449) https://www.wowhead.com/object=244449/reflective-mirror */
+enum ReflectiveMirror {
+    NPC_GLAZER = 96680,
+    SPELL_ROTATING = 191917,
+    SPELL_ARCANE_EXPLOSION = 202220,
+    PHASE_GLAZER_STUNNED = 556,
+};
 class go_reflective_mirror : public GameObjectScript
 {
 public:
@@ -1005,8 +950,88 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* go) override
     {
-        player->CastSpell(player, 191917, true);
+        player->CastSpell(go, SPELL_ROTATING, true);
+
+        if (Creature* glazer = player->FindNearestCreature(NPC_GLAZER, player->GetVisibilityRange(), true))
+            glazer->CastSpell(glazer, SPELL_ARCANE_EXPLOSION, true);
+
         return true;
+    }
+};
+
+/* Lingering Gaze https://www.wowhead.com/spell=196460/lingering-gaze */
+class spell_196460 : public SpellScriptLoader
+{
+public:
+    spell_196460() : SpellScriptLoader("spell_196460") { }
+
+    class spell_196460_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_196460_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (!GetCaster())
+                return;
+
+            uint32 missiles = urand(1, 3);
+            float directionX = frand(0.0f, 6.0f);
+            float directionY = 6.0f - directionX;
+            if (urand(0, 1))
+                directionX *= -1.0f;
+            if (urand(0, 1))
+                directionY *= -1.0f;
+
+            Position pos = GetCaster()->GetRandomNearPosition(25.0f);
+            for (uint8 i = 0; i < missiles; i++)
+            {
+                GetCaster()->CastSpell(pos, 196504, true);
+                pos.m_positionX += directionX;
+                pos.m_positionY += directionY;
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectLaunch += SpellEffectFn(spell_196460_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_196460_SpellScript();
+    }
+};
+
+/* Pulse https://www.wowhead.com/spell=196462/pulse */
+class spell_196462 : public SpellScriptLoader
+{
+public:
+    spell_196462() : SpellScriptLoader("spell_196462") { }
+
+    class spell_196462_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_196462_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (!GetCaster())
+                return;
+
+            Position pos = GetCaster()->GetPosition();
+            pos.SetOrientation(frand(0.0f, 2.0f) * static_cast<float>(M_PI));
+            GetCaster()->CastSpell(pos, 194853, true);
+        }
+
+        void Register() override
+        {
+            OnEffectLaunch += SpellEffectFn(spell_196462_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_196462_SpellScript();
     }
 };
 
@@ -1093,8 +1118,10 @@ public:
                 {
                     if (giveKillCredit <= diff)
                     {
-                        if (player->GetPositionZ() >= 253.0f)
+                        if (player->GetPositionZ() >= 253.0f) {
                             player->KilledMonsterCredit(96814, ObjectGuid::Empty);
+                            player->AddDelayedConversation(2000, 6804);
+                        }
 
                         giveKillCredit = 1000;
                     }
@@ -1121,19 +1148,120 @@ public:
     {
         player->KilledMonsterCredit(100166, ObjectGuid::Empty);
         player->SendMovieStart(478);
-        return true;
+        return false;
     }
 };
 
+/* Kayn Subfury (97273) or Altruis the Sufferer (97274) will assist the Player in Bastillax fight */
+class npc_bastillax_attacker : public CreatureScript
+{
+    enum atData {
+        NPC_BASTILLAX = 96783,
+        DATA_BASTILLAX_DEATH = 21,
+        EVENT_EYE_BEAM = 1,
+        EVENT_CHAOS_STRIKE = 2,
+        SPELL_EYE_BEAM = 197641,
+        SPELL_CHAOS_STRIKE = 197639,
+    };
+public:
+    npc_bastillax_attacker() : CreatureScript("npc_bastillax_attacker") { }
+
+    struct npc_bastillax_attacker_AI : public ScriptedAI
+    {
+        npc_bastillax_attacker_AI(Creature* creature) : ScriptedAI(creature) {
+            me->SetReactState(REACT_DEFENSIVE);
+        }
+
+        void MoveInLineOfSight(Unit* who) override {
+            if (Player* player = who->ToPlayer())
+                if (player->GetDistance(me) < 20.0f && player->IsInCombat())
+                    if (player->HasQuest(QUEST_BETWEEN_US_AND_FREEDOM_HA) ||
+                        player->HasQuest(QUEST_BETWEEN_US_AND_FREEDOM_HH) ||
+                        player->HasQuest(QUEST_BETWEEN_US_AND_FREEDOM_VA) ||
+                        player->HasQuest(QUEST_BETWEEN_US_AND_FREEDOM_VH))
+                            if (Creature* bastillax = me->FindNearestCreature(NPC_BASTILLAX, me->GetVisibilityRange(), true))
+                                AttackStart(bastillax);
+        }
+
+        void EnterCombat(Unit* who) override
+        {   
+            _events.ScheduleEvent(EVENT_EYE_BEAM, urand(20000, 35000));
+            _events.ScheduleEvent(EVENT_CHAOS_STRIKE, urand(15000, 45000));
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage) override
+        {
+            if (HealthBelowPct(45))
+                damage = urand(1, 2);
+            else
+                me->SetHealth(me->GetMaxHealth() * 0.85f);
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_BASTILLAX_DEATH:
+                Talk(0);
+                EnterEvadeMode(EVADE_REASON_OTHER);
+                break;
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!UpdateVictim())
+                return;
+
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_EYE_BEAM:
+                    DoCast(SPELL_EYE_BEAM);
+                    _events.ScheduleEvent(EVENT_EYE_BEAM, 12000);
+                    break;
+                case EVENT_CHAOS_STRIKE:
+                    DoCast(SPELL_CHAOS_STRIKE);
+                    _events.ScheduleEvent(EVENT_EYE_BEAM, 22000);
+                    break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap _events;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_bastillax_attacker_AI(creature);
+    }
+};
+
+/* Bastillax (96783) https://www.wowhead.com/npc=96783/bastillax#abilities
+ * Abilities:
+ * - Blur of Shadows (https://www.wowhead.com/spell=200002/blur-of-shadows)
+ * - Crushing Shadows (https://www.wowhead.com/spell=200027/crushing-shadows)
+ * - Crushing Shadows (https://www.wowhead.com/spell=200066/crushing-shadows)
+ * - Fel Annihilation (https://www.wowhead.com/spell=200007/fel-annihilation)
+ * - Portal Surge (https://www.wowhead.com/spell=200104/portal-surge)
+ */
 enum eBastillax
 {
     EVENT_FEL_ANNIHILATION = 0,
     EVENT_CRUSHING_SHADOWS = 1,
     EVENT_BLUR_OF_SHADOWS = 2,
-    SPELL_FEL_ANNIHILATION = 200007, // 5 + 35
-    SPELL_CRUSHING_SHADOWS = 200027, // 45
-    SPELL_BLUR_OF_SHADOWS = 200002, // 23 say
-    SPELL_3 = 200353,  // 16 + 50  say + summon
+    EVENT_PORTAL_SURGE = 3,
+    SPELL_FEL_ANNIHILATION = 200007,
+    SPELL_CRUSHING_SHADOWS = 200066,
+    SPELL_BLUR_OF_SHADOWS = 200002,
+    SPELL_PORTAL_SURGE = 200104,
+    SPELL_POWER_02 = 210500,
+    BASTILLAXS_POWER_QUEST_CREDIT = 106255,
 };
 
 class npc_bastillax : public CreatureScript
@@ -1143,31 +1271,75 @@ public:
 
     struct npc_bastillaxAI : public ScriptedAI
     {
-        npc_bastillaxAI(Creature* creature) : ScriptedAI(creature) {}
+        npc_bastillaxAI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            _firstTextTrigger = false;
+            _secondTextTrigger = false;
+            _thirdTextTrigger = false;
+            me->SetCorpseDelay(30);
+            me->SetRespawnDelay(15);
+        }
 
         void Reset() override
         {
             events.Reset();
+            Initialize();
         }
 
         void JustDied(Unit* killer) override
-        {
-            if (killer->GetTypeId() == TYPEID_PLAYER)
+        {   
+            /* Give Kill Credit to all players in the range */
+            std::list<Player*> players;
+            me->GetPlayerListInGrid(players, 30.0f);
+            for (Player* player : players)
             {
-                killer->ToPlayer()->KilledMonsterCredit(113812, ObjectGuid::Empty);
-                killer->ToPlayer()->KilledMonsterCredit(106255, ObjectGuid::Empty);
+                player->KilledMonsterCredit(BASTILLAXS_POWER_QUEST_CREDIT);
+                player->CastSpell(player, SPELL_POWER_02);
+                player->ClearInCombat();
             }
+
+            /* Set Data for Kayn (97273) and Altruis (97274) to talk and go */
+            if (Creature* creature = me->FindNearestCreature(97273, me->GetVisibilityRange(), true))
+                creature->AI()->SetData(21, 21);
+            if (Creature* creature = me->FindNearestCreature(97274, me->GetVisibilityRange(), true))
+                creature->AI()->SetData(21, 21);
         }
 
         void EnterCombat(Unit* /*who*/) override
         {
             events.RescheduleEvent(EVENT_FEL_ANNIHILATION, urand(4000, 6000));
-            events.RescheduleEvent(EVENT_CRUSHING_SHADOWS, 45000);
-            events.RescheduleEvent(EVENT_BLUR_OF_SHADOWS, 23000);
+            events.RescheduleEvent(EVENT_CRUSHING_SHADOWS, 22000);
+            events.RescheduleEvent(EVENT_BLUR_OF_SHADOWS, 13000);
+            events.RescheduleEvent(EVENT_PORTAL_SURGE, 35000);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (HealthBelowPct(65) && !_firstTextTrigger) {
+                Talk(0);
+                _firstTextTrigger = true;
+            }
+
+            if (HealthBelowPct(50) && !_secondTextTrigger) {
+                Talk(1);
+                _secondTextTrigger = true;
+            }
+
+            if (HealthBelowPct(25) && !_thirdTextTrigger) {
+                Talk(2);
+                _thirdTextTrigger = true;
+            }
         }
 
         void UpdateAI(uint32 diff) override
         {
+            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
             events.Update(diff);
 
             while (uint32 eventId = events.ExecuteEvent())
@@ -1175,52 +1347,51 @@ public:
                 switch (eventId)
                 {
                 case EVENT_FEL_ANNIHILATION:
-                    if (Unit* target = me->GetVictim())
-                        me->CastSpell(me, SPELL_FEL_ANNIHILATION, true);
-
-                    events.RescheduleEvent(EVENT_FEL_ANNIHILATION, 35000);
+                    DoCast(SPELL_FEL_ANNIHILATION);
+                    events.RescheduleEvent(EVENT_FEL_ANNIHILATION, 15000);
                     break;
                 case EVENT_CRUSHING_SHADOWS:
-                    if (Unit* target = me->GetVictim())
-                        me->CastSpell(target, SPELL_CRUSHING_SHADOWS, true);
-
-                    events.RescheduleEvent(EVENT_CRUSHING_SHADOWS, 45000);
+                    DoCast(SPELL_CRUSHING_SHADOWS);
+                    events.RescheduleEvent(EVENT_CRUSHING_SHADOWS, 32000);
                     break;
                 case EVENT_BLUR_OF_SHADOWS:
-                    if (Unit* target = me->GetVictim())
-                        me->CastSpell(target, SPELL_BLUR_OF_SHADOWS, true);
-
+                    Talk(3);
+                    DoCast(SPELL_BLUR_OF_SHADOWS);
                     events.RescheduleEvent(EVENT_BLUR_OF_SHADOWS, 23000);
                     break;
-                /*case EVENT_3:
-                    DoCast(SPELL_3);
-                    Talk(1);
-                    for (uint8 i = 0; i < 4; i++)
+                case EVENT_PORTAL_SURGE:
+                    DoCast(SPELL_PORTAL_SURGE);
+                    for (uint8 i = 0; i < 3; i++)
                     {
-                        if (Creature* add = me->SummonCreature(101505, 4221.51f + irand(-3, 3), -627.92f + irand(-3, 3), 255.12f, 3.10f))
+                        if (Creature* add = me->SummonCreature(101505, 4221.51f + irand(-3, 3), -627.92f + irand(-3, 3), 255.12f, 3.10f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000))
                         {
                             add->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
-                            DoZoneInCombat(add, 50.0f);
+                            if (Unit* target = me->GetVictim())
+                                add->AI()->AttackStart(target);
                         }
                     }
-                    for (uint8 i = 0; i < 4; i++)
+                    for (uint8 i = 0; i < 3; i++)
                     {
-                        if (Creature* add = me->SummonCreature(101505, 4146.97f + irand(-3, 3), -626.29f + irand(-3, 3), 255.12f, 6.27f))
+                        if (Creature* add = me->SummonCreature(101505, 4146.97f + irand(-3, 3), -626.29f + irand(-3, 3), 255.12f, 6.27f, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000))
                         {
                             add->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ());
-                            DoZoneInCombat(add, 50.0f);
+                            if (Unit* target = me->GetVictim())
+                                add->AI()->AttackStart(target);
                         }
                     }
-                    events.RescheduleEvent(EVENT_3, 50000);
-                    break;*/
+                    events.RescheduleEvent(EVENT_PORTAL_SURGE, 50000);
+                    break;
+                default:
+                    break;
                 }
             }
-
-            if (UpdateVictim())
-                DoMeleeAttackIfReady();
+            DoMeleeAttackIfReady();
         }
     private:
         EventMap events;
+        bool _firstTextTrigger;
+        bool _secondTextTrigger;
+        bool _thirdTextTrigger;
     };
 
     CreatureAI* GetAI(Creature* creature) const override
@@ -1319,17 +1490,26 @@ public:
     }
 };
 
+/**
+* NPC: Immolanth (96682)
+* Abilities:
+* - 199758 Burning Fel
+* - 199828 Chaos Nova
+* - 199836 Fel Spirit
+*/
 enum ImmolanthEvents
 {
     EVENT_BURNING_FEL = 1,
     EVENT_CHAOS_NOVA = 2,
     EVENT_SUMMON_BURNING_FEL = 3,
+    EVENT_FEL_SPIRIT = 3,
 };
 
 enum ImmolanthSpells
 {
     SPELL_CHAOS_NOVA = 199828,
     SPELL_BURNING_FEL = 199758,
+    SPELL_FEL_SPIRIT = 199836,
 };
 
 enum ImmolanthMisc
@@ -1338,9 +1518,10 @@ enum ImmolanthMisc
     NPC_BURNING_FEL = 60685,
     KILL_CREDIT_BONUS_OBJECTIVE = 97970,
     IMMOLANTH_POWER_TAKEN = 106254,
+    FORGED_IN_FIRE_TAKING_POWER_02 = 210486,
+    FORGED_IN_FIRE_IMMOLANTH_DIES_01 = 210483,
 };
 
-// 96682
 class npc_immolanth : public CreatureScript
 {
 public:
@@ -1355,6 +1536,10 @@ public:
         void Initialize()
         {
             _playerParticipating = false;
+            _phase1 = false;
+            _phase2 = false;
+            me->SetHealth(me->CountPctFromMaxHealth(27));
+            me->setRegeneratingHealth(false);
         }
 
         void Reset() override
@@ -1367,40 +1552,30 @@ public:
 
         void EnterCombat(Unit* /*who*/) override
         {
-            _events.ScheduleEvent(EVENT_BURNING_FEL, 8000);
-            _events.ScheduleEvent(EVENT_CHAOS_NOVA, urand(16000, 18000));
+            _events.ScheduleEvent(EVENT_BURNING_FEL, 18000);
+            _events.ScheduleEvent(EVENT_FEL_SPIRIT, 8000);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage) override
         {
-            if (HealthAbovePct(85) && attacker->IsCreature())
+            if (HealthBelowPct(27) && attacker->IsCreature())
                 if (attacker->GetEntry() == NPC_CYANA_IMMOLANTH)
                     damage = urand(1, 2);
 
-            if (HealthBelowPct(85) && attacker->IsCreature())
-                if (attacker->GetEntry() == NPC_CYANA_IMMOLANTH)
-                    me->SetHealth(me->GetHealth() + damage);
-
-            if (!_playerParticipating && attacker->ToPlayer())
-            {
-                if (Creature* creature = me->FindNearestCreature(NPC_CYANA_IMMOLANTH, me->GetVisibilityRange(), true))
-                {
-                    _playerParticipating = true;
-                }
+            if (HealthBelowPct(15) && !_phase1) {
+                Talk(0);
+                _phase1 = true;
             }
 
-            if (damage >= me->GetHealth())
-            {
-                std::list<HostileReference*> threatList;
-                threatList = me->getThreatManager().getThreatList();
-                for (std::list<HostileReference*>::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
-                    if (Player* target = (*itr)->getTarget()->ToPlayer())
-                        if (target->GetQuestStatus(QUEST_FORGED_IN_FIRE_H) == QUEST_STATUS_INCOMPLETE ||
-                            target->GetQuestStatus(QUEST_FORGED_IN_FIRE_V) == QUEST_STATUS_INCOMPLETE)
-                        {
-                            target->KilledMonsterCredit(IMMOLANTH_POWER_TAKEN);
-                            target->KilledMonsterCredit(KILL_CREDIT_BONUS_OBJECTIVE);
-                        }
+            if (HealthBelowPct(6) && !_phase2) {
+                Talk(1);
+                _phase2 = true;
+                _events.ScheduleEvent(EVENT_CHAOS_NOVA, Seconds(1));
+            }   
+
+            if (!_playerParticipating && attacker->ToPlayer()) {
+                if (Creature* creature = me->FindNearestCreature(NPC_CYANA_IMMOLANTH, me->GetVisibilityRange(), true))
+                    _playerParticipating = true;
             }
         }
 
@@ -1408,6 +1583,15 @@ public:
         {
             if (Creature* creature = me->FindNearestCreature(NPC_CYANA_IMMOLANTH, me->GetVisibilityRange(), true))
                 creature->AI()->SetData(DATA_IMMOLANTH_DEATH, DATA_IMMOLANTH_DEATH);
+
+            std::list<Player*> players;
+            me->GetPlayerListInGrid(players, 30.0f);
+            for (Player* player : players)
+            {
+                player->CastSpell(player, FORGED_IN_FIRE_TAKING_POWER_02, true);
+                player->KilledMonsterCredit(IMMOLANTH_POWER_TAKEN);
+                player->KilledMonsterCredit(KILL_CREDIT_BONUS_OBJECTIVE);
+            }
 
             me->DespawnOrUnsummon(20000, Seconds(1));
         }
@@ -1426,12 +1610,16 @@ public:
                 case EVENT_CHAOS_NOVA:
                     if (Unit* target = me->GetVictim())
                         me->CastSpell(target, SPELL_CHAOS_NOVA, true);
-                    _events.ScheduleEvent(EVENT_CHAOS_NOVA, 18000);
                     break;
                 case EVENT_BURNING_FEL:
                     if (Unit* target = me->GetVictim())
                         me->CastSpell(target, SPELL_BURNING_FEL, true);
                     _events.ScheduleEvent(EVENT_BURNING_FEL, urand(10000, 14000));
+                    break;
+                case EVENT_FEL_SPIRIT:
+                    if (Unit* target = me->GetVictim())
+                        me->CastSpell(target, SPELL_FEL_SPIRIT, true);
+                    _events.ScheduleEvent(EVENT_FEL_SPIRIT, urand(8000, 12000));
                     break;
                 }
             }
@@ -1441,11 +1629,42 @@ public:
     private:
         EventMap _events;
         bool _playerParticipating;
+        bool _phase1;
+        bool _phase2;
     };
 
     CreatureAI* GetAI(Creature* creature) const override
     {
         return new npc_immolanthAI(creature);
+    }
+};
+
+/* Burning Fel https://www.wowhead.com/spell=199760/burning-fel */
+class spell_199760 : public SpellScriptLoader
+{
+public:
+    spell_199760() : SpellScriptLoader("spell_199760") { }
+    class spell_199760_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_199760_SpellScript);
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            PreventHitDefaultEffect(EFFECT_0);
+            if (!GetCaster())
+                return;
+            Position pos;
+            GetCaster()->GetRandomNearPosition(20.0f);
+            WorldLocation* dest = const_cast<WorldLocation*>(GetExplTargetDest());
+            dest->Relocate(pos);
+        }
+        void Register() override
+        {
+            OnEffectLaunch += SpellEffectFn(spell_199760_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_TRIGGER_MISSILE);
+        }
+    };
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_199760_SpellScript();
     }
 };
 
@@ -1490,18 +1709,168 @@ enum eChoices
     SPELL_NEW_DIRECTION_CHOICE_KAYN_OR_ALTRUIS = 196650,
     SPELL_NEW_DIRECTION_CHOSE_ALTRUIS = 196662,
     SPELL_NEW_DIRECTION_CHOSE_KAYN = 196661,
+    QUEST_OBTAINED_KAYN = 40374,
+    QUEST_OBTAINED_ALTRUIS = 40375,
 };
 
+/* Korvas Bloodthorn (97644) https://www.wowhead.com/npc=97644/korvas-bloodthorn */
 class npc_korvas_bloodthorn : public CreatureScript
 {
 public:
     npc_korvas_bloodthorn() : CreatureScript("npc_korvas_bloodthorn") { }
+
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
     {
-        player->CastSpell(player, SPELL_NEW_DIRECTION_CHOICE_KAYN_OR_ALTRUIS, true); // Display follower choice
-        CloseGossipMenuFor(player);
+        player->CastSpell(player, SPELL_NEW_DIRECTION_CHOICE_KAYN_OR_ALTRUIS, true); // Display follower choice 234
+        
+        return false;
+    }
+
+    bool OnQuestReward(Player* player, Creature* /*creature*/, const Quest* quest, uint32 /*p_Option*/) override
+    {
+        if (quest->GetQuestId() == QUEST_ALL_THE_WAY_UP) {
+            WorldLocation loc;
+            loc.m_mapId = 1468; // Warden Prison DH Quests
+            loc.m_positionX = 4282.88f;
+            loc.m_positionY = -452.90f;
+            loc.m_positionZ = 259.51f;
+            loc.SetOrientation(player->GetOrientation());
+            player->SetHomebind(loc, 7865); // The Wardens Court
+            player->SendBindPointUpdate();
+        }
         return true;
     }
+    
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_BETWEEN_US_AND_FREEDOM_HA ||
+            quest->GetQuestId() == QUEST_BETWEEN_US_AND_FREEDOM_HH ||
+            quest->GetQuestId() == QUEST_BETWEEN_US_AND_FREEDOM_VA ||
+            quest->GetQuestId() == QUEST_BETWEEN_US_AND_FREEDOM_VH)
+                creature->AI()->Talk(1);
+    
+        return true;
+    }
+    
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_korvas_bloodthorn_AI(creature);
+    }
+    
+    struct npc_korvas_bloodthorn_AI : public ScriptedAI
+    {
+        npc_korvas_bloodthorn_AI(Creature* creature) : ScriptedAI(creature) { }
+    
+        bool _greetSaid = false;
+    
+        void MoveInLineOfSight(Unit* unit) override
+        {
+            if (Player* player = unit->ToPlayer())
+                if (player->GetDistance(me) < 15.0f)
+                    if (player->GetQuestStatus(QUEST_ALL_THE_WAY_UP) == QUEST_STATUS_COMPLETE && !_greetSaid)
+                    {
+                        me->AI()->Talk(0);
+                        if (Creature* kayn = me->FindNearestCreature(97265, me->GetVisibilityRange(), true))
+                            kayn->AI()->SetData(24, 24);
+                        if (Creature* altruis = me->FindNearestCreature(97267, me->GetVisibilityRange(), true))
+                            altruis->AI()->SetData(24, 24);
+                        _greetSaid = true;
+                    }
+        }
+    };
+};
+
+/* Kayn (97265) and Altruis (97267) scripts for quest "A New Direction" */
+enum eData {
+    DATA_CHOICE_KAYN = 22,
+    DATA_CHOICE_ALTRUIS = 23,
+    DATA_START_CONVERSATION = 24,
+};
+class npc_votw_kayn_altruis_choice : public CreatureScript
+{   
+public:
+    npc_votw_kayn_altruis_choice() : CreatureScript("npc_votw_kayn_altruis_choice") { }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_votw_kayn_altruis_choice_AI(creature);
+    }
+
+    struct npc_votw_kayn_altruis_choice_AI : public ScriptedAI
+    {
+        npc_votw_kayn_altruis_choice_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Initialize() {
+            /*if (me->GetEntry() == 97265)
+                if (Creature* altruis = me->FindNearestCreature(97267, me->GetVisibilityRange(), true))
+                    AttackStart(altruis);
+            if (me->GetEntry() == 97267)
+                if (Creature* kayn = me->FindNearestCreature(97265, me->GetVisibilityRange(), true))
+                    AttackStart(kayn);*/
+        }
+
+        void Reset() override
+        {
+            Initialize();
+            me->SetCorpseDelay(0);
+            me->SetRespawnDelay(0);
+            me->SetRespawnTime(0);
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_CHOICE_KAYN:
+                if (me->GetEntry() == 97267) { // Altruis
+                    Talk(1);
+                    me->GetScheduler().Schedule(Seconds(6), [this](TaskContext context)
+                    {
+                        Creature* altruis = GetContextCreature();
+                        altruis->GetMotionMaster()->MovePoint(4227.93f, -449.99f, 266.79f, false);
+                        altruis->DespawnOrUnsummon(6000, Seconds(15));
+                    });
+                }
+                break;
+            case DATA_CHOICE_ALTRUIS:
+                if (me->GetEntry() == 97265) { // Kayn
+                    Talk(2);
+                }
+                me->GetScheduler().Schedule(Seconds(6), [this](TaskContext context)
+                {
+                    Creature* kayn = GetContextCreature();
+                    kayn->GetMotionMaster()->MovePoint(4227.93f, -449.99f, 266.79f, false);
+                    kayn->DespawnOrUnsummon(6000, Seconds(15));
+                });
+                break;
+            case DATA_START_CONVERSATION:
+                if (me->GetEntry() == 97265)
+                {
+                    me->GetScheduler().Schedule(Seconds(4), [this](TaskContext context)
+                    {
+                        Creature* kayn = GetContextCreature();
+                        kayn->AI()->Talk(0);
+                    })
+                    .Schedule(Seconds(18), [this](TaskContext context)
+                    {
+                        Creature* kayn = GetContextCreature();
+                        kayn->AI()->Talk(1);
+                    });
+                }
+                if (me->GetEntry() == 97267)
+                {
+                    me->GetScheduler().Schedule(Seconds(13), [this](TaskContext context)
+                    {
+                        Creature* altruis = GetContextCreature();
+                        altruis->AI()->Talk(0);
+                    });
+                }
+                break;
+            }
+        }
+    };
 };
 
 class PlayerScript_follower_choice : public PlayerScript
@@ -1509,7 +1878,7 @@ class PlayerScript_follower_choice : public PlayerScript
 public:
     PlayerScript_follower_choice() : PlayerScript("PlayerScript_follower_choice") {}
 
-    void OnCompleteQuestChoice(Player* player, uint32 choiceID, uint32 responseID)
+    void OnPlayerChoiceResponse(Player* player, uint32 choiceID, uint32 responseID) override
     {
         if (choiceID != PLAYER_CHOICE_DH_FOLLOWER_SELECTION)
             return;
@@ -1518,9 +1887,15 @@ public:
         {
         case PLAYER_CHOICE_DH_FOLLOWER_SELECTION_KAYN:
             player->CastSpell(player, SPELL_NEW_DIRECTION_CHOSE_KAYN, true);
+            player->ForceCompleteQuest(QUEST_OBTAINED_KAYN);
+            if (Creature* altruis = player->FindNearestCreature(97267, player->GetVisibilityRange(), true))
+                altruis->AI()->SetData(22, 22);
             break;
         case PLAYER_CHOICE_DH_FOLLOWER_SELECTION_ALTRUIS:
             player->CastSpell(player, SPELL_NEW_DIRECTION_CHOSE_ALTRUIS, true);
+            player->ForceCompleteQuest(QUEST_OBTAINED_ALTRUIS);
+            if (Creature* kayn = player->FindNearestCreature(97265, player->GetVisibilityRange(), true))
+                kayn->AI()->SetData(23, 23);
             break;
         default:
             break;
@@ -1551,39 +1926,78 @@ public:
     }
 };
 
-class scene_guldan_stealing_illidan_corpse : public SceneScript
-{
-public:
-   scene_guldan_stealing_illidan_corpse() : SceneScript("scene_guldan_stealing_illidan_corpse") { }
-   enum {
-       KILL_CREDIT_ENTER_THE_CHAMBER = 99303,
-       DB_PHASE_FIGHT_IN_CHAMBER = 543,
-   };
-   void OnSceneEnd(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) override
-   {
-       player->KilledMonsterCredit(KILL_CREDIT_ENTER_THE_CHAMBER);
-       if (GameObject* go = player->FindNearestGameObject(244923, 50.0f)) {
-           go->UseDoorOrButton();
-       }   
-       player->TeleportTo(1468, 4084.52f, -297.89f, -282.28f, 3.132f, false);
-   }
-};
-
 class npc_maiev_shadowsong : public CreatureScript
 {
 public:
     npc_maiev_shadowsong() : CreatureScript("npc_maiev_shadowsong") { }
-    enum {
-        SCENE_GULDAN_STEAL_ILLIDAN_ID = 1016,
-    };
     bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest) override
     {
         if (quest->GetQuestId() == QUEST_STOP_GULDAN_H || QUEST_STOP_GULDAN_A)
-            player->GetSceneMgr().PlayScene(SCENE_GULDAN_STEAL_ILLIDAN_ID);
-
+            player->CastSpell(player, 187864);
         return true;
     }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_maiev_shadowsong_AI(creature);
+    }
+
+    struct npc_maiev_shadowsong_AI : public ScriptedAI
+    {
+        npc_maiev_shadowsong_AI(Creature* creature) : ScriptedAI(creature) { }
+
+        bool _greetSaid = false;
+
+        void MoveInLineOfSight(Unit* unit) override
+        {
+            if (Player* player = unit->ToPlayer())
+                if (player->GetDistance(me) < 10.0f)
+                    if (player->GetQuestStatus(QUEST_RISE_OF_THE_ILLIDARI) == QUEST_STATUS_COMPLETE
+                        && player->GetQuestStatus(QUEST_FEL_INFUSION) == QUEST_STATUS_COMPLETE
+                        && !_greetSaid)
+                    {
+                        me->AI()->Talk(1);
+                        _greetSaid = true;
+                    }
+        }
+    };
  };
+
+/* https://www.wowhead.com/spell=187864/play-scene
+ * (1423) 7.0 DH-VotW - Illidan's Chamber - Illidan Breakout
+ */
+class spell_play_scene_1423 : public SpellScriptLoader
+{
+public:
+    spell_play_scene_1423() : SpellScriptLoader("spell_play_scene_1423") { }
+
+    class spell_play_scene_1423_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_play_scene_1423_AuraScript);
+
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* target = GetTarget();
+
+            if (!target || !target->ToPlayer())
+                return;
+
+            target->ToPlayer()->TeleportTo(1468, 4084.27f, -298.11f, -282.07f, 3.118031f);
+            target->ToPlayer()->KilledMonsterCredit(99303);
+        }
+
+        void Register() override
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_play_scene_1423_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_PLAY_SCENE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_play_scene_1423_AuraScript();
+    }
+};
+
 
 enum eLegionPortal {
     SPELL_PORTAL_EXPLOSION = 196084,
@@ -1605,45 +2019,45 @@ public:
     }
 };
 
-class On100DHArrival : public PlayerScript
-{
-public:
-    On100DHArrival() : PlayerScript("On100DHArrival") { }
-    enum
-    {
-        SPELL_DH_IMPRISON = 217832,
-        SPELL_DH_DARKNESS = 196718,
-        SPELL_DH_BLADE_DANCE = 188499,
-        SPELL_DH_SIGIL_OF_FLAME = 204596,
-    };
-
-    void OnLogin(Player* player, bool firstLogin) override
-    {
-        // For recovery purposes
-        if (player->getLevel() >= 100 && firstLogin)
-            Handle100DHArrival(player);
-    }
-
-    void OnLevelChanged(Player* player, uint8 oldLevel) override
-    {
-        if (oldLevel < 100 && player->getLevel() >= 100)
-            Handle100DHArrival(player);
-    }
-
-    void Handle100DHArrival(Player* player)
-    {
-        if (player->getClass() == CLASS_DEMON_HUNTER)
-        {
-            player->LearnSpell(SPELL_DH_IMPRISON, false);
-            if (player->GetSpecializationId() == TALENT_SPEC_DEMON_HUNTER_HAVOC) {
-                player->LearnSpell(SPELL_DH_BLADE_DANCE, false);
-            }
-            else {
-                player->LearnSpell(SPELL_DH_SIGIL_OF_FLAME, false);
-            }
-        }
-    }
-};
+//class On100DHArrival : public PlayerScript
+//{
+//public:
+//    On100DHArrival() : PlayerScript("On100DHArrival") { }
+//    enum
+//    {
+//        SPELL_DH_IMPRISON = 217832,
+//        SPELL_DH_DARKNESS = 196718,
+//        SPELL_DH_BLADE_DANCE = 188499,
+//        SPELL_DH_SIGIL_OF_FLAME = 204596,
+//    };
+//
+//    void OnLogin(Player* player, bool firstLogin) override
+//    {
+//        // For recovery purposes
+//        if (player->getLevel() >= 100 && firstLogin)
+//            Handle100DHArrival(player);
+//    }
+//
+//    void OnLevelChanged(Player* player, uint8 oldLevel) override
+//    {
+//        if (oldLevel < 100 && player->getLevel() >= 100)
+//            Handle100DHArrival(player);
+//    }
+//
+//    void Handle100DHArrival(Player* player)
+//    {
+//        if (player->getClass() == CLASS_DEMON_HUNTER)
+//        {
+//            player->LearnSpell(SPELL_DH_IMPRISON, false);
+//            if (player->GetSpecializationId() == TALENT_SPEC_DEMON_HUNTER_HAVOC) {
+//                player->LearnSpell(SPELL_DH_BLADE_DANCE, false);
+//            }
+//            else {
+//                player->LearnSpell(SPELL_DH_SIGIL_OF_FLAME, false);
+//            }
+//        }
+//    }
+//};
 
 class PlayerScript_bonus_objective : public PlayerScript
 {
@@ -1668,234 +2082,6 @@ public:
             checkTimer = 1000;
         }
         else checkTimer -= diff;
-    }
-};
-
-class PlayerScript_switch_phases : public PlayerScript
-{
-public:
-    PlayerScript_switch_phases() : PlayerScript("PlayerScript_switch_phases") {}
-
-    uint32 checkTimer = 1000;
-
-    void OnUpdate(Player* player, uint32 diff) override
-    {
-        if (checkTimer <= diff)
-        {
-            if (player->getClass() == CLASS_DEMON_HUNTER &&
-                player->GetAreaId() == 7819 && player->GetPositionX() < 4080 &&
-                (player->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_INCOMPLETE ||
-                 player->GetQuestStatus(QUEST_STOP_GULDAN_A) == QUEST_STATUS_INCOMPLETE) &&
-                !player->GetPhaseShift().HasPhase(543))
-            {
-                PhasingHandler::AddPhase(player, 543, true);
-                // Crusher respawn
-                std::list<Creature*> crushers;
-                player->GetCreatureListWithEntryInGrid(crushers, NPC_CRUSHER, 200.0f);
-                for (std::list<Creature*>::iterator itr = crushers.begin(); itr != crushers.end(); ++itr)
-                    if (!(*itr)->IsAlive())
-                        (*itr)->Respawn();
-                // Sledge respawn
-                std::list<Creature*> sledges;
-                player->GetCreatureListWithEntryInGrid(sledges, NPC_SLEDGE, 200.0f);
-                for (std::list<Creature*>::iterator itr = sledges.begin(); itr != sledges.end(); ++itr)
-                    if (!(*itr)->IsAlive())
-                        (*itr)->Respawn();
-            }
-            if (player->getClass() == CLASS_DEMON_HUNTER &&
-                player->GetAreaId() == 7819 &&
-                (player->GetQuestStatus(QUEST_STOP_GULDAN_H) == QUEST_STATUS_REWARDED ||
-                    player->GetQuestStatus(QUEST_STOP_GULDAN_A) == QUEST_STATUS_REWARDED) &&
-                !player->GetPhaseShift().HasPhase(993))
-            {
-                PhasingHandler::AddPhase(player, 993, true);
-            }
-            checkTimer = 1000;
-        }
-        else checkTimer -= diff;
-    }
-};
-
-// ********* Grand Theft Felbat: Kayn and Altruis run and speak
-class npc_kayn_sunfury_4 : public CreatureScript
-{
-public:
-    npc_kayn_sunfury_4() : CreatureScript("npc_kayn_sunfury_4") { }
-
-    enum eCreatureTexts {
-        KAYN_TEXT_3 = 3,
-        KAYN_TEXT_4 = 4,
-        // ALTRUIS_TEXT_4 = 4,
-    };
-
-    enum eCreaturesEvents {
-        EVENT_KAYN_TALK_1 = 0,
-        EVENT_KAYN_TALK_2 = 1,
-        // EVENT_ALTRUIS_TALK_1 = 2,
-        EVENT_START_KAYN_MOVE = 4,
-        // EVENT_START_ALTRUIS_MOVE = 5,
-    };
-
-    enum eCreaturesMisc {
-        NPC_KAYN_FELBAT = 92984,
-        // NPC_ALTRUIS_FELBAT = 92985,
-        KAYN_FELBAT_PATH = 9298400,
-        // ALTRUIS_FELBAT_PATH = 9298500,
-    };
-
-    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest) override
-    {
-        if (quest->GetQuestId() == QUEST_GRAND_THEFT_FELBAT)
-        {
-            if (creature == nullptr)
-                return false;
-
-            // Kayn copy
-            player->SummonCreature(NPC_KAYN_FELBAT, creature->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 15000);
-            // Altruis copy
-            // if (Creature* altruis = creature->FindNearestCreature(NPC_ALTRUIS_FELBAT, creature->GetVisibilityRange(), true))
-                // player->SummonCreature(NPC_ALTRUIS_FELBAT, altruis->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 15000);
-        }
-        return true;
-    }
-
-    struct npc_kayn_sunfury_4AI : public ScriptedAI
-    {
-        npc_kayn_sunfury_4AI(Creature* creature) : ScriptedAI(creature)
-        {
-            Initialize();
-        }
-
-        void Initialize() {}
-
-        void Reset() override {}
-
-        void EnterCombat(Unit* /*who*/) override { }
-
-        void IsSummonedBy(Unit* who) override
-        {
-            _events.ScheduleEvent(EVENT_START_KAYN_MOVE, 1000);
-            _events.ScheduleEvent(EVENT_KAYN_TALK_1, 1000);
-            _events.ScheduleEvent(EVENT_KAYN_TALK_2, 11000);
-        }
-
-        void EnterEvadeMode(EvadeReason /*why*/) override {}
-
-        void UpdateAI(uint32 diff) override
-        {
-            UpdateVictim();
-
-            _events.Update(diff);
-
-            while (uint32 eventId = _events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                case EVENT_KAYN_TALK_1:
-                    Talk(KAYN_TEXT_3, me->GetOwner());
-                    break;
-                case EVENT_KAYN_TALK_2:
-                    Talk(KAYN_TEXT_4, me->GetOwner());
-                    break;
-                case EVENT_START_KAYN_MOVE:
-                    me->GetMotionMaster()->MovePath(KAYN_FELBAT_PATH, false);
-                default:
-                    break;
-                }
-            }
-            // no melee attacks
-        }
-    private:
-        EventMap _events;
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {
-        return new npc_kayn_sunfury_4AI(creature);
-    }
-};
-
-class npc_altruis_sufferer_4 : public CreatureScript
-{
-public:
-    npc_altruis_sufferer_4() : CreatureScript("npc_altruis_sufferer_4") { }
-
-    enum eCreatureTexts {
-        ALTRUIS_TEXT_4 = 4,
-    };
-
-    enum eCreaturesEvents {
-        EVENT_ALTRUIS_TALK_1 = 2,
-        EVENT_START_ALTRUIS_MOVE = 5,
-    };
-
-    enum eCreaturesMisc {
-        NPC_ALTRUIS_FELBAT = 92985,
-        ALTRUIS_FELBAT_PATH = 9298500,
-    };
-
-    bool OnQuestAccept(Player* player, Creature* creature, const Quest* quest) override
-    {
-        if (quest->GetQuestId() == QUEST_GRAND_THEFT_FELBAT)
-        {
-            if (creature == nullptr)
-                return false;
-
-            // Altruis copy
-            player->SummonCreature(NPC_ALTRUIS_FELBAT, creature->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 15000);
-        }
-        return true;
-    }
-
-    struct npc_altruis_sufferer_4AI : public ScriptedAI
-    {
-        npc_altruis_sufferer_4AI(Creature* creature) : ScriptedAI(creature)
-        {
-            Initialize();
-        }
-
-        void Initialize() {}
-
-        void Reset() override {}
-
-        void EnterCombat(Unit* /*who*/) override { }
-
-        void IsSummonedBy(Unit* who) override
-        {
-            _events.ScheduleEvent(EVENT_START_ALTRUIS_MOVE, 1000);
-            _events.ScheduleEvent(EVENT_ALTRUIS_TALK_1, 7000);
-        }
-
-        void EnterEvadeMode(EvadeReason /*why*/) override {}
-
-        void UpdateAI(uint32 diff) override
-        {
-            UpdateVictim();
-
-            _events.Update(diff);
-
-            while (uint32 eventId = _events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                case EVENT_ALTRUIS_TALK_1:
-                    Talk(ALTRUIS_TEXT_4, me->GetOwner());
-                    break;
-                case EVENT_START_ALTRUIS_MOVE:
-                    me->GetMotionMaster()->MovePath(ALTRUIS_FELBAT_PATH, false);
-                default:
-                    break;
-                }
-            }
-            // no melee attacks
-        }
-    private:
-        EventMap _events;
-    };
-
-    CreatureAI* GetAI(Creature* creature) const override
-    {   
-        return new npc_altruis_sufferer_4AI(creature);
     }
 };
 
@@ -2347,7 +2533,7 @@ public:
         }
 
         void MovementInform(uint32 type, uint32 pointId) override
-        {
+        {       
             if (type == EFFECT_MOTION_TYPE && pointId == pathSize)
                 _events.ScheduleEvent(EVENT_DESPAWN, 200);
         }
@@ -2365,6 +2551,8 @@ public:
                 {
                 case EVENT_START_PATH:
                     me->GetMotionMaster()->MoveSmoothPath(uint32(pathSize), secondStagePath, pathSize, false, true);
+                    if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                        player->AddDelayedConversation(10000, 6803);
                     break;
                 case EVENT_DESPAWN:
                     me->RemoveAllAuras();
@@ -2388,11 +2576,126 @@ public:
     }
 };
 
+enum grandFelbatQuest {
+    NPC_KAYN_FOLLOWER_ALTRUIS = 92985
+};
+// 92984 - Kayn Sunfury - Grand Theft Felbat
+class npc_kayn_sunfury_felbat : public CreatureScript
+{
+public:
+    npc_kayn_sunfury_felbat() : CreatureScript("npc_kayn_sunfury_felbat") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QUEST_GRAND_THEFT_FELBAT)
+        {
+            creature->AI()->SetGUID(player->GetGUID());
+
+            if (Creature* normalAltruis = creature->FindNearestCreature(NPC_KAYN_FOLLOWER_ALTRUIS, 50.0f))
+            {   
+                normalAltruis->AI()->SetGUID(player->GetGUID());
+            }
+        }
+
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_kayn_sunfury_felbatAI(creature);
+    }
+
+    struct npc_kayn_sunfury_felbatAI : public npc_escortAI
+    {
+        npc_kayn_sunfury_felbatAI(Creature* creature) : npc_escortAI(creature) { }
+
+        ObjectGuid playerGuid;
+
+        void Reset() override
+        {
+            playerGuid = ObjectGuid::Empty;
+            me->SetCorpseDelay(0);
+            me->SetRespawnDelay(0);
+            me->SetRespawnTime(0);
+        }
+
+        void SetGUID(ObjectGuid guid, int32 /*id*/) override
+        {
+            playerGuid = guid;
+            Start(false, true, guid);
+            SetDespawnAtFar(false);
+        }
+
+        void WaypointReached(uint32 pointId) override
+        {
+            switch (pointId) {
+                case 0:
+                    Talk(3);
+                    break;
+                case 4:
+                    Talk(4);
+                    break;
+            }
+        }
+
+        void LastWaypointReached() override
+        {
+            me->DespawnOrUnsummon();
+            me->setDeathState(JUST_DIED);
+            me->Respawn();
+        }
+    };
+};
+
+// 92985 (Altruis) - Kayn Sunfury follower - Grand Theft Felbat
+class npc_kayn_sunfury_follower : public CreatureScript
+{
+public:
+    npc_kayn_sunfury_follower() : CreatureScript("npc_kayn_sunfury_follower") { }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_kayn_sunfury_followerAI(creature);
+    }
+
+    struct npc_kayn_sunfury_followerAI : public npc_escortAI
+    {
+        npc_kayn_sunfury_followerAI(Creature* creature) : npc_escortAI(creature) { }
+
+        void Reset() override
+        {
+            me->SetCorpseDelay(0);
+            me->SetRespawnDelay(0);
+            me->SetRespawnTime(0);
+        }
+
+        void SetGUID(ObjectGuid guid, int32 /*id*/) override
+        {
+            Start(true, true, guid);
+        }
+
+        void WaypointReached(uint32 pointId) override
+        {
+            switch (pointId) {
+                case 1:
+                    Talk(4);
+                    break;
+            }
+        }
+
+        void LastWaypointReached() override
+        {
+            me->DespawnOrUnsummon();
+            me->setDeathState(JUST_DIED);
+            me->Respawn();
+        }
+    };
+};
+
 /*********/
 /* AddSC */
 /*********/
-void AddSC_zone_vault_of_wardens()
-{
+void AddSC_zone_vault_of_wardens() {
     new npc_kayn_cell();
     new npc_altruis_cell();
     new npc_fel_infusion();
@@ -2402,9 +2705,8 @@ void AddSC_zone_vault_of_wardens()
     new q_breaking_out();
     new q_frozen_in_time();
     new npc_kayn_sledge_fight();
-    new npc_sledge();
     new npc_altruis_crusher_fight();
-    new npc_crusher();
+    new npc_sledge_crusher();
     new go_reflective_mirror();
     new spell_activate_countermeasure();
     new go_warden_ascent();
@@ -2417,15 +2719,20 @@ void AddSC_zone_vault_of_wardens()
     RegisterCreatureAI(npc_vow_ashgolm);
     new npc_maiev_shadowsong();
     new npc_legion_portal();
-    new scene_guldan_stealing_illidan_corpse();
-    new npc_kayn_sunfury_4();
-    new npc_altruis_sufferer_4();
     new PlayerScript_follower_choice();
-    new On100DHArrival();
+    // new On100DHArrival();
     new PlayerScript_bonus_objective();
-    new PlayerScript_switch_phases();
     new npc_altruis_sufferer_freed_99632();
     new npc_kayn_sunfury_freed_99631();
     new npc_vault_of_the_wardens_vampiric_felbat();
     new npc_maiev_shadowsong_welcome();
-}
+    new spell_play_scene_1423(); // 187864: Play Scene
+    new npc_kayn_sunfury_felbat();
+    new npc_kayn_sunfury_follower();
+    new spell_196460(); // Lingering Gaze
+    new spell_196462(); // Pulse
+    new spell_199760(); // Burning Fel
+    new npc_korvas_bloodthorn_97643(); // 97643
+    new npc_votw_kayn_altruis_choice(); // 97265, 97267 
+    new npc_bastillax_attacker(); // 97273, 97274
+ }

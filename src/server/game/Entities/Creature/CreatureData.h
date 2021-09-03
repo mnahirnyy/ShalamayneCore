@@ -648,6 +648,4 @@ struct TC_GAME_API TrainerSpellData
     TrainerSpell const* Find(uint32 spell_id) const;
 };
 
-typedef std::unordered_map<uint32, float /*SparringHealthLimit*/> CreatureSparringTemplateMap;
-
 #endif // CreatureData_h__

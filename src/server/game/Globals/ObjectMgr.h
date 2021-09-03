@@ -801,7 +801,6 @@ struct PlayerChoiceResponse
     std::string Answer;
     std::string Description;
     std::string Confirmation;
-    int32 QuestId;
     Optional<PlayerChoiceResponseReward> Reward;
 };
 
@@ -1203,7 +1202,6 @@ class TC_GAME_API ObjectMgr
         void LoadCreatureTemplates();
         void LoadCreatureTemplateJournals();
         void LoadCreatureTemplateAddons();
-        void LoadCreatureSparringTemplate();
         void LoadScriptParams();
         void LoadCreatureTemplate(Field* fields);
         void LoadCreatureScalingData();
@@ -1465,17 +1463,6 @@ class TC_GAME_API ObjectMgr
                 return nullptr;
             return &itr->second;
         }
-
-        float GetSparringHealthLimitFor(uint32 entry) const
-        {
-            auto itr = _creatureSparringTemplateStore.find(entry);
-            if (itr != _creatureSparringTemplateStore.end())
-            {
-                return itr->second;
-            }
-            return 0.0f;
-        }
-
         char const* GetTrinityString(uint32 entry, LocaleConstant locale) const;
         char const* GetTrinityStringForDBCLocale(uint32 entry) const { return GetTrinityString(entry, DBCLocaleIndex); }
         LocaleConstant GetDBCLocaleIndex() const { return DBCLocaleIndex; }
@@ -1768,7 +1755,6 @@ class TC_GAME_API ObjectMgr
         GameObjectQuestItemMap _gameObjectQuestItemStore;
         CreatureQuestItemMap _creatureQuestItemStore;
         CreatureTemplateAddonContainer _creatureTemplateAddonStore;
-        CreatureSparringTemplateMap _creatureSparringTemplateStore;
         EquipmentInfoContainer _equipmentInfoStore;
         LinkedRespawnContainer _linkedRespawnStore;
         CreatureLocaleContainer _creatureLocaleStore;

@@ -71,6 +71,7 @@ UPDATE `creature_template` SET `maxlevel`= 12 WHERE `entry` IN (36461, 36671, 36
 DELETE FROM `creature` WHERE `guid`= 801903; -- removed a copy of Grandma Wahl 36458
 DELETE FROM `creature` WHERE `guid` IN (801836, 801901); -- removed a copy of Lucius the Cruel 36461
 DELETE FROM `creature` WHERE `guid` IN (801929, 801941, 801937, 801925, 801922, 801944, 801939, 801921, 801931, 801919, 801924, 801926, 801943, 801923); -- removed a copy of 36488
+DELETE FROM `creature_addon` WHERE `guid` IN (801929, 801941, 801937, 801925, 801922, 801944, 801939, 801921, 801931, 801919, 801924, 801926, 801943, 801923); -- removed a copy of 36488
 -- Barrel of Coal Tar (196808)
 DELETE FROM  `gameobject` WHERE `id` = 196808;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) VALUES
