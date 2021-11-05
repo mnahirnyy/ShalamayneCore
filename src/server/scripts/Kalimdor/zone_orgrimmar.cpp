@@ -57,29 +57,29 @@ enum eQuest {
     CONVERSATION_KHADGAR_BLINK_OF_EYE = 3827,
 };
 
-class PlayerScript_summon_khadgar : public PlayerScript
-{
-public:
-    PlayerScript_summon_khadgar() : PlayerScript("PlayerScript_summon_khadgar") {}
-
-    uint32 checkTimer = 1000;
-    bool _khadgarSummoned = false;
-
-    void OnUpdate(Player* player, uint32 diff) override
-    {
-        if (checkTimer <= diff)
-        {
-            if (player->getClass() == CLASS_DEMON_HUNTER &&
-                (player->GetAreaId() == 1637 || 5170 || 5356) &&
-                player->GetQuestStatus(QUEST_ILLIDARI_LEAVING_H) == QUEST_STATUS_REWARDED &&
-                !player->GetPhaseShift().HasPhase(PHASE_ORGRIMMAR_WARCHIEF)) {
-                    PhasingHandler::AddPhase(player, PHASE_ORGRIMMAR_WARCHIEF, true);
-            }
-            checkTimer = 1000;
-        }
-        else checkTimer -= diff;
-    }
-};
+//class PlayerScript_summon_khadgar : public PlayerScript
+//{
+//public:
+//    PlayerScript_summon_khadgar() : PlayerScript("PlayerScript_summon_khadgar") {}
+//
+//    uint32 checkTimer = 1000;
+//    bool _khadgarSummoned = false;
+//
+//    void OnUpdate(Player* player, uint32 diff) override
+//    {
+//        if (checkTimer <= diff)
+//        {
+//            if (player->getClass() == CLASS_DEMON_HUNTER &&
+//                (player->GetAreaId() == 1637 || 5170 || 5356) &&
+//                player->GetQuestStatus(QUEST_ILLIDARI_LEAVING_H) == QUEST_STATUS_REWARDED &&
+//                !player->GetPhaseShift().HasPhase(PHASE_ORGRIMMAR_WARCHIEF)) {
+//                    PhasingHandler::AddPhase(player, PHASE_ORGRIMMAR_WARCHIEF, true);
+//            }
+//            checkTimer = 1000;
+//        }
+//        else checkTimer -= diff;
+//    }
+//};
 
 class npc_archmage_khadgar : public CreatureScript
 {
@@ -788,7 +788,7 @@ public:
 void AddSC_orgrimmar()
 {
 	new play_fate_of_the_horde();
-    new PlayerScript_summon_khadgar();
+    // new PlayerScript_summon_khadgar();
     new npc_lord_saurfang();
     new PlayerScript_summon_khadgar_servant();
     new npc_khadgars_upgraded_servant();

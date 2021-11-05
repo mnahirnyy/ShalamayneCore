@@ -27,6 +27,7 @@
 Scenario::Scenario(ScenarioData const* scenarioData) : _data(scenarioData), _currentstep(nullptr)
 {
     ASSERT(_data);
+    TC_LOG_ERROR("scenario", "Scenario::Scenario: *** SCENARIO CONSTRUCTOR (id: %u)", _data->Entry->ID);
 
     for (auto step : _data->Steps)
         SetStepState(step.second, SCENARIO_STEP_NOT_STARTED);
@@ -102,7 +103,7 @@ void Scenario::SetStep(ScenarioStepEntry const* step)
 void Scenario::OnPlayerEnter(Player* player)
 {
     _players.insert(player->GetGUID());
-    SendScenarioState(player);
+    // SendScenarioState(player);
 }
 
 void Scenario::OnPlayerExit(Player* player)
@@ -256,6 +257,7 @@ ScenarioStepEntry const* Scenario::GetFirstStep() const
 
 void Scenario::SendScenarioState(Player* player)
 {
+    TC_LOG_ERROR("server.worldserver", "*** Scenario::SendScenarioState '%u'", _data->Entry->ID);
     WorldPackets::Scenario::ScenarioState scenarioState;
     BuildScenarioState(&scenarioState);
     player->SendDirectMessage(scenarioState.Write());

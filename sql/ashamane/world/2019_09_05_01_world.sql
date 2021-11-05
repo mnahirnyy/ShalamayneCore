@@ -528,9 +528,9 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficult
 (280000465,95240,1519,0,0,0,0,0,0,-1,0,1,1524.21,1406.65,243.764,6.12075,30,0,0,113100,0,0,0,0,0,0,0,'',22423),
 (280000466,95237,1519,8022,8023,0,0,0,0,-1,0,1,1551.41,1414.73,237.108,6.225207,30,0,0,1203351,0,0,0,0,0,0,0,'',22423),
 (280000467,103025,1519,8022,8023,0,0,0,0,-1,0,1,1584.68,1409.38,218.026,2.990351,30,0,0,1203351,0,0,0,0,0,0,0,'',22423),
-(280000468,102799,1220,7502,7505,0,0,4165,0,-1,0,1,-835.92,4265.74,746.253,4.27038,30,0,0,870,0,0,0,0,0,0,0,'',26972),
-(280000469,109276,1220,7502,7505,0,0,4165,0,-1,0,1,-836.94,4266.27,746.265,4.31515,30,0,0,870,0,0,0,0,0,0,0,'',26972),
-(280000470,109277,1220,7502,7505,0,0,4165,0,-1,0,1,-834.75,4265.10,746.252,4.38190,30,0,0,870,0,0,0,0,0,0,0,'',26972);
+(280000468,102799,1220,7502,7505,0,0,0,0,-1,0,1,-835.92,4265.74,746.253,4.27038,30,0,0,870,0,0,0,0,0,0,0,'',26972),
+(280000469,109276,1220,7502,7505,0,0,0,0,-1,0,1,-836.94,4266.27,746.265,4.31515,30,0,0,870,0,0,0,0,0,0,0,'',26972),
+(280000470,109277,1220,7502,7505,0,0,0,0,-1,0,1,-834.75,4265.10,746.252,4.38190,30,0,0,870,0,0,0,0,0,0,0,'',26972);
 DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (109196, 109247, 109340, 102798, 102797, 95237);
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
 (109196,1,128360,0,0,128370,0,0,0,0,0,25549),
@@ -544,7 +544,12 @@ INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `Appearanc
 (102799,1,128359,0,0,128371,0,0,0,0,0,25549),
 (109276,1,128361,0,0,128369,0,0,0,0,0,25549),
 (109277,1,128361,0,0,128369,0,0,0,0,0,25549);
-UPDATE `creature` SET `equipment_id`=0 WHERE `guid` IN (280000468, 280000469, 280000470);
+UPDATE `creature` SET `equipment_id`=1 WHERE `guid` IN (280000468, 280000469, 280000470);
+DELETE FROM `creature_template_addon` WHERE `entry` IN (102799, 109276, 109277);
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `aiAnimKit`, `movementAnimKit`, `meleeAnimKit`, `auras`) VALUES
+(102799, 0, 0, 0, 0, 0, 0, 0, 0, '42459'),
+(109276, 0, 0, 0, 0, 0, 0, 0, 0, '42459'),
+(109277, 0, 0, 0, 0, 0, 0, 0, 0, '42459');
 DELETE FROM `gameobject` WHERE `guid` IN (51014378, 51014379);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) VALUES
 (51014378,251528,1220,7502,8284,0,0,0,0,-1,-949.313,4090.18,648.245,05.66822,-0,-0,-0.302659,0.953099,300,255,1,0,'',26822),

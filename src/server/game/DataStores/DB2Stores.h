@@ -173,6 +173,7 @@ TC_GAME_API extern DB2Storage<QuestPOIBlobEntry>                    sQuestPOIBlo
 TC_GAME_API extern DB2Storage<QuestSortEntry>                       sQuestSortStore;
 TC_GAME_API extern DB2Storage<QuestXPEntry>                         sQuestXPStore;
 TC_GAME_API extern DB2Storage<RandPropPointsEntry>                  sRandPropPointsStore;
+TC_GAME_API extern DB2Storage<RelicTalentEntry>                     sRelicTalentStore;
 TC_GAME_API extern DB2Storage<RewardPackEntry>                      sRewardPackStore;
 TC_GAME_API extern DB2Storage<ResearchBranchEntry>                  sResearchBranchStore;
 TC_GAME_API extern DB2Storage<ResearchSiteEntry>                    sResearchSiteStore;

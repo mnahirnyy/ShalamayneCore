@@ -2505,6 +2505,10 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         bool IsAdvancedCombatLoggingEnabled() const { return _advancedCombatLoggingEnabled; }
         void SetAdvancedCombatLogging(bool enabled) { _advancedCombatLoggingEnabled = enabled; }
 
+        // Scenario
+        uint16 GetScenarioId() const { return m_scenarioId; }
+        void SetScenarioId(uint16 scenarioId) { m_scenarioId = scenarioId; }
+
         PlayerAchievementMgr* GetAchievementMgr() { return m_achievementMgr; }
         QuestObjectiveCriteriaMgr* GetQuestObjectiveCriteriaMgr() const { return m_questObjectiveCriteriaMgr.get(); }
         SceneMgr& GetSceneMgr() { return m_sceneMgr; }
@@ -2921,6 +2925,8 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         float _PersonnalXpRate;
 
         uint32 _activeCheats;
+
+        uint16 m_scenarioId = 0;
 
         PlayerGarrisonMap _garrisons;
         GarrisonType _insideGarrisonType;

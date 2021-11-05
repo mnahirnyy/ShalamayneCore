@@ -107,9 +107,23 @@ INSERT INTO `scenario_step` (`ID`, `Description`, `Title`, `ScenarioID`, `Supers
 (1941, 'Use your demonic senses to pickup Caria\'s trail.', 'Nowhere to Hide', 961, 0, 0, 4, 0, 45979, 0, 26972),
 (1942, 'Caria Felsoul\'s time has come.', 'Vengeance for the Illidari', 961, 0, 0, 5, 0, 45981, 0, 26972),
 (2302, 'Claim the Aldrachi Warblades as your own.', 'Right by Ascension', 961, 0, 0, 6, 0, 47219, 0, 26972);
+-- Dark Whispers
+DELETE FROM `scenario` WHERE `ID` = 1097;
+INSERT INTO `scenario` (`ID`, `Name`, `AreaTableID`, `Flags`, `Type`, `VerifiedBuild`) VALUES
+(1097, 'Dark Whispers', 0, 0, 0, 26972);
+DELETE FROM `scenario_step` WHERE `ScenarioID` = 1097;
+INSERT INTO `scenario_step` (`ID`, `Description`, `Title`, `ScenarioID`, `Supersedes`, `RewardQuestID`, `OrderIndex`, `Flags`, `Criteriatreeid`, `RelatedStep`, `VerifiedBuild`) VALUES
+(2443, 'The skull should be within Felsoul Hold. Make your way down the path and search for it.', 'Searching the Hold', 1097, 0, 0, 0, 0, 47894, 0, 26972),
+(2475, 'Defeat the Felborn Overfiend.', 'Getting Over the Overfiend', 1097, 0, 0, 1, 0, 48017, 0, 26972),
+(2476, 'Mephistroth has escaped with the skull. Find a way across his trap and chase after him!', 'Demon Hunting', 1097, 0, 0, 2, 0, 48045, 0, 26972),
+(2477, 'Mephistroth has sent his minions after you. Survive their assault until Lady Tyrana and Pain Mistress Nikta arrives, then kill them.', 'The Legion', 1097, 0, 0, 3, 0, 48047, 0, 26972),
+(2478, 'Mephistroth is attempting to destroy the skull! Clear the way to his ritual site and stop him!', 'Screams of the Skull', 1097, 0, 0, 4, 0, 48050, 0, 26972),
+(2479, 'Mephistroth has escaped but the skull is intact. Take it.', 'The Skull of the Man''ari', 1097, 0, 0, 5, 0, 48053, 0, 26972),
+(2502, 'The skull is yours! Step through its portal to depart this place.', 'There''s a New Master in Town', 1097, 0, 0, 6, 0, 48097, 0, 26972);
 -- Twinblades of the Deceiver
-DELETE FROM `broadcast_text` WHERE `ID` BETWEEN 143432 AND 143456;
+DELETE FROM `broadcast_text` WHERE `ID` BETWEEN 143432 AND 143457;
 INSERT INTO `broadcast_text` (`ID`, `Text`, `Text1`, `EmoteID1`, `EmoteID2`, `EmoteID3`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmotesID`, `LanguageID`, `Flags`, `ConditionID`, `SoundEntriesID1`, `SoundEntriesID2`, `VerifiedBuild`) VALUES
+(143457, 'Well done, $p. We managed to clear the skies while you dealt with Varedis.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 57452, 0, 26972), -- Kayn
 (143456, 'Behold the infinite power of the Twinblades!', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 52044, 0, 26972), -- Varedis
 (143455, 'So, Illidari, you seek my head, that you might take the Twinblades as your own? Allow me to introduce you to their power... personally.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 52021, 0, 26972), -- Varedis
 (143454, 'Keep your wits about you, $p. Varedis will be a cunning adversary.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58218, 0, 26972), -- Kayn
@@ -135,7 +149,7 @@ INSERT INTO `broadcast_text` (`ID`, `Text`, `Text1`, `EmoteID1`, `EmoteID2`, `Em
 (143434, 'The fools think they can stand against you. Show them the price of their arrogance!', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58249, 0, 26972), -- Altruis
 (143433, 'The Legion won\'t soon forget this day.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58256, 0, 26972), -- Altruis
 (143432, 'We\'ve rid the skies of the worst of them. We should have a clear shot to Dalaran from here.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58257, 0, 26972); -- Altruis
-DELETE FROM `conversation_line` WHERE `ID` BETWEEN 15675 AND 15697;
+DELETE FROM `conversation_line` WHERE `ID` BETWEEN 15675 AND 15698;
 INSERT INTO `conversation_line` (`ID`, `BroadcastTextID`, `SpellVisualKitID`, `AdditionalDuration`, `NextConversationLineID`, `AnimKitID`, `SpeechType`, `StartAnimation`, `EndAnimation`, `VerifiedBuild`) VALUES
 (15675, 143454, 0, 500, 0, 0, 0, 60, 60, 26972),
 (15676, 143453, 0, 500, 0, 0, 0, 60, 60, 26972),
@@ -158,5 +172,27 @@ INSERT INTO `conversation_line` (`ID`, `BroadcastTextID`, `SpellVisualKitID`, `A
 (15693, 143436, 0, 500, 0, 0, 0, 60, 60, 26972),
 (15694, 143435, 0, 500, 0, 0, 0, 60, 60, 26972),
 (15695, 143434, 0, 500, 0, 0, 0, 60, 60, 26972),
-(15696, 143433, 0, 500, 0, 0, 0, 60, 60, 26972),
-(15697, 143432, 0, 500, 0, 0, 0, 60, 60, 26972);
+(15696, 143433, 0, 500, 15697, 0, 0, 60, 60, 26972),
+(15697, 143432, 0, 500, 0, 0, 0, 60, 60, 26972),
+(15698, 143457, 0, 500, 0, 0, 0, 60, 60, 26972);
+-- Dark Whispers
+DELETE FROM `broadcast_text` WHERE `ID` BETWEEN 143458 AND 143465;
+INSERT INTO `broadcast_text` (`ID`, `Text`, `Text1`, `EmoteID1`, `EmoteID2`, `EmoteID3`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmotesID`, `LanguageID`, `Flags`, `ConditionID`, `SoundEntriesID1`, `SoundEntriesID2`, `VerifiedBuild`) VALUES
+(143458, 'There you are, mortal! I sense you are near. Move quickly and head down the path! ', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62315, 0, 26972), -- Thalkiel
+(143459, 'The master is gone and his minions gorge upon my power. Come, repay this degradation! Introduce them to unfathomable levels of pain!', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62318, 0, 26972), -- Thalkiel
+(143460, 'Good! Now, before the master returns, slay my captors and free me!', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62320, 0, 26972), -- Thalkiel
+(143461, 'Do you hear me, mortal? Mephistroth imprisoned me at the far side of the valley. Hurry! I sense he is preparing for something... significant.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62322, 0, 26972), -- Thalkiel
+(143462, 'Arrrghhh!', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62324, 0, 26972), -- Thalkiel
+(143463, 'Curse you! I will not give in!', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62326, 0, 26972), -- Thalkiel
+(143464, 'Freedom! The feeling is sweet, but Mephistroth''s magic has diminished my power. Let''s depart this place before the dreadlord is able to return.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62327, 0, 26972), -- Thalkiel
+(143465, 'Did you think I would stand idle as you clawed your way through my minions? Listen, mortal, as the treasure you fight so hard to obtain is broken to my will!', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62328, 0, 26972); -- Mephistroth
+DELETE FROM `conversation_line` WHERE `ID` BETWEEN 15699 AND 15706;
+INSERT INTO `conversation_line` (`ID`, `BroadcastTextID`, `SpellVisualKitID`, `AdditionalDuration`, `NextConversationLineID`, `AnimKitID`, `SpeechType`, `StartAnimation`, `EndAnimation`, `VerifiedBuild`) VALUES
+(15699, 143458, 0, 500, 15700, 0, 0, 60, 60, 26972),
+(15700, 143459, 0, 500, 0, 0, 0, 60, 60, 26972),
+(15701, 143460, 0, 500, 0, 0, 0, 60, 60, 26972),
+(15702, 143461, 0, 500, 0, 0, 0, 60, 60, 26972),
+(15703, 143462, 0, 500, 15704, 0, 0, 60, 60, 26972),
+(15704, 143463, 0, 500, 0, 0, 0, 60, 60, 26972),
+(15705, 143464, 0, 500, 0, 0, 0, 60, 60, 26972),
+(15706, 143465, 0, 500, 0, 0, 0, 60, 60, 26972);

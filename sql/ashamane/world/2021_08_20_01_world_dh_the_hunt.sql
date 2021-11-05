@@ -1,9 +1,94 @@
 -- "The Twinblades of the Deceiver" Artifact Scenario
 UPDATE `instance_template` SET `script`='scenario_artifact_suramar_acquisition', `parent`=1220, `insideResurrection`=1 WHERE `map`=1498;
-DELETE FROM `scenarios` WHERE `map` = '1498' AND `scenario_A` IN ('900', '1097');
+DELETE FROM `scenarios` WHERE `map` = '1498' AND `scenario_A`='900';
 INSERT INTO `scenarios` (`map`, `difficulty`, `scenario_A`, `scenario_H`) VALUES
-('1498', '12', '900', '900'),
-('1498', '11', '1097', '1097');
+('1498', '12', '900', '900');
+/* The Twinblades of the Deceiver Scenario spawns */
+SET @CGUID := 280001139;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+70;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `unit_flags2`, `unit_flags3`, `dynamicflags`, `ScriptName`, `VerifiedBuild`) VALUES
+(@CGUID+0,95313,1498,7637,7768,12,0,0,522,-1,0,0,1064.09,5146.94,57.9364,3.10926,900,0,0,0,0,0,0,768,0,0,0,'',25549), -- Felsoul Chaosweaver (ability: 183345)
+(@CGUID+1,95313,1498,7637,7768,12,0,0,522,-1,0,0,1052.9,5109.51,57.0457,2.62376,900,0,0,0,0,0,0,768,0,0,0,'',25549), -- Felsoul Chaosweaver (ability: 183345)
+(@CGUID+2,95899,1498,7637,7768,12,0,0,522,-1,0,0,979.793,4852.98,42.5688,1.13435,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Infinite AOI Bunny - GJC [INSTANCES ONLY - SPECIAL CASE USE ONLY]
+(@CGUID+3,101906,1498,7637,7768,12,0,0,522,-1,0,0,970.715,4906.96,60.9847,0.584905,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Universal Bunny
+(@CGUID+4,101695,1498,7637,7768,12,0,0,522,-1,0,0,1099.81,4901.87,61.8493,0.91476,900,0,0,0,0,0,0,0,0,0,0,'npc_felsoul_obliterator_101695',25549), -- Felsoul Obliterator (abilities: 191669, 202211)
+(@CGUID+5,95899,1498,7637,7768,12,0,0,522,-1,0,0,1096.89,4961.00,49.1263,0.36076,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Infinite AOI Bunny - GJC [INSTANCES ONLY - SPECIAL CASE USE ONLY]
+(@CGUID+6,101906,1498,7637,7768,12,0,0,522,-1,0,0,1216.74,5003.82,86.3502,2.57561,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Universal Bunny
+(@CGUID+7,95899,1498,7637,7768,12,0,0,522,-1,0,0,1091.08,5140.42,89.8238,0.349389,900,0,0,0,0,0,0,0,0,0,0,'npc_suramar_second_AOIbunny',25549), -- Infinite AOI Bunny - GJC [INSTANCES ONLY - SPECIAL CASE USE ONLY]
+(@CGUID+8,101906,1498,7637,7768,12,0,0,522,-1,0,0,1055.25,5091.42,80.0833,0.45281,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Universal Bunny
+(@CGUID+9,95899,1498,7637,7768,12,0,0,522,-1,0,0,1258.78,5236.05,130.786,0.349389,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Infinite AOI Bunny - GJC [INSTANCES ONLY - SPECIAL CASE USE ONLY]
+(@CGUID+10,101763,1498,7637,7768,12,0,0,522,-1,0,0,936.345,4882.26,131.293,2.07462,900,20,0,0,0,1,0,0,0,0,0,'',25549), -- Felsoul Swarmer
+(@CGUID+11,101763,1498,7637,7768,12,0,0,522,-1,0,0,1004.57,5014.33,130.979,5.93877,900,20,0,0,0,1,0,0,0,0,0,'',25549), -- Felsoul Swarmer
+(@CGUID+12,101763,1498,7637,7768,12,0,0,522,-1,0,0,970.291,4989.14,135.664,4.54916,900,20,0,0,0,1,0,0,0,0,0,'',25549), -- Felsoul Swarmer
+(@CGUID+13,95329,1498,7637,7768,12,0,0,522,-1,0,0,1207.27,4976.65,57.7924,0.60798,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Fleshcarver
+(@CGUID+14,95922,1498,7637,7768,12,0,0,522,-1,0,0,970.566,4906.9,36.1507,0.580077,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Generic Bunny
+(@CGUID+15,101763,1498,7637,7768,12,0,0,522,-1,0,0,1094.64,5064.25,139.405,4.41542,900,20,0,0,0,1,0,0,0,0,0,'',25549), -- Felsoul Swarmer
+(@CGUID+16,101763,1498,7637,7768,12,0,0,522,-1,0,0,1062.27,4983.62,133.57,2.39036,900,20,0,0,0,1,0,0,0,0,0,'',25549), -- Felsoul Swarmer
+(@CGUID+17,101695,1498,7637,7768,12,0,0,522,-1,0,0,1270.28,5253.43,93.9493,4.2859,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Obliterator (abilities: 191669, 202211)
+(@CGUID+18,101764,1498,7637,7768,12,0,0,522,-1,0,0,1099.84,5009.24,126.758,3.58149,900,20,0,0,0,1,0,0,0,0,0,'',25549), -- Felsoul Doomlord
+(@CGUID+19,101763,1498,7637,7768,12,0,0,522,-1,0,0,1169.72,5139.56,130.979,4.33128,900,20,0,0,0,1,0,0,0,0,0,'',25549), -- Felsoul Swarmer
+(@CGUID+20,101764,1498,7637,7768,12,0,0,522,-1,0,0,1106.73,5044.1,135.439,4.05676,900,20,0,0,0,1,0,0,0,0,0,'',25549), -- Felsoul Doomlord
+(@CGUID+21,101764,1498,7637,7768,12,0,0,522,-1,0,0,1155.88,5061.14,143.361,3.73965,900,20,0,0,0,1,0,0,0,0,0,'',25549), -- Felsoul Doomlord
+(@CGUID+22,101770,1498,7637,7768,12,0,0,522,-1,0,0,1253.03,5254.09,106.522,4.57183,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Doomlord
+(@CGUID+23,101770,1498,7637,7768,12,0,0,522,-1,0,0,1283.03,5249.42,108.391,4.02794,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Doomlord
+(@CGUID+24,95313,1498,7637,7768,12,0,0,522,-1,0,0,997.72,4978.12,37.4653,4.14846,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Chaosweaver
+(@CGUID+25,95899,1498,7637,7768,12,0,0,522,-1,0,0,1117.88,5185.47,66.8023,0.79537,900,0,0,0,0,0,0,0,0,0,0,'npc_suramar_first_AOIbunny',25549), -- Infinite AOI Bunny - GJC [INSTANCES ONLY - SPECIAL CASE USE ONLY]
+(@CGUID+26,101867,1498,7637,7768,12,0,0,522,-1,0,0,976.986,5148.53,69.9649,2.99324,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Gateway
+(@CGUID+27,54638,1498,7637,7768,12,0,0,522,-1,0,0,1192.05,5250.71,79.632,0.424421,1,0,0,0,0,0,0,0,0,0,0,'npc_fel_spike_bunny',25549), -- Generic Bunny (abilities: 211742)
+(@CGUID+28,54638,1498,7637,7768,12,0,0,522,-1,0,0,1103.25,5186.29,65.4488,0.620403,1,0,0,0,0,0,0,0,0,0,0,'npc_fel_spike_bunny',25549), -- Generic Bunny (abilities: 211742)
+(@CGUID+29,54638,1498,7637,7768,12,0,0,522,-1,0,0,1105.57,5180.24,64.259,0.78054,1,0,0,0,0,0,0,0,0,0,0,'npc_fel_spike_bunny',25549), -- Generic Bunny (abilities: 211742)
+(@CGUID+30,54638,1498,7637,7768,12,0,0,522,-1,0,0,1118.65,5171.46,65.7147,1.06036,1,0,0,0,0,0,0,0,0,0,0,'npc_fel_spike_bunny',25549), -- Generic Bunny (abilities: 211742)
+(@CGUID+31,54638,1498,7637,7768,12,0,0,522,-1,0,0,1130.63,5166.3,67.7482,1.1575,1,0,0,0,0,0,0,0,0,0,0,'npc_fel_spike_bunny',25549), -- Generic Bunny (abilities: 211742)
+(@CGUID+32,54638,1498,7637,7768,12,0,0,522,-1,0,0,1125.47,5170.15,67.2623,1.21732,1,0,0,0,0,0,0,0,0,0,0,'npc_fel_spike_bunny',25549), -- Generic Bunny (abilities: 211742)
+(@CGUID+33,95922,1498,7637,7768,12,0,0,522,-1,0,0,1055.16,5091.29,55.3546,0.45281,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Generic Bunny
+(@CGUID+34,54638,1498,7637,7768,12,0,0,522,-1,0,0,1150.35,5231.76,70.9866,0.81895,1,0,0,0,0,0,0,0,0,0,0,'npc_fel_spike_bunny',25549), -- Generic Bunny (abilities: 211742)
+(@CGUID+35,73985,1498,7637,7768,12,0,0,522,-1,0,0,972.177,4952.98,49.1648,5.7127,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Large AOI Bunny - GJC (auras: 265123)
+(@CGUID+36,54638,1498,7637,7768,12,0,0,522,-1,0,0,1086.704,4941.24,49.7059,6.10013,1,0,0,0,0,0,0,0,0,0,0,'npc_fel_spike_bunny',25549), -- Generic Bunny (abilities: 211742)
+(@CGUID+37,54638,1498,7637,7768,12,0,0,522,-1,0,0,1065.38,4971.16,44.8989,5.57757,1,0,0,0,0,0,0,0,0,0,0,'npc_fel_spike_bunny',25549), -- Generic Bunny (abilities: 211742)
+(@CGUID+38,54638,1498,7637,7768,12,0,0,522,-1,0,0,1064.64,4943.56,48.257,0.20963,1,0,0,0,0,0,0,0,0,0,0,'npc_fel_spike_bunny',25549), -- Generic Bunny (abilities: 211742)
+(@CGUID+39,102966,1498,7637,7768,12,0,0,522,-1,0,0,1004.21,4931.21,43.3358,0.800601,900,0,0,0,0,2,0,0,0,0,0,'',25549), -- Invisible Stalker
+(@CGUID+40,54638,1498,7637,7768,12,0,0,522,-1,0,0,1026.34,4973.94,38.9889,6.10011,1,0,0,0,0,0,0,0,0,0,0,'npc_fel_spike_bunny',25549), -- Generic Bunny (abilities: 211742)
+(@CGUID+41,95452,1498,7637,7768,12,0,0,522,-1,0,0,1130.33,4974.91,50.1715,0.363882,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Crusher
+(@CGUID+42,95922,1498,7637,7768,12,0,0,522,-1,0,0,1216.84,5003.89,62.0476,2.58232,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Generic Bunny
+(@CGUID+43,95464,1498,7637,7768,12,0,0,522,-1,0,0,982.17,4879.24,32.3454,0.558073,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Gigantic AOI Bunny - GJC [INSTANCES ONLY]
+(@CGUID+44,95464,1498,7637,7768,12,0,0,522,-1,0,0,993.337,4876.76,32.2556,0.558073,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Gigantic AOI Bunny - GJC [INSTANCES ONLY]
+(@CGUID+45,95464,1498,7637,7768,12,0,0,522,-1,0,0,998.892,4876.26,32.1876,0.558073,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Gigantic AOI Bunny - GJC [INSTANCES ONLY]
+(@CGUID+46,95464,1498,7637,7768,12,0,0,522,-1,0,0,975.722,4866.96,32.1424,0.558073,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Gigantic AOI Bunny - GJC [INSTANCES ONLY]
+(@CGUID+47,95464,1498,7637,7768,12,0,0,522,-1,0,0,984.99,4854.77,32.2291,0.558073,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Gigantic AOI Bunny - GJC [INSTANCES ONLY]
+(@CGUID+48,95464,1498,7637,7768,12,0,0,522,-1,0,0,992.911,4862.37,32.251,0.558073,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Gigantic AOI Bunny - GJC [INSTANCES ONLY]
+(@CGUID+49,95464,1498,7637,7768,12,0,0,522,-1,0,0,977.141,4855.65,32.2291,0.558073,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Gigantic AOI Bunny - GJC [INSTANCES ONLY]
+(@CGUID+50,95464,1498,7637,7768,12,0,0,522,-1,0,0,981.135,4866.82,32.2052,0.558073,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Gigantic AOI Bunny - GJC [INSTANCES ONLY]
+(@CGUID+51,95464,1498,7637,7768,12,0,0,522,-1,0,0,987.154,4875.05,32.2052,0.558073,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Gigantic AOI Bunny - GJC [INSTANCES ONLY]
+(@CGUID+52,95464,1498,7637,7768,12,0,0,522,-1,0,0,987.427,4866.53,32.2109,0.558073,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Gigantic AOI Bunny - GJC [INSTANCES ONLY]
+(@CGUID+53,95313,1498,7637,7768,12,0,0,522,-1,0,0,1106.11,5162.37,62.4132,0.772932,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Chaosweaver (abilities: 183345)
+(@CGUID+54,95313,1498,7637,7768,12,0,0,522,-1,0,0,1097.54,5160.78,61.0519,0.763566,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Chaosweaver (abilities: 183345)
+(@CGUID+55,95314,1498,7637,7768,12,0,0,522,-1,0,0,1145.56,5225.91,70.3035,0.849695,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Stalker (abilities: 182566, 204337)
+(@CGUID+56,95314,1498,7637,7768,12,0,0,522,-1,0,0,1107.46,5158.2,62.2113,0.771014,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Stalker (abilities: 182566, 204337)
+(@CGUID+57,95314,1498,7637,7768,12,0,0,522,-1,0,0,1156.65,5219.11,70.9498,1.15993,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Stalker (abilities: 182566, 204337)
+(@CGUID+58,6491,1498,7637,7768,12,0,0,522,-1,0,0,753.85,4963.45,138.2,3.41,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Ritualist (abilities: 183345)
+(@CGUID+59,95848,1498,7637,7768,12,0,0,522,-1,0,0,1076.42,4946.62,48.6052,0.19315,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Ritualist (abilities: 183345)
+(@CGUID+60,95848,1498,7637,7768,12,0,0,522,-1,0,0,1076.66,4954.06,47.5632,0.33530,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Ritualist (abilities: 183345)
+(@CGUID+61,6491,1498,7637,7768,12,0,0,522,-1,0,0,998.093,4894.58,36.354,2.45279,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Ritualist (abilities: 183345)
+(@CGUID+62,95848,1498,7637,7768,12,0,0,522,-1,0,0,1079.77,4989.49,49.8667,0.35490,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Ritualist (abilities: 183345)
+(@CGUID+63,6491,1498,7637,7768,12,0,0,522,-1,0,0,1264.29,5236.38,93.5313,1.47915,120,0,0,0,0,0,0,0,0,0,0,'',25549), -- Spirit Healer
+(@CGUID+64,95329,1498,7637,7768,12,0,0,522,-1,0,0,1070.59,5119.97,57.3696,0.891316,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Fleshcarver (abilities: 204114, 205818)
+(@CGUID+65,95329,1498,7637,7768,12,0,0,522,-1,0,0,1163.74,5226.07,73.0995,1.16385,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Fleshcarver (abilities: 204114, 205818)
+(@CGUID+66,95329,1498,7637,7768,12,0,0,522,-1,0,0,1155.84,5230.14,71.6007,0.84577,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Fleshcarver (abilities: 204114, 205818)
+(@CGUID+67,95429,1498,7637,7768,12,0,0,522,-1,0,0,1004.116,4931.888,36.2755,0.67523,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Fist of the Deceiver
+(@CGUID+68,95285,1498,7637,7768,12,0,0,522,-1,0,0,1201.0,4994.28,57.8075,1.96338,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Fel Commander Igrius (abilities: 193906, 199094, 205817, 216681)
+(@CGUID+69,95423,1498,7637,7768,12,0,0,522,-1,0,0,1037.51,5131.58,58.582,5.61795,900,0,0,0,0,0,0,0,0,0,0,'',25549), -- Felsoul Berserker
+(@CGUID+70,95423,1498,7637,7768,12,0,0,522,-1,0,0,1039.46,5134.89,58.486,5.4805,900,0,0,0,0,0,0,0,0,0,0,'',25549); -- Felsoul Berserker
+/* Felsoul Hold objects spawn */
+SET @GOGUID := 51014704;
+DELETE FROM `gameobject` WHERE `guid` BETWEEN @GOGUID+0 AND @GOGUID+6;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnDifficulties`, `phaseUseFlags`, `PhaseId`, `PhaseGroup`, `terrainSwapMap`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `isActive`, `ScriptName`, `VerifiedBuild`) VALUES
+(@GOGUID+0,243428,1498,7637,7768,12,0,0,522,-1,1055.15,5091.44,55.2713,0.452808,-0,-0,-0,1,7200,255,1,1,'',22423), -- Felshield Ward (triggers: 190275)
+(@GOGUID+1,243472,1498,7637,7768,12,0,0,522,-1,1213.633,5026.272,60.0546,2.58231,-0,-0,-0,1,7200,255,1,1,'',22423), -- Felshield Ward (triggers: 190275)
+(@GOGUID+2,243473,1498,7637,7768,12,0,0,522,-1,970.566,4906.9,36.0674,0.580076,-0,-0,-0,1,7200,255,1,1,'',22423), -- Felshield Ward (triggers: 190275)
+(@GOGUID+3,246288,1498,7637,7768,12,0,0,522,-1,1263.05,5237.32,93.5311,2.25552,0,0,0,1,7200,255,0,1,'',22423), -- Rune
+(@GOGUID+4,243679,1498,7637,7768,12,0,0,522,-1,972.904,4953.49,36.0268,5.8367,0,0,0,1,7200,255,0,1,'',22423), -- Ritual Portal
+(@GOGUID+5,246316,1498,7637,7768,12,0,0,522,-1,976.986,5148.53,69.8816,2.99322,0,0,0,1,7200,255,0,1,'',22423), -- Ritual Portal
+(@GOGUID+6,243468,1498,7637,7768,12,0,0,522,-1,987.344,4869.25,31.0751,5.95153,0,0,0,1,7200,255,0,1,'',22423); -- Ritual Portal
 -- Felsoul Fleshcarver 95329
 UPDATE `creature_template` SET `lootid`=95314, `AIName`="SmartAI", `minlevel`=100, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=1 WHERE `entry`=95329;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=95329 AND `source_type`=0;
@@ -55,7 +140,7 @@ INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `Appearanc
 (95423,1,128519,0,0,0,0,0,0,0,0,25549);
 UPDATE `creature` SET `equipment_id`=1 WHERE `id`=95423;
 -- Fist of the Deceiver 95429
-UPDATE `creature_template` SET `lootid`=95429, `AIName`="SmartAI", `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=2.5 WHERE `entry`=95429;
+UPDATE `creature_template` SET `lootid`=95429, `AIName`="SmartAI", `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=2.0 WHERE `entry`=95429;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=95429 AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (95429,0,0,0,54,0,100,0,0,0,0,0,11,189447,0,0,0,0,0,1,0,0,0,0,0,0,0,"Fist of the Deceiver - JustSpawned - CastSpell 'Legion- Spawn from Portal'"),
@@ -67,7 +152,7 @@ INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `Appearanc
 (95429,1,133351,0,0,133351,0,0,0,0,0,25549);
 UPDATE `creature` SET `equipment_id`=1 WHERE `id`=95429;
 -- Fel Commander Igrius 95285
-UPDATE `creature_template` SET `lootid`=95285, `AIName`="", `ScriptName`='npc_fel_commander_igrius_95285', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=2.5 WHERE `entry`=95285;
+UPDATE `creature_template` SET `lootid`=95285, `AIName`="", `ScriptName`='npc_fel_commander_igrius_95285', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=2.0 WHERE `entry`=95285;
 DELETE FROM `creature_equip_template` WHERE `CreatureID`=95285;
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
 (95285,1,128279,0,0,0,0,0,0,0,0,25549);
@@ -82,7 +167,7 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 (95285, 5, 0, 'Your life is forfeit!', 12, 0, 100, 0, 0, 58251, 0, 0, 'Fel Commander Igrius to Player'),
 (95285, 6, 0, 'Master... I have... failed...', 12, 0, 100, 0, 0, 52037, 0, 0, 'Fel Commander Igrius to Player');
 -- Varedis Felsoul 94836
-UPDATE `creature_template` SET `unit_class`=2, `AIName`='', `ScriptName`='npc_varedis_felsoul_94836', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=94836;
+UPDATE `creature_template` SET `unit_class`=2, `AIName`='', `ScriptName`='npc_varedis_felsoul_94836', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=2.5 WHERE `entry`=94836;
 DELETE FROM `creature_equip_template` WHERE `CreatureID`=94836;
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
 (94836,1,127829,0,0,127830,0,0,0,0,0,25549);
@@ -179,14 +264,11 @@ INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type
 (100996,0,1,0,60,0,100,1,7000,7000,52000,53000,11,199104,0,0,0,0,0,1,0,0,0,0,0,0,0,'arts'),
 (100996,0,2,0,60,0,100,0,10000,10000,10000,10000,11,199062,0,0,0,0,0,1,0,0,0,0,0,0,0,'arts');
 -- Creature Addon corrections
-DELETE FROM `creature_addon` WHERE `guid` IN (280001205, 280001208, 280001210, 280001139, 280001140, 280001158);
+DELETE FROM `creature_addon` WHERE `guid` IN (280001139, 280001140, 280001157);
 INSERT INTO `creature_addon` (`guid`, `mount`, `bytes1`, `bytes2`, `auras`) VALUES
-(280001205, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
-(280001208, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
-(280001210, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
 (280001139, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
 (280001140, 0, 0x0, 0x1, '29266'), -- 25680 - 29266 - 29266
-(280001158, 0, 0x0, 0x1, '29266'); -- 25680 - 29266 - 29266
+(280001157, 0, 0x0, 0x1, '29266'); -- 25680 - 29266 - 29266
 DELETE FROM `gameobject_template_addon` WHERE `entry` IN (243472, 243428, 243473);
 INSERT INTO `gameobject_template_addon` (`entry`, `faction`, `flags`, `mingold`, `maxgold`, `WorldEffectId`) VALUES
 (243472, 0, 262176, 0, 0, 0),
@@ -281,13 +363,29 @@ DELETE FROM `conversation_line_template` WHERE `Id` IN (15676, 15695);
 INSERT INTO `conversation_line_template` (`Id`, `StartTime`, `UiCameraID`, `ActorIdx`, `Flags`, `VerifiedBuild`) VALUES
 (15676, 0, 82, 0, 0, 26972),
 (15695, 0, 99, 0, 0, 26972);
+-- Kayn and Altruis when Varedis defeated
+DELETE FROM `conversation_actors` WHERE `ConversationId` IN (6817, 6818);
+INSERT INTO `conversation_actors` (`ConversationId`, `ConversationActorId`, `ConversationActorGuid`, `Idx`, `VerifiedBuild`) VALUES
+(6817, 60432, 0, 0, 26972), -- Kayn
+(6818, 60433, 0, 0, 26972); -- Altruis
+DELETE FROM `conversation_line_template` WHERE `Id` IN (15696, 15697, 15698);
+INSERT INTO `conversation_line_template` (`Id`, `StartTime`, `UiCameraID`, `ActorIdx`, `Flags`, `VerifiedBuild`) VALUES
+(15696, 0, 99, 0, 0, 26972),
+(15697, 3720, 99, 0, 0, 26972),
+(15698, 0, 82, 0, 0, 26972);
+DELETE FROM `conversation_template` WHERE `Id` IN (6817, 6818);
+INSERT INTO `conversation_template` (`Id`, `FirstLineId`, `LastLineEndTime`, `ScriptName`, `VerifiedBuild`) VALUES
+(6817, 15698, 5620, '', 26972), -- Well done. We managed to clear the skies while you dealt with Varedis.
+(6818, 15696, 8920, '', 26972); -- The Legion wont soon forget this day.
 -- Creature fixes
 UPDATE `creature_template` SET `minlevel`=100, `maxlevel`=100, `VehicleId`= 4275, `type`= 7, `spell1`= 0, `unit_flags2`= 2048 WHERE `entry`=94324;
 UPDATE `creature_template` SET `minlevel`=100, `maxlevel`=100, `VehicleId`= 4275, `type`= 7, `ScriptName`= 'npc_illidari_felbat_101902' WHERE `entry`=101902;
 DELETE FROM `npc_spellclick_spells` WHERE `npc_entry`=101902;
 INSERT INTO `npc_spellclick_spells` (`npc_entry`, `spell_id`, `cast_flags`, `user_type`) VALUES (101902, 46598, 1, 0);
 UPDATE `gameobject_template` SET `castBarCaption`='Reigniting' WHERE `entry`=239985;
-UPDATE `scene_template` SET `ScriptName`='scene_varedis_reveal' WHERE `ScriptPackageId`= 1452;
+UPDATE `scene_template` SET `ScriptName`='scene_varedis_reveal' WHERE `ScriptPackageId`= 1452; -- Varedis Felsoul reveal
+UPDATE `scene_template` SET `ScriptName`='scene_twinblades_looted' WHERE `ScriptPackageId`= 1462; -- Twinblades of the Deceiver Looted
+UPDATE `scene_template` SET `ScriptName`='scene_camp_explosion' WHERE `ScriptPackageId`= 1411; -- Camp Explosion
 -- Graveyards
 DELETE FROM `graveyard_zone` WHERE `GhostZone` IN (7637, 7502);
 INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
@@ -295,4 +393,29 @@ INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
 (5313, 7637, 0, '7.0 Artifacts - Havoc Demon Hunter Scenario - Start'),
 (5362, 7637, 0, '7.0 Artifacts - Havoc DH Acquisition GY - Stage 4 - GJC'),
 (5376, 7502, 0, '1498 - Artifact - Havoc Acquisition');
+-- Phase WIP
+DELETE FROM `phase_area` WHERE `AreaId`=7768 AND `PhaseId`=251;
+DELETE FROM `phase_area` WHERE `AreaId`=7768 AND `PhaseId`=280;
+INSERT INTO `phase_area` (`AreaId`, `PhaseId`, `Comment`) VALUES
+(7768, 280, 'PHASE - CONDITION_QUESTSTATE');
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=26 AND `ConditionTypeOrReference`=47 AND `SourceGroup`=251 AND `SourceEntry`=7768 AND `ConditionValue1`=39247;
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=26 AND `ConditionTypeOrReference`=47 AND `SourceGroup`=280 AND `SourceEntry`=7768 AND `ConditionValue1`=39247;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+('26', '280', '7768', '0', '0', '47', '0', '39247', '8', '0', '0', '0', '0', '', 'Phase 280 on Felsoul Hold when quest 39247 taken');
+DELETE FROM `phase_area` WHERE `AreaId`=7768 AND `PhaseId`=281;
+INSERT INTO `phase_area` (`AreaId`, `PhaseId`, `Comment`) VALUES
+(7768, 281, 'PHASE - CONDITION_QUESTSTATE');
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=26 AND `ConditionTypeOrReference`=47 AND `SourceGroup`=251 AND `SourceEntry`=7768 AND `ConditionValue1`=41119;
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=26 AND `ConditionTypeOrReference`=47 AND `SourceGroup`=281 AND `SourceEntry`=7768 AND `ConditionValue1`=41119;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+('26', '281', '7768', '0', '0', '47', '0', '41119', '8', '0', '0', '0', '0', '', 'Phase 281 on Felsoul Hold when quest 41119 taken');
+DELETE FROM `phase_area` WHERE `AreaId`=7768 AND `PhaseId`=252;
+DELETE FROM `phase_area` WHERE `AreaId`=7768 AND `PhaseId`=282;
+INSERT INTO `phase_area` (`AreaId`, `PhaseId`, `Comment`) VALUES
+(7768, 282, 'PHASE - CONDITION_QUESTSTATE');
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=26 AND `ConditionTypeOrReference`=47 AND `SourceGroup`=252 AND `SourceEntry`=7768 AND `ConditionValue1`=42125;
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=26 AND `ConditionTypeOrReference`=47 AND `SourceGroup`=282 AND `SourceEntry`=7768 AND `ConditionValue1`=42125;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+('26', '282', '7768', '0', '0', '47', '0', '42125', '8', '0', '0', '0', '0', '', 'Phase 252 on Felsoul Hold when quest 42125 taken');
+DELETE FROM `phase_area` WHERE `AreaId`=7768 AND `PhaseId`=169;
 

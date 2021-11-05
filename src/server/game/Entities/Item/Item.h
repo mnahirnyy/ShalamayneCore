@@ -167,6 +167,29 @@ struct ItemDynamicFieldGems
     uint8 Context;
     uint8 Padding[3];
 };
+
+struct SocketTier
+{
+    SocketTier() = default;
+    SocketTier(uint16 first, uint16 second)
+        : FirstSpell(first)
+        , SecondSpell(second)
+    {}
+
+    uint16 FirstSpell = 0;
+    uint16 SecondSpell = 0;
+};
+
+struct ItemSocketInfo
+{
+    uint32 unk1 = 0;
+    uint32 socketIndex = 0;
+    uint32 firstTier = 0;
+    uint32 secondTier = 0;
+    uint32 thirdTier = 0;
+    uint32 additionalThirdTier = 0;
+
+};
 #pragma pack(pop)
 
 class TC_GAME_API Item : public Object
@@ -273,6 +296,8 @@ class TC_GAME_API Item : public Object
         DynamicFieldStructuredView<ItemDynamicFieldGems> GetGems() const;
         ItemDynamicFieldGems const* GetGem(uint16 slot) const;
         void SetGem(uint16 slot, ItemDynamicFieldGems const* gem, uint32 gemScalingLevel);
+        std::map<uint8, ItemSocketInfo> GetArtifactSockets() const;
+        void AddOrRemoveSocketTalent(uint8 talentIndex, bool add, uint8 socketIndex);
 
         std::string const& GetText() const { return m_text; }
         void SetText(std::string const& text) { m_text = text; }
@@ -385,6 +410,9 @@ class TC_GAME_API Item : public Object
 
         void GiveArtifactXp(uint64 amount, Item* sourceItem, uint32 artifactCategoryId);
         void ActivateFishArtifact(uint8 artifactId);
+
+        bool GetModsApplied() const { return m_modsApplied; }
+        void SetModsApplied(bool apply) { m_modsApplied = apply; }
     protected:
         BonusData _bonusData;
 
@@ -404,5 +432,6 @@ class TC_GAME_API Item : public Object
         ObjectGuid m_childItem;
         std::unordered_map<uint32, uint16> m_artifactPowerIdToIndex;
         std::array<uint32, MAX_ITEM_PROTO_SOCKETS> m_gemScalingLevels;
+        bool m_modsApplied = false;
 };
 #endif

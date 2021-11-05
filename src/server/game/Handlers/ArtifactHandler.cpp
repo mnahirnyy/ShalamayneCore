@@ -271,22 +271,52 @@ void WorldSession::HandleConfirmArtifactRespec(WorldPackets::Artifact::ConfirmAr
 
 void WorldSession::HandleArtifactAddRelicTalent(WorldPackets::Artifact::ArtifactAddRelicTalent& packet)
 {
-        //ClientToServer: CMSG_ARTIFACT_ADD_RELIC_TALENT (0x31A8) Length: 31 ConnIdx: 2 Time: 05/20/2018 23:38:39.813 Number: 2207
-            //ArtifactGUID: HighType: Item; SubType: 0; ItemUnkPart1: 0; ItemUnkPart2: 150994944; Low: 34304044863; RealmdID: 1929; ServerID: 4194304; Map: 0 (Eastern Kingdoms); Full: 0x0C1E24000000000040000007FCAE2F3F
-            //GameObjectGUID: HighType: GameObject; SubType: 0; Low: 8258587; RealmdID: 1467; ServerID: 26822; Map: 1669; Entry: 273273 (?????? ????? ???????); Full: 0x2C16ECD0A10ADE400068C600007E041B
-            //TalentIndex: 2
-            //SlotIndex: 0
-        
-            //ServerToClient: SMSG_UPDATE_OBJECT (0x280F) Length: 880 ConnIdx: 0 Time: 05/20/2018 23:38:40.203 Number: 2222
-            //[0] Object Guid: HighType: Item; SubType: 0; ItemUnkPart1: 0; ItemUnkPart2: 150994944; Low: 34304044863; RealmdID: 1929; ServerID: 4194304; Map: 0 (Eastern Kingdoms); Full: 0x0C1E24000000000040000007FCAE2F3F
-            //[0] [48] ITEM_DYNAMIC_FIELD_ARTIFACT_POWERS: 1739
-            //[0] [49] ITEM_DYNAMIC_FIELD_ARTIFACT_POWERS: 65792
-            //[0] [0] ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA: 1
-            //[0] [1] ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA: 2
-            //[0] [2] ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA: 65537
-            //[0] [3] ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA: 2818078
-            //[0] [4] ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA: 393221
-            //[0] [5] ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA: 8
+    if (!_player->GetGameObjectIfCanInteractWith(packet.ForgeGUID, GAMEOBJECT_TYPE_ARTIFACT_FORGE))
+        return;
+
+    Item* artifact = _player->GetItemByGuid(packet.ArtifactGUID);
+    if (!artifact)
+        return;
+
+    auto relicks = artifact->GetArtifactSockets();
+    if (relicks.find(packet.SlotIndex) == relicks.end()) // can it?
+        return;
+
+    if (auto gem = artifact->GetGem(packet.SlotIndex - 2))
+    {
+        if (!gem || !gem->ItemId)
+            return;
+    }
+
+    if ((1 << packet.TalentIndex) & relicks[packet.SlotIndex].firstTier)
+        return;
+
+    uint32 reqLevel = 0;
+    if (packet.TalentIndex > 0)
+        reqLevel = 60 + (packet.SlotIndex - 2) * 3;
+    if (packet.TalentIndex > 2)
+        reqLevel += 9;
+
+    if (reqLevel > artifact->GetTotalPurchasedArtifactPowers())
+    {
+        _player->SendEquipError(EQUIP_ERR_SCALING_STAT_ITEM_LEVEL_TOO_LOW);
+        return;
+    }
+
+    artifact->SetState(ITEM_CHANGED, _player);
+
+    uint8 offset = (packet.SlotIndex - 2) * 6;
+    artifact->SetDynamicValue(ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA, offset++, relicks[packet.SlotIndex].unk1);
+    artifact->SetDynamicValue(ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA, offset++, packet.SlotIndex);
+    artifact->SetDynamicValue(ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA, offset++, relicks[packet.SlotIndex].firstTier | (1 << packet.TalentIndex));
+    artifact->SetDynamicValue(ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA, offset++, relicks[packet.SlotIndex].secondTier);
+    artifact->SetDynamicValue(ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA, offset++, relicks[packet.SlotIndex].thirdTier);
+    artifact->SetDynamicValue(ITEM_DYNAMIC_FIELD_RELIC_TALENT_DATA, offset++, relicks[packet.SlotIndex].additionalThirdTier);
+
+    // _player->UpdateAchievementCriteria(CRITERIA_TYPE_RELIC_TALENT_UNLOCKED, 1739, 1);
+    _player->UpdateCriteria(CRITERIA_TYPE_RELIC_TALENT_UNLOCKED, 1739, 1);
+
+    artifact->AddOrRemoveSocketTalent(packet.TalentIndex, true, packet.SlotIndex);
 }
 
 void WorldSession::HandleArtifactAttuneSocketedRelic(WorldPackets::Artifact::ArtifactAttuneSocketedRelic& packet)

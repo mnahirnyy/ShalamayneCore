@@ -31,14 +31,36 @@ enum DataTypes
 {
 	SCENARIO_ID_DH = 900, // The Twinblades of the Deceiver
     SCENARIO_ID_WARL = 1097, // Dark Whispers
-	DATA_DH_STEP_1 = 1808, // Fly into Felsoul Hold. (Stalking Your Prey) 44016
-	DATA_DH_STEP_2 = 1821, // Dive into the fray. (They Are Not Prepared) 44321
-	DATA_DH_STEP_3 = 1822, // Destroy the wards protecting Varedis and absorb the souls of his minions. (Wrath of the Illidari) 44323
-	DATA_DH_STEP_4 = 1825, // Kill Varedis Felsoul. (Unleashed Havoc) 44331
-	DATA_DH_STEP_5 = 2712, // Wield the Twinblades of the Deceiver. (The Twinblades of the Deceiver) 49475
+    /* DH Scenario Data */
+	DATA_DH_STEP_1 = 1808, // Fly into Felsoul Hold. (Stalking Your Prey)
+	DATA_DH_STEP_2 = 1821, // Dive into the fray. (They Are Not Prepared)
+	DATA_DH_STEP_3 = 1822, // Destroy the wards protecting Varedis and absorb the souls of his minions. (Wrath of the Illidari)
+	DATA_DH_STEP_4 = 1825, // Kill Varedis Felsoul. (Unleashed Havoc)
+	DATA_DH_STEP_5 = 2712, // Wield the Twinblades of the Deceiver. (The Twinblades of the Deceiver)
+    CRITERIA_DH_STEP_1 = 44016,
+    CRITERIA_DH_STEP_2 = 44321,
+    CRITERIA_DH_STEP_3 = 44323,
+    CRITERIA_DH_STEP_4 = 44331,
+    CRITERIA_DH_STEP_5 = 49475,
+    /* Demo Warlock Scenario Data */
+    DATA_WARL_STEP_1 = 2443, // The skull should be within Felsoul Hold.Make your way down the path and search for it. (Searching the Hold)
+    DATA_WARL_STEP_2 = 2475, // Defeat the Felborn Overfiend. (Getting Over the Overfiend)
+    DATA_WARL_STEP_3 = 2476, // Mephistroth has escaped with the skull. Find a way across his trap and chase after him! (Demon Hunting)
+    DATA_WARL_STEP_4 = 2477, // Mephistroth has sent his minions after you.Survive their assault until Lady Tyrana and Pain Mistress Nikta arrives, then kill them. (The Legion)
+    DATA_WARL_STEP_5 = 2478, // Mephistroth is attempting to destroy the skull!Clear the way to his ritual site and stop him! (Screams of the Skull)
+    DATA_WARL_STEP_6 = 2479, // Mephistroth has escaped but the skull is intact.Take it. (The Skull of the Man''ari)
+    DATA_WARL_STEP_7 = 2502, // The skull is yours!Step through its portal to depart this place. (There''s a New Master in Town)
+    CRITERIA_WARL_STEP_1 = 47894,
+    CRITERIA_WARL_STEP_2 = 48017,
+    CRITERIA_WARL_STEP_3 = 48045,
+    CRITERIA_WARL_STEP_4 = 48047,
+    CRITERIA_WARL_STEP_5 = 48050,
+    CRITERIA_WARL_STEP_6 = 48053,
+    CRITERIA_WARL_STEP_7 = 48097,
 	DATA_MAX_ENCOUNTERS_DH = 5,
 	NORMAL_PHASE = 169,
-    WARL_PHASE = 170,
+    DH_PHASE = 251,
+    WARL_PHASE = 252,
 	DATA_SURAMAR_ACQUISITION = 0,
 	DATA_STAGE_1 = 1,
 	DATA_STAGE_2 = 2,
@@ -53,9 +75,6 @@ enum DataTypes
     GO_FIRST_FELSHIELD_WARD = 243428,
     GO_SECOND_FELSHIELD_WARD = 243472,
     GO_THIRD_FELSHIELD_WARD = 243473,
-    DH_HAVOC_ACQUISITION_CAMP_EXPLOSION_GJC_SCENE = 1411,
-    DH_HAVOC_ACQUISITION_VAREDIS_REVEAL_GJC_SCENE = 1452, // Stage 4
-    DH_HAVOC_ACQUISTION_ARTIFACT_LOOTED_GJC_SCENE = 1462, // Stage 4
     NPC_VAREDIS_FELSOUL = 94836,
     NPC_TWINBLADES_OF_THE_DECEIVER = 109978,
     NPC_FELSOUL_BERSERKER = 95423,
@@ -74,13 +93,22 @@ enum DataTypes
     ALTRUIS_CONV_1 = 6816, // The fools think they can stand against you. Show them the price of their arrogance!
     QUEST_THE_HUNT_ALTRUIS = 41119,
     QUEST_THE_HUNT_KAYN = 39247,
+    QUEST_DARK_WHISPERS = 42125,
     RED_ILLIDARI_FELBAT = 101902,
     TWINBLADES_KILLCREDIT = 114515,
     SPELL_VAREDIS_FELSOUL_REVEAL = 189475,
     SPELL_VAREDIS_FELSOUL_REVEAL_CANCEL = 189501,
+    SPELL_TWINBLADES_OF_DECEIVER = 189916,
+    SPELL_DH_CAMP_EXPLOSION = 186760,
+    SPELL_DH_CAMP_EXPLOSION_CANCEL = 189002,
+    /* Demo Warlock Data */
+    SPELL_RETRIEVING_THE_SKULL = 211766,
+    SPELL_SKULL_WANDER_AURA = 223917,
+    NPC_THALKIEL_SKULL_OF_THE_MANARI = 111031,
+    GO_SKULL_OF_THE_MANARI = 249821,
+    KILLCREDIT_OBTAIN_SKULL_OF_MANARI = 106973,
+    NPC_PORTAL_THALKIEL = 106846,
 };
-
-/* The Idea Here if there are more than one scenario on the same map, we will split them using different difficultie (11 and 12 for example) */
 
 struct scenario_artifact_suramar_acquisition : public InstanceScript
 {
@@ -91,8 +119,6 @@ struct scenario_artifact_suramar_acquisition : public InstanceScript
 		SetBossNumber(1);
 		SetData(DATA_SURAMAR_ACQUISITION, NOT_STARTED);
         ClassMode = DATA_STAGE_7;
-		/*for (uint8 i = 1; i <= ClassMode; ++i)
-			SetData(i, NOT_STARTED);*/
 		StepID = DATA_STAGE_1;
 		isComplete = false;
         _playerGUID = ObjectGuid::Empty;
@@ -102,53 +128,57 @@ struct scenario_artifact_suramar_acquisition : public InstanceScript
         secondWardDestroyed = false;
         thirdWardDestroyed = false;
         allWardsDestroyed = false;
+        _currentScenarioId = 0;
+        eredarsKilled = 0;
 	}
 
 	void OnPlayerEnter(Player* player) override
 	{
-		InstanceScript::OnPlayerEnter(player);
-        
-        if (player->getClass() == CLASS_DEMON_HUNTER) {
+        if (player->getClass() == CLASS_DEMON_HUNTER)
+        {
+            _currentScenarioId = 900;
             _playerGUID = player->GetGUID();
+            // Phase
+            // player->GetPhaseShift().AddPhase(DH_PHASE, PhaseFlags::None, nullptr);
+            ClassMode = DATA_STAGE_5;
+            SendScenarioState(ScenarioData(SCENARIO_ID_DH, DATA_DH_STEP_1));
+            // Reset the scenario data
+            for (uint8 i = 1; i <= ClassMode; ++i)
+                SetData(i, NOT_STARTED);
+            // Dungeon Diificulty
             player->SetDungeonDifficultyID(DIFFICULTY_3_MAN_SCENARIO_N);
             player->SendDungeonDifficulty(DIFFICULTY_3_MAN_SCENARIO_N);
-            ClassMode = DATA_STAGE_5;
-            // Reset the scenario data
-            for (uint8 i = 1; i <= ClassMode; ++i)
-            {
-                SetData(i, NOT_STARTED);
-            }   
-            SendScenarioState(ScenarioData(SCENARIO_ID_DH, DATA_STAGE_1));
-            PhasingHandler::AddPhase(player, NORMAL_PHASE, true);
-            // Summons
-            SummonFelshieldWards();
-            SummonCommanderIgrius();
-            SkipTwoSteps(); // We just skip two steps when player flying and floating to the area
-            // Scenes
-            DoPlayScenePackageIdOnPlayers(DH_HAVOC_ACQUISITION_CAMP_EXPLOSION_GJC_SCENE);
-            // Conversations
-            DoConversation(IGRIUS_CONV_1);
-            if (player->HasQuest(QUEST_THE_HUNT_ALTRUIS))
-                DoDelayedConversation(5000, ALTRUIS_CONV_1);
-            else if (player->HasQuest(QUEST_THE_HUNT_KAYN))
-                DoDelayedConversation(5000, KAYN_CONV_1);
+            // We just skip two steps when player flying and floating to the area
+            SkipTwoSteps();
         }
-
-        if (player->getClass() == CLASS_WARLOCK) {
+        else if (player->getClass() == CLASS_WARLOCK)
+        {
+            _currentScenarioId = 1097;
             _playerGUID = player->GetGUID();
-            player->SetDungeonDifficultyID(DIFFICULTY_3_MAN_SCENARIO_HC);
-            player->SendDungeonDifficulty(DIFFICULTY_3_MAN_SCENARIO_HC);
+            // Phase
+            // player->GetPhaseShift().AddPhase(WARL_PHASE, PhaseFlags::None, nullptr);
             ClassMode = DATA_STAGE_7;
+            SendScenarioState(ScenarioData(SCENARIO_ID_WARL, DATA_WARL_STEP_1));
             // Reset the scenario data
             for (uint8 i = 1; i <= ClassMode; ++i)
-            {
                 SetData(i, NOT_STARTED);
-            }
-            SendScenarioState(ScenarioData(SCENARIO_ID_DH, DATA_STAGE_1));
-            PhasingHandler::AddPhase(player, WARL_PHASE, true);
+            // Dungeon Diificulty
+            player->SetDungeonDifficultyID(DIFFICULTY_3_MAN_SCENARIO_N);
+            player->SendDungeonDifficulty(DIFFICULTY_3_MAN_SCENARIO_N);
             // Zone summons and specific things
         }
+        else {
+            // default one
+            _playerGUID = player->GetGUID();
+            player->SetDungeonDifficultyID(DIFFICULTY_NORMAL);
+            player->SendDungeonDifficulty(DIFFICULTY_NORMAL);
+            ClassMode = DATA_SURAMAR_ACQUISITION;
+        }
+
+        InstanceScript::OnPlayerEnter(player);
 	}
+
+    void OnPlayerExit(Player* player) override {}
 
 	void OnCreatureCreate(Creature* creature) override
 	{
@@ -187,6 +217,13 @@ struct scenario_artifact_suramar_acquisition : public InstanceScript
             if (who->GetEntry() == 95452)
                 DoDelayedConversation(6000, VAREDIS_CONV_2); // Pity your allies had to die. Dont worry. Ill put their souls to good use.
             break;
+        case 106698: // Eredar Doomweaver
+            eredarsKilled = eredarsKilled + 1;
+            SetData(DATA_STAGE_1, 106698);
+            break;
+        case 106644: // Felborn Overfiend
+            SetData(DATA_STAGE_2, DONE);
+            break;
         default:
             break;
         }
@@ -198,12 +235,12 @@ struct scenario_artifact_suramar_acquisition : public InstanceScript
 		{
 			++StepID;
 			if (Scenario* scenario = instance->GetInstanceScenario())
-				scenario->CompleteCurrStep();
+                scenario->CompleteCurrStep();
 		}
 		else if (StepID == ClassMode)
 		{
 			if (Scenario* scenario = instance->GetInstanceScenario())
-			{   
+			{
 				if (!isComplete) {
 					scenario->CompleteCurrStep();
 				}
@@ -219,16 +256,36 @@ struct scenario_artifact_suramar_acquisition : public InstanceScript
 	{
 		InstanceScript::SetData(type, data);
 
-		if (data == NOT_STARTED)
+        if (data == NOT_STARTED)
 			return;
 
-        if (type == DATA_STAGE_1 && data == DONE)
+        if (type == DATA_STAGE_1) //  && data == DONE
         {
-            NextStep();
+            switch (data)
+            {
+            case 106698:
+                if (_currentScenarioId == SCENARIO_ID_WARL && eredarsKilled == 3)
+                    SummonMephisroth1(); // Summon Mephistroth 106692
+                break;
+            case DONE:
+                NextStep();
+                if (_currentScenarioId == SCENARIO_ID_WARL)
+                    SummonOverfiend(); // Summon Felborn Overfiend 106644
+                break;
+            default:
+                break;
+            }
+            // NextStep();
         }
         else if (type == DATA_STAGE_2 && data == DONE)
         {
             NextStep();
+            if (_currentScenarioId == SCENARIO_ID_DH)
+            {
+                // DoCastSpellOnPlayers(SPELL_DH_CAMP_EXPLOSION);
+                DoPlayScenePackageIdOnPlayers(1411);
+                DoDelayedConversation(1000, IGRIUS_CONV_1);
+            }
         }
         else if (type == DATA_STAGE_3)
         {
@@ -241,15 +298,18 @@ struct scenario_artifact_suramar_acquisition : public InstanceScript
             case GO_SECOND_FELSHIELD_WARD:
                 secondWardDestroyed = true;
                 DoConversation(VAREDIS_CONV_1);
-                SummonFistOfTheDeceiver();
+                // SummonFistOfTheDeceiver();
                 break;
             case GO_THIRD_FELSHIELD_WARD:
                 thirdWardDestroyed = true;
                 break;
+            case DONE:
+                NextStep();
+                break;
             default:
                 break;
             }
-                
+
             if (isAllWardsDestroyed() && demonSoulsAbsorbed >= 100)
             {
                 allWardsDestroyed = true;
@@ -264,14 +324,35 @@ struct scenario_artifact_suramar_acquisition : public InstanceScript
         else if (type == DATA_STAGE_4 && data == DONE)
         {
             NextStep();
-            SummonTwinbladesOfDeceiver(); // Summon Twinblades of the Deceiver GO + NPC
+            if (_currentScenarioId == SCENARIO_ID_DH)
+                SummonTwinbladesOfDeceiver(); // Summon Twinblades of the Deceiver GO + NPC
         }
         else if (type == DATA_STAGE_5 && data == DONE)
         {
-            DoPlayScenePackageIdOnPlayers(DH_HAVOC_ACQUISTION_ARTIFACT_LOOTED_GJC_SCENE);
+            if (_currentScenarioId == SCENARIO_ID_DH)
+            {
+                DoCastSpellOnPlayers(SPELL_TWINBLADES_OF_DECEIVER);
+                isComplete = true;
+                NextStep();
+                SummonFelBat(); // Summon Felbat to return to Dalaran
+            }
+            else if (_currentScenarioId == SCENARIO_ID_WARL)
+            {
+                SummonSkullOfManari();
+                NextStep();
+            }
+
+        }
+        else if (type == DATA_STAGE_6 && data == DONE)
+        {
+            DoCastSpellOnPlayers(SPELL_RETRIEVING_THE_SKULL);
+            NextStep();
+            SummonPortalOfThalkiel();
+        }
+        else if (type == DATA_STAGE_7 && data == DONE)
+        {
             isComplete = true;
             NextStep();
-            SummonFelBat(); // Summon Felbat to return to Dalaran
         }
 	}
 
@@ -280,40 +361,74 @@ struct scenario_artifact_suramar_acquisition : public InstanceScript
         return firstWardDestroyed && secondWardDestroyed && thirdWardDestroyed;
     }
 
-    void SummonFelshieldWards()
-    {
-        GameObject* felshieldWard1 = instance->SummonGameObject(GO_FIRST_FELSHIELD_WARD, Position(1055.15f, 5091.44f, 55.2713f, 0.452808f), QuaternionData(-0.0f, -0.0f, -0.0f, 1.0f), 7200);
-        GameObject* felshieldWard2 = instance->SummonGameObject(GO_SECOND_FELSHIELD_WARD, Position(1213.633f, 5026.272f, 60.0546f, 2.58231f), QuaternionData(-0.0f, -0.0f, -0.0f, 1.0f), 7200);
-        GameObject* felshieldWard3 = instance->SummonGameObject(GO_THIRD_FELSHIELD_WARD, Position(970.566f, 4906.9f, 36.0674f, 0.580076f), QuaternionData(-0.0f, -0.0f, -0.0f, 1.0f), 7200);
-    }
-
-    void SummonCommanderIgrius()
-    {
-        TempSummon* commanderIgrius = instance->SummonCreature(NPC_FEL_COMMANDER_IGRIUS, Position(1201.0f, 4994.28f, 57.8075f, 1.96338f));
-    }
-
-    void SummonFistOfTheDeceiver()
-    {
-        TempSummon* varedisFelsoul = instance->SummonCreature(NPC_FIST_OF_DECEIVER, Position(1004.116f, 4931.888f, 36.2755f, 0.67523f));
-    }
-
     void SummonTwinbladesOfDeceiver()
     {
-        TempSummon* twinbladesWb = instance->SummonCreature(NPC_TWINBLADES_OF_THE_DECEIVER, Position(984.354f, 4826.77f, 34.7617f, 2.80852f));
-        GameObject* twinbladesWbLoot = instance->SummonGameObject(GO_TWINBLADES_OF_THE_DECEIVER, Position(984.354f, 4826.77f, 34.7617f, 2.80852f), QuaternionData(), 300);
+        Map::PlayerList const& players = instance->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        {
+            if (Player* player = itr->GetSource())
+            {
+                Creature* twinbladesWb = player->SummonCreature(NPC_TWINBLADES_OF_THE_DECEIVER, Position(984.354f, 4826.77f, 34.7617f, 2.80852f));
+                GameObject* twinbladesWbLoot = player->SummonGameObject(GO_TWINBLADES_OF_THE_DECEIVER, Position(984.354f, 4826.77f, 34.7617f, 2.80852f), QuaternionData(), 300);
+            }
+        }
+    }
+
+    void SummonSkullOfManari()
+    {
+        Map::PlayerList const& players = instance->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        {
+            if (Player* player = itr->GetSource())
+            {
+                Creature* manariWb = instance->SummonCreature(NPC_THALKIEL_SKULL_OF_THE_MANARI, Position(1003.776f, 4932.012f, 36.2760f, 0.442167f));
+                GameObject* manariWbLoot = instance->SummonGameObject(GO_SKULL_OF_THE_MANARI, Position(1003.776f, 4932.012f, 36.2760f, 0.442167f), QuaternionData(), 300);
+            }
+        }
     }
 
     void SummonVaredisFelsoul()
     {
-        if (TempSummon* varedisFelsoul = instance->SummonCreature(NPC_VAREDIS_FELSOUL, Position(976.344f, 4842.468f, 35.1716f, 1.17540f)))
-        {   
-            varedisFelsoul->AI()->SetData(DATA_GET_BRIDGE, DATA_GET_BRIDGE);
+        Map::PlayerList const& players = instance->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        {
+            if (Player* player = itr->GetSource())
+                if (Creature* varedisFelsoul = player->SummonCreature(NPC_VAREDIS_FELSOUL, Position(976.344f, 4842.468f, 35.1716f, 1.17540f)))
+                    varedisFelsoul->AI()->SetData(DATA_GET_BRIDGE, DATA_GET_BRIDGE);
         }
+    }
+
+    void SummonMephisroth1()
+    {
+        Map::PlayerList const& players = instance->GetPlayers();
+        Map::PlayerList::const_iterator itr = players.begin();
+        if (Player* player = itr->GetSource())
+            if (Creature* mephi1 = player->SummonCreature(106692, Position(1044.419f, 5128.788f, 57.953f, 6.15776f)))
+                mephi1->AI()->SetData(1515, 1515);
+
+    }
+
+    void SummonOverfiend()
+    {
+        Map::PlayerList const& players = instance->GetPlayers();
+        Map::PlayerList::const_iterator itr = players.begin();
+            if (Player* player = itr->GetSource())
+                Creature* overfiend = player->SummonCreature(106644, Position(1052.626f, 5129.9101f, 57.259f, 5.98881f));
     }
 
     void SummonFelBat()
     {
-        TempSummon* felbat = instance->SummonCreature(RED_ILLIDARI_FELBAT, Position(960.155f, 4858.343f, 35.267f, 4.5778f));
+        Map::PlayerList const& players = instance->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        {
+            if (Player* player = itr->GetSource())
+                Creature* felbat = instance->SummonCreature(RED_ILLIDARI_FELBAT, Position(960.155f, 4858.343f, 35.267f, 4.5778f));
+        }
+    }
+
+    void SummonPortalOfThalkiel()
+    {
+        Creature* thalkielPortal = instance->SummonCreature(NPC_PORTAL_THALKIEL, Position(1015.169f, 4942.440f, 36.276f, 0.705941f));
     }
 
     void SkipTwoSteps() // Skip the flying and floating steps in Demon Hunter Scenario
@@ -338,6 +453,27 @@ private:
     bool secondWardDestroyed;
     bool thirdWardDestroyed;
     bool allWardsDestroyed;
+    int _currentScenarioId;
+    int eredarsKilled;
+};
+
+/* Demon Hunter Havoc Artifact Acquisition Scripts */
+class scene_camp_explosion : public SceneScript
+{
+public:
+    scene_camp_explosion() : SceneScript("scene_camp_explosion") {}
+
+    void OnSceneComplete(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) override
+    {
+        if (InstanceScript * instance = player->GetInstanceScript())
+        {
+            if (player->HasQuest(QUEST_THE_HUNT_ALTRUIS))
+                instance->DoDelayedConversation(5000, ALTRUIS_CONV_1);
+            else if (player->HasQuest(QUEST_THE_HUNT_KAYN))
+                instance->DoDelayedConversation(5000, KAYN_CONV_1);
+            // instance->DoCastSpellOnPlayers(SPELL_DH_CAMP_EXPLOSION_CANCEL);
+        }
+    }
 };
 
 class scene_varedis_reveal : public SceneScript
@@ -349,6 +485,23 @@ public:
     {
         if (InstanceScript * instance = player->GetInstanceScript())
             instance->SetData(DATA_STAGE_4, DATA_CANCEL_SCENE);
+    }
+};
+
+class scene_twinblades_looted : public SceneScript
+{
+public:
+    scene_twinblades_looted() : SceneScript("scene_twinblades_looted") {}
+
+    void OnSceneEnd(Player* player, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) override
+    {
+        if (InstanceScript * instance = player->GetInstanceScript())
+        {
+            if (player->HasQuest(41119))
+                instance->DoDelayedConversation(500, 6818);
+            else if (player->HasQuest(39247))
+                instance->DoDelayedConversation(500, 6817);
+        }
     }
 };
 
@@ -365,7 +518,7 @@ public:
         void OnStateChanged(uint32 state, Unit* who) override
         {
             if (state == GO_ACTIVATED)
-            {   
+            {
                 if (who)
                     go->SendCustomAnim(ANIM_DESTROY);
             }
@@ -398,12 +551,12 @@ public:
         void OnStateChanged(uint32 state, Unit* who) override
         {
             if (state == GO_ACTIVATED)
-            {   
+            {
                 if (who)
                     go->SendCustomAnim(ANIM_DESTROY);
             }
             else if (state == GO_JUST_DEACTIVATED)
-            {   
+            {
                 go->DespawnOrUnsummon();
                 instance->SetData(DATA_STAGE_3, go->GetEntry());
             }
@@ -431,7 +584,7 @@ public:
         void OnStateChanged(uint32 state, Unit* who) override
         {
             if (state == GO_ACTIVATED)
-            {   
+            {
                 if (who)
                     go->SendCustomAnim(ANIM_DESTROY);
             }
@@ -616,9 +769,9 @@ public:
         SPELL_EYE_BEAM = 190231,
         SPELL_CHAOS_NOVA = 190246,
         SPELL_EMPOWERED_CHAOS_NOVA = 218930,
-        SPELL_FEL_PORTAL = 241648,
+        SPELL_FEL_PORTAL = 219124, // 241648,
         SPELL_TWINBLADES = 218933,
-        SPELL_FEL_ERUPTION = 197217,
+        SPELL_FEL_ERUPTION = 218621, // 197217
         EVENT_DEMONS_BITE = 1,
         EVENT_EYE_BEAM = 2,
         EVENT_CHAOS_NOVA = 3,
@@ -650,7 +803,7 @@ public:
             _events.Reset();
             Initialize();
         }
-        
+
         void EnterCombat(Unit* /*who*/) override
         {
             Talk(2); // Join me! Unleash your true power. Do not let the weak hold you back!
@@ -680,7 +833,7 @@ public:
                 _firstConversationTrigger = true;
             }
 
-            if (HealthBelowPct(10) && !_secondConversationTrigger) {
+            if (HealthBelowPct(6) && !_secondConversationTrigger) {
                 _events.ScheduleEvent(EVENT_EMPOWERED_CHAOS_NOVA, 1000);
                 _secondConversationTrigger = true;
             }
@@ -699,11 +852,12 @@ public:
                     me->CastSpell(me, SPELL_FEL_ERUPTION, true);
                 }).Schedule(Seconds(8), [this](TaskContext context)
                 {
+                    me->SummonGameObject(243468, Position(987.344f, 4869.25f, 31.0751f, 5.95153f), QuaternionData(-0.0f, -0.0f, -0.0f, 1.0f), 900); // Bridge
                     Player* player = me->SelectNearestPlayer(500.0f);
                     Talk(1, player); // So, Illidari, you seek my head, that you might take the Twinblades as your own?
                 }).Schedule(Seconds(10), [this](TaskContext context)
                 {
-                    me->GetMotionMaster()->MoveJump({ 960.845f, 4811.054f, 34.4906f, 1.09558f }, 15.9f, 15.0f, 1, true);
+                    me->GetMotionMaster()->MoveJump({ 960.845f, 4811.054f, 34.4906f, 1.09558f }, 15.9f, 15.9f, 1, true);
                     me->HandleEmoteCommand(EMOTE_STATE_READY2H_ALLOW_MOVEMENT);
                 });
                 break;
@@ -740,7 +894,7 @@ public:
                             l_InstanceScript->DoConversation(KJ_CONVERSATION_1);
                         _events.ScheduleEvent(EVENT_RESTORE_COMBAT, 6000);
                         break;
-                    case EVENT_EMPOWERED_CHAOS_NOVA:                        
+                    case EVENT_EMPOWERED_CHAOS_NOVA:
                         DoCastVictim(SPELL_EMPOWERED_CHAOS_NOVA);
                         me->AttackStop();
                         me->SetReactState(REACT_PASSIVE);
@@ -823,7 +977,7 @@ public:
                         bunny->RemoveAurasDueToSpell(SPELL_FEL_SPIKE);
                         bunny->DespawnOrUnsummon(1000);
                     });
-                }   
+                }
         }
     };
 };
@@ -964,7 +1118,7 @@ public:
         }
 
         void Reset() override
-        {  
+        {
             Initialize();
         }
 
@@ -1032,17 +1186,21 @@ public:
             {
                 _actionStarted = true;
                 instance->DoDelayedConversation(1000, IGRIUS_CONV_3);
-                // Summon Moargs and move them to the Front point
+                // Move Moargs closer to the first Felshield Ward
                 SummonBerserkers();
             }
         }
 
         void SummonBerserkers()
         {
-            if (Creature* felsoulBers1 = me->SummonCreature(NPC_FELSOUL_BERSERKER, Position(1037.51f, 5131.58f, 58.582f, 5.61795f)))
-                felsoulBers1->GetMotionMaster()->MovePoint(1, 1055.577f, 5121.498f, 56.998f, false);
-            if (Creature* felsoulBers2 = me->SummonCreature(NPC_FELSOUL_BERSERKER, Position(1039.46f, 5134.89f, 58.486f, 5.4805f)))
-                felsoulBers2->GetMotionMaster()->MovePoint(1, 1055.577f, 5121.498f, 56.998f, false);
+            std::list<Creature*> felsoulBerserkers;
+            felsoulBerserkers = me->FindNearestCreatures(NPC_FELSOUL_BERSERKER, 30.0f);
+            for (std::list<Creature*>::const_iterator itr = felsoulBerserkers.begin(); itr != felsoulBerserkers.end(); ++itr)
+                if (Creature* berserker = (*itr)->ToCreature())
+                    berserker->GetScheduler().Schedule(Seconds(1), [berserker](TaskContext context) {
+                        if (Creature* nearFleshcarver = berserker->FindNearestCreature(95329, berserker->GetVisibilityRange(), true))
+                            berserker->GetMotionMaster()->MoveCloserAndStop(1, nearFleshcarver, 15.0f); // MovePoint(1, 1045.68f, 5121.78f, 57.57029f);
+                    });
         }
 
     private:
@@ -1055,6 +1213,337 @@ public:
         return new npc_suramar_second_AOIbunny_AI(creature);
     }
 };
+/* Demon Hunter (Havoc) Artifact Acquisition Scripts END */
+
+/* Warlock (Demonology) Artifact Acquisition Scripts */
+// 210920 - Teleport to Felsoul Hold
+class spell_teleport_felsoul_hold : public SpellScript
+{
+    PrepareSpellScript(spell_teleport_felsoul_hold);
+
+    void HandleOnCast()
+    {
+        if (Player* player = GetCaster()->ToPlayer())
+        {
+            WorldLocation location(1498, 1267.38f, 5239.71f, 93.5321f, 1.47446f);
+            player->TeleportTo(location);
+            player->KilledMonsterCredit(106033);
+        }
+    }
+
+    void Register() override
+    {
+        OnCast += SpellCastFn(spell_teleport_felsoul_hold::HandleOnCast);
+    }
+};
+
+/* Mephistroth 106811 (Bunny to summon 3 waves and generals ) */
+class npc_mephistroth_106811 : public CreatureScript
+{
+public:
+    npc_mephistroth_106811() : CreatureScript("npc_mephistroth_106811") { }
+
+    enum eMephi
+    {
+        EVENT_SUMMON_SOULWRATH = 1,
+        DATA_CANCEL_WAVE = 59,
+    };
+
+    struct npc_mephistroth_106811_AI : public ScriptedAI
+    {
+        npc_mephistroth_106811_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            instance = me->GetInstanceScript();
+            waveStarted = false;
+            creaturesSpawned = 0;
+        }
+
+        void Reset() override
+        {
+            _events.Reset();
+            Initialize();
+        }
+
+        void MoveInLineOfSight(Unit* who) override
+        {
+            if (!who || !who->IsInWorld() || !me->IsWithinDist(who, 25.0f, false))
+                return;
+
+            Player* player = who->GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (!player)
+                return;
+            if (instance->GetData(DATA_STAGE_2) == NOT_STARTED && !waveStarted)
+            {
+                waveStarted = true;
+                _events.ScheduleEvent(EVENT_SUMMON_SOULWRATH, 500);
+            }
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            switch (id)
+            {
+            case DATA_CANCEL_WAVE:
+                _events.CancelEvent(EVENT_SUMMON_SOULWRATH);
+                break;
+            default:
+                break;
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_SUMMON_SOULWRATH:
+                    if (creaturesSpawned == 8) {
+                        _events.CancelEvent(EVENT_SUMMON_SOULWRATH);
+                        break;
+                    }
+                    // dreadguard sentry + eredar soul binder
+                    // wrathguard hellblade and Fel mongrel
+                    // eredar soul binder + eredar soul binder + fel mongrel
+                    // tyrana and nikta
+
+                    if (TempSummon* soulwrath = me->SummonCreature(105000, me->GetPosition(), TEMPSUMMON_DEAD_DESPAWN, 20000, 0, true))
+                    {
+                        float x, y, z;
+                        soulwrath->GetClosePoint(x, y, z, soulwrath->GetObjectSize() / 3, 25.0f);
+                        soulwrath->GetMotionMaster()->MovePoint(0, x, y, z);
+                        soulwrath->SetReactState(REACT_AGGRESSIVE);
+                    }
+                    ++creaturesSpawned;
+                    _events.ScheduleEvent(EVENT_SUMMON_SOULWRATH, 8000);
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+    private:
+        EventMap _events;
+        InstanceScript * instance;
+        bool waveStarted;
+        uint32 creaturesSpawned;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_mephistroth_106811_AI(creature);
+    }
+};
+
+/* Mephistroth 106692 (Bunny to summon overfiend) */
+class npc_mephistroth_106692 : public CreatureScript
+{
+public:
+    npc_mephistroth_106692() : CreatureScript("npc_mephistroth_106692") { }
+
+    enum eMephi
+    {
+        EVENT_START_ACTION = 1,
+        EVENT_CONTINUE_TALK = 2,
+        EVENT_SUMMON_OVERFIEND = 3,
+    };
+
+    struct npc_mephistroth_106692_AI : public ScriptedAI
+    {
+        npc_mephistroth_106692_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            instance = me->GetInstanceScript();
+        }
+
+        void Reset() override
+        {
+            _events.Reset();
+            Initialize();
+        }
+
+        void SetData(uint32 id, uint32 /*value*/) override
+        {
+            if (id == 1515)
+                _events.ScheduleEvent(EVENT_START_ACTION, 1000);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_START_ACTION:
+                    Talk(0); // Foolish warlock! Did you really think I would remain unaware of your infantile plot to steal my treasure? You underestimate the Nathrezim!
+                    _events.ScheduleEvent(EVENT_CONTINUE_TALK, 8000);
+                    break;
+                case EVENT_CONTINUE_TALK:
+                    Talk(1); // As for you, treacherous skull. I''ll deal with you later.
+                    _events.ScheduleEvent(EVENT_SUMMON_OVERFIEND, 4000);
+                    break;
+                case EVENT_SUMMON_OVERFIEND:
+                    instance->SetData(DATA_STAGE_1, DONE);
+                    me->CastSpell(me, 211701, true);
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+    private:
+        EventMap _events;
+        InstanceScript *instance;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_mephistroth_106692_AI(creature);
+    }
+};
+
+/* Mephistroth 106652 (Battle Target before artifact summon) */
+class npc_mephistroth_106652 : public CreatureScript
+{
+public:
+    npc_mephistroth_106652() : CreatureScript("npc_mephistroth_106652") { }
+
+    enum eMephistroth
+    {
+        SPELL_MIND_BLAST = 196944,
+        EVENT_MIND_BLAST = 1,
+        EVENT_ESCAPE = 2,
+        EVENT_DESPAWN = 3,
+    };
+
+    struct npc_mephistroth_106652_AI : public ScriptedAI
+    {
+        npc_mephistroth_106652_AI(Creature* creature) : ScriptedAI(creature) {
+            Initialize();
+        }
+
+        void Initialize()
+        {
+            instance = me->GetInstanceScript();
+            _firstTextTrigger = false;
+        }
+
+        void Reset() override
+        {
+            _events.Reset();
+            Initialize();
+        }
+
+        void EnterCombat(Unit* /*who*/) override
+        {
+            Talk(0); // I grow tired of your interference! DIE!
+            _events.ScheduleEvent(EVENT_MIND_BLAST, 1000);
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) override
+        {
+            if (HealthBelowPct(8) && !_firstTextTrigger) {
+                _events.ScheduleEvent(EVENT_ESCAPE, 1000);
+                _firstTextTrigger = true;
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            _events.Update(diff);
+
+            if (!UpdateVictim() || me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                case EVENT_MIND_BLAST:
+                    DoCastVictim(SPELL_MIND_BLAST, true);
+                    _events.RescheduleEvent(EVENT_MIND_BLAST, 5000);
+                    break;
+                case EVENT_ESCAPE:
+                    me->AttackStop();
+                    me->SetReactState(REACT_PASSIVE);
+                    Talk(1); // Enjoy your victory while you can, warlock. This isn't over between us. It has only begun!
+                    _events.ScheduleEvent(EVENT_DESPAWN, 6000);
+                    break;
+                case EVENT_DESPAWN:
+                    me->DespawnOrUnsummon();
+                    break;
+                default:
+                    break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        EventMap _events;
+        InstanceScript * instance;
+        bool _firstTextTrigger;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_mephistroth_106652_AI(creature);
+    }
+};
+
+class go_skull_of_the_manari_249821 : public GameObjectScript
+{
+public:
+    go_skull_of_the_manari_249821() : GameObjectScript("go_skull_of_the_manari_249821") {
+        isLooted = false;
+        prevState = 0;
+        playerGuid = ObjectGuid::Empty;
+    }
+
+    void OnLootStateChanged(GameObject* go, uint32 state, Unit* unit)
+    {
+        if (state == GO_ACTIVATED && unit) {
+            if (Player* player = unit->ToPlayer())
+                playerGuid = player->GetGUID();
+        }
+        if (state == GO_JUST_DEACTIVATED && prevState == GO_ACTIVATED && playerGuid != ObjectGuid::Empty && !isLooted)
+        {
+            isLooted = true;
+            if (Player* player = ObjectAccessor::GetPlayer(*go, playerGuid)) {
+                if (!player->GetQuestObjectiveData(QUEST_DARK_WHISPERS, 1))
+                    player->KilledMonsterCredit(KILLCREDIT_OBTAIN_SKULL_OF_MANARI); // Obtain the Skull of the Manari
+                // TO DO: Force Artifact Equip
+                if (InstanceScript * instance = go->GetInstanceScript())
+                    instance->SetData(DATA_STAGE_6, DONE);
+
+                if (Creature* npc_skull_manari = go->FindNearestCreature(NPC_THALKIEL_SKULL_OF_THE_MANARI, go->GetVisibilityRange(), true))
+                    npc_skull_manari->DespawnOrUnsummon(2000);
+                go->DespawnOrUnsummon(2000ms);
+            }
+        }
+        prevState = state;
+    }
+    bool isLooted;
+    uint32 prevState;
+    ObjectGuid playerGuid;
+};
+/* Warlock (Demonology) Artifact Acquisition Scripts END */
 
 /*********/
 /* AddSC */
@@ -1063,6 +1552,8 @@ void AddSC_scenario_artifact_suramar_acquisition()
 {
 	RegisterInstanceScript(scenario_artifact_suramar_acquisition, 1498);
 
+    /* DH Havoc */
+    new scene_camp_explosion();
     new go_first_felshieldward();
     new go_second_felshieldward();
     new go_third_felshieldward();
@@ -1075,4 +1566,13 @@ void AddSC_scenario_artifact_suramar_acquisition()
     new npc_suramar_first_AOIbunny();
     new npc_suramar_second_AOIbunny();
     new scene_varedis_reveal();
+    new scene_twinblades_looted();
+    /* DH Havoc END */
+    /* Warl Demo */
+    new npc_mephistroth_106811();
+    new npc_mephistroth_106692();
+    new npc_mephistroth_106652();
+    RegisterSpellScript(spell_teleport_felsoul_hold);
+    new go_skull_of_the_manari_249821();
+    /* Warl Demo END */
 }
