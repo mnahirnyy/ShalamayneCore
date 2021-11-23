@@ -1089,6 +1089,7 @@ void InstanceScript::GetScenarioData(Player* p_Player/*= nullptr*/)
 
 void InstanceScript::SendScenarioState(ScenarioData p_Data, Player* p_Player /*= nullptr*/)
 {
+    TC_LOG_ERROR("server.worldserver", "*** InstanceScript::SendScenarioState '%u' Step '%u' Difficulty '%u'", p_Data.m_ScenarioID, p_Data.m_StepID, instance->GetDifficultyID());
     WorldPacket l_Data(SMSG_SCENARIO_STATE);
 
     l_Data << int32(p_Data.m_ScenarioID);
