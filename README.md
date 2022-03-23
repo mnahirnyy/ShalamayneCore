@@ -1,10 +1,10 @@
-# 5CentsCore
+# ShalamayneCore
 
 --------------
 
 ## Introduction
 
-5CentsCore is a *MMORPG* Framework based mostly in C++.
+ShalamayneCore is a *MMORPG* Framework based mostly in C++.
 It is fully based on the AshamaneCore, TrinityCore and MagicStormTeam core.
 All credits to these guys.
 

@@ -29,7 +29,6 @@
 #    NETWORK CONFIG
 #    CONSOLE AND REMOTE ACCESS
 #    REST SERVICE
-#    WORLD TO DISCORD
 #    CHARACTER DELETE OPTIONS
 #    CUSTOM SERVER OPTIONS
 #    AUCTION HOUSE BOT SETTINGS
@@ -873,7 +872,7 @@ StartDemonHunterPlayerLevel = 98
 #        Default:     0
 #                     100 - (1 Silver)
 
-StartPlayerMoney = 0
+StartPlayerMoney = 5000
 
 #
 #    RecruitAFriend.MaxLevel
@@ -917,7 +916,7 @@ AllFlightPaths = 0
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
-InstantFlightPaths = 0
+InstantFlightPaths = 1
 
 #
 #    ActivateWeather
@@ -2024,7 +2023,7 @@ Visibility.GroupMode = 1
 #                     For instances default ~170.
 #                     Max limited by grid size: 533.33333
 #                     Min limit is max aggro radius (45) * Rate.Creature.Aggro
-#        Default:     100  - (Visibility.Distance.Continents)
+#        Default:     100 - (Visibility.Distance.Continents)
 #                     170 - (Visibility.Distance.Instances)
 #                     533 - (Visibility.Distance.BGArenas)
 
@@ -2925,28 +2924,6 @@ WorldREST.Port = 8082
 #        Default:     ""
 
 WorldREST.AuthToken = ""
-
-#
-###################################################################################################
-
-###################################################################################################
-# WORLD TO DISCORD
-#
-#
-#    WorldREST.Enabled
-#        Description: Enable World to Discord service.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-WorldToDiscord.Enabled = 0
-
-#
-#    WorldREST.RelayURL
-#        Description: Relay http server that will handle the http call
-#                     every 2 seconds with world channel player chats
-#        Default:     "http://127.0.0.1:8083"
-
-WorldToDiscord.RelayURL = "http://127.0.0.1:8083"
 
 #
 ###################################################################################################
