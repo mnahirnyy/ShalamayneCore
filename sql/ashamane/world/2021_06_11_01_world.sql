@@ -1485,7 +1485,7 @@ DELETE FROM `creature_equip_template` WHERE `CreatureID`=99247;
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES 
 ('99247', '1', '128359', '0', '0', '128371', '0', '0', '0', '0', '0', '0');
 UPDATE `creature` SET `equipment_id`='1' WHERE `id` = '99247';
-UPDATE `creature_loot_template` SET `GroupId`=1 WHERE `Item`=128227; -- TEST was 6
+UPDATE `creature_loot_template` SET `GroupId`=3 WHERE `Item`=128227; -- TEST was 6
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` IN (15) AND `SourceGroup` IN (19175);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `sourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES 
 (15, 19175, 0, 0, 0, 48, 0, 279763, 0, 0, 1, 0, 0, '', 'Gossip Only Shows if Quest Objective not done'); -- TEST

@@ -138,7 +138,7 @@ UPDATE `creature` SET `equipment_id`=1 WHERE `id`=106657;
 -- Wild Imps 99739
 UPDATE `creature_template` SET `lootid`=99739, `AIName`="SmartAI", `minlevel`=98, `maxlevel`=100, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `HealthModifier`=1 WHERE `entry`=99739;
 -- Fel Creep 106783
-UPDATE `creature_template` SET `lootid`=106783, `AIName`="SmartAI", `minlevel`=98, `maxlevel`=100, `faction`=0, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=1 WHERE `entry`=106783;
+UPDATE `creature_template` SET `lootid`=106783, `AIName`="SmartAI", `minlevel`=98, `maxlevel`=100, `faction`=35, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=1 WHERE `entry`=106783;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=106783 AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (106783,0,0,0,60,0,100,1,0,0,0,0,11,194073,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fel Creep - Event Update - Cast Spell');
@@ -174,7 +174,7 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`=106660 AND `source_type`=0;
 INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
 (106660,0,0,0,0,0,100,0,0,0,5000,5000,11,198603,0,0,0,0,0,2,0,0,0,0,0,0,0,"Fel Mongrel - In Combat - Cast 'Felbite'");
 -- Hellfire Gun 106789
-UPDATE `creature_template` SET `lootid`=106789, `AIName`="SmartAI", `minlevel`=98, `maxlevel`=100, `faction`=0, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `HealthModifier`=1 WHERE `entry`=106789;
+UPDATE `creature_template` SET `lootid`=106789, `AIName`="SmartAI", `minlevel`=98, `maxlevel`=100, `faction`=35, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `HealthModifier`=1 WHERE `entry`=106789;
 -- Mephistroth 106652 (Mind Blast 196944)
 UPDATE `creature_template` SET `lootid`=106652, `AIName`="", `ScriptName`='npc_mephistroth_106652', `minlevel`=100, `maxlevel`=101, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=2.0 WHERE `entry`=106652;
 DELETE FROM `creature_equip_template` WHERE `CreatureID`=106652;

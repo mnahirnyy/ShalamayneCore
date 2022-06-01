@@ -785,6 +785,21 @@ public:
     }
 };
 
+class npc_general_nazgrim_55054 : public ScriptedAI
+{
+public:
+    npc_general_nazgrim_55054(Creature* creature) : ScriptedAI(creature) { }
+
+    void sGossipSelect(Player* player, uint32 /*menuId*/, uint32 /*gossipListId*/) override
+    {
+        if (player->GetQuestStatus(29690) == QUEST_STATUS_INCOMPLETE) //Into the Mists
+        {
+            player->ForceCompleteQuest(29690);
+            player->TeleportTo(870, 3169.132f, -689.578f, 230.825f, 5.635f);
+        }
+    }
+};
+
 void AddSC_orgrimmar()
 {
 	new play_fate_of_the_horde();
@@ -798,4 +813,5 @@ void AddSC_orgrimmar()
     new npc_orgri_shanggok_greet();
     new npc_garrosh_hellscream_39605();
     new quest_the_horde_way();
+    RegisterCreatureAI(npc_general_nazgrim_55054);
 }

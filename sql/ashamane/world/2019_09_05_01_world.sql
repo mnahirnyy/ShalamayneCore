@@ -270,7 +270,7 @@ INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `Appearanc
 (108646,1,126793,0,0,0,0,0,0,0,0,25549);
 UPDATE `creature` SET `equipment_id`=1 WHERE `id`=108646;
 -- Caria Felsoul 99184
-UPDATE `creature_template` SET `unit_class`=12, `lootid`=99184, `AIName`='', `ScriptName`='npc_caria_felsoul_99184', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=99184;
+UPDATE `creature_template` SET `unit_class`=1, `lootid`=99184, `AIName`='', `ScriptName`='npc_caria_felsoul_99184', `minlevel`=102, `maxlevel`=102, `faction`=16, `BaseAttackTime`=2000, `RangeAttackTime`=2000, `unit_flags`=32832, `HealthModifier`=3 WHERE `entry`=99184;
 DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (99184);
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `AppearanceModID1`, `ItemVisual1`, `ItemID2`, `AppearanceModID2`, `ItemVisual2`, `ItemID3`, `AppearanceModID3`, `ItemVisual3`, `VerifiedBuild`) VALUES
 (99184,1,128832,0,0,128831,0,0,0,0,0,25549);

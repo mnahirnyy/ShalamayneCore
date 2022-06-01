@@ -69,22 +69,3 @@ INSERT INTO `creature_text` (`creatureid`, `groupid`, `id`, `text`, `type`, `lan
 DELETE FROM `gossip_menu_option` WHERE `MenuId`=20679;
 INSERT INTO `gossip_menu_option` (`MenuId`, `OptionIndex`, `OptionIcon`, `OptionText`, `OptionBroadcastTextId`, `OptionType`, `OptionNpcFlag`, `VerifiedBuild`) VALUES
 (20679, 0, 0, 'You are free to go!', 0, 1, 1, 29416);
-
--- DB Errors (Testing)
--- Corrected flags for some quest givers
-UPDATE creature_template SET npcflag = 3 WHERE entry IN(18927,20102,20870,20885,20886,20912,22113,51998,107997);
-UPDATE creature_template SET npcflag = 3 WHERE entry IN(17076,17296,36479,39063);
-
--- Deleted some mess
-DELETE FROM game_event_creature WHERE guid IN(136150,136166,136167,136168,136169,136170,136171,136172,136173,136174,136175,136176,136177,136178,136179,136180,136181,136182,136185,136186,136187,136188,136200,136201,136202,136203,136215,136224,136225,136226,136227);
-DELETE FROM game_event_creature WHERE guid BETWEEN 136228 AND 142240;
-DELETE FROM game_event_creature WHERE guid BETWEEN 373394 AND 374888;
-DELETE FROM game_event_creature WHERE guid BETWEEN 375109 AND 375150;
-DELETE FROM game_event_gameobject WHERE guid IN(200965,200966,203103,203104,212814,214896,215000,215003,216443,216444);
-
-UPDATE creature_template SET trainer_type = 3 WHERE entry IN (16583,19341,47420,108825,95844);
-UPDATE creature_template SET npcflag = 4307 WHERE entry IN (16583,19341,47420,108825,95844);
-
-DELETE FROM `achievement_reward` WHERE `entry` IN (147876, 140998, 140997, 139284, 128513, 116788, 115301, 90918, 71134, 49362, 46894, 44819);
-
-
